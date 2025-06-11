@@ -1,7 +1,7 @@
 ## Geospatial Risk Hotspot Project Roadmap
 
 ### Phase 1: The Foundational MVP (Target: 1 Week)
-- [ ] Sprint 1.1: The "Map on a Screen" Slice
+- [x] Sprint 1.1: The "Map on a Screen" Slice
 - [ ] Sprint 1.2: The "Shapes on the Map" Slice
 - [ ] Sprint 1.3: The "Single-Metric Choropleth" Slice
 - [ ] Sprint 1.4: The "Interactive Raw Data" Slice
@@ -15,3 +15,4 @@
 
 ### Completed Tasks
 - [x] Created project-specific .clinerules files
+- [x] Completed Sprint 1.1: The "Map on a Screen" Slice

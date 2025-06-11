@@ -1,19 +1,16 @@
-## Current Task: Phase 1 - Sprint 1.1: The "Map on a Screen" Slice
+## Current Task: Phase 1 - Sprint 1.2: The "Shapes on the Map" Slice
 
 ### Objective
-Validate the basic frontend toolchain and deployment pipeline. This proves that your development environment, framework, and hosting are all configured correctly before any complex logic is added.
+Validate the geospatial data pipeline by rendering the geographic boundaries on the map. This confirms your shapefile is valid and can be processed and displayed by React-Leaflet.
 
 ### Context
-We have successfully created the project-specific `.clinerules` files. We will use the current directory directly instead of creating a separate project folder.
+We have successfully completed Sprint 1.1, which involved setting up the basic React project, installing dependencies, creating a Map component, rendering a map with OpenStreetMap tiles, setting up a GitHub repository, and connecting to Vercel.
 
 ### Next Steps
-1. Initialize a new React project using Vite (npm create vite@latest .).
-2. Install core dependencies: react, react-dom, leaflet, react-leaflet, and tailwindcss.
-3. Create a single Map.jsx component.
-4. Inside Map.jsx, render a `<MapContainer>` with a set initial view (e.g., centered on your target state).
-5. Add a `<TileLayer>` component to display a base map from OpenStreetMap.
-6. Set up a new GitHub repository and push your initial code.
-7. Connect the repository to Vercel for continuous deployment.
+1. Data Prep: Download the ZCTA shapefile for your target state.
+2. Scripting: Write a simple Python script using geopandas to read the shapefile and export it as a GeoJSON file (shapes.geojson). This file should contain only the geometry and the ZCTA code for each feature.
+3. Frontend: Place shapes.geojson into your React project's /public directory.
+4. Frontend: In your Map.jsx component, add a `<GeoJSON>` layer that loads shapes.geojson.
 
 ### Success Criteria
-You have a live, public Vercel URL that displays a zoomable, draggable world map. Nothing more.
+The live Vercel application now shows the uncolored outlines of all zip codes in your target state overlaid on the base map.
