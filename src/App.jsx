@@ -9,7 +9,6 @@ function App() {
 
   return (
     <>
-      {/* Render the Map component */}
       <Map />
     </>
   )
