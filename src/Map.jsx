@@ -6,7 +6,7 @@ const Map = () => {
   const [geojsonData, setGeojsonData] = useState(null);
 
   useEffect(() => {
-    fetch('/shapes.geojson')
+    fetch('https://raw.githubusercontent.com/Josuevillalona/geo-risk-spotter/master/public/shapes.geojson')
       .then(response => response.json())
       .then(data => setGeojsonData(data))
       .catch(error => console.error('Error loading GeoJSON data:', error));
