@@ -16,4 +16,4 @@
 ### Completed Tasks
 - [x] Created project-specific .clinerules files
 - [x] Completed Sprint 1.1: The "Map on a Screen" Slice
-- [x] Completed Sprint 1.2: The "Shapes on the Map" Slice
+- [x] Completed Sprint 1.2: The "Shapes on the Map" Slice (with GeoJSON fetched from GitHub Raw)
