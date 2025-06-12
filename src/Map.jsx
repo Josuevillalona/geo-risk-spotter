@@ -19,7 +19,18 @@ const Map = () => {
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
       {/* Add GeoJSON layer */}
-      {geojsonData && <GeoJSON data={geojsonData} />}
+      {geojsonData && (
+        <GeoJSON
+          data={geojsonData}
+          style={() => {
+            return {
+              color: '#1f2021', // Dark gray outline color
+              weight: 1, // Thin line weight
+              fillOpacity: 0, // No fill
+            };
+          }}
+        />
+      )}
     </MapContainer>
   );
 };
