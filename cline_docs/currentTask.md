@@ -1,16 +1,16 @@
-## Current Task: Phase 1 - Sprint 1.2: The "Shapes on the Map" Slice
+## Current Task: Phase 1 - Sprint 1.3: The "Single-Metric Choropleth" Slice
 
 ### Objective
-Validate the geospatial data pipeline by rendering the geographic boundaries on the map. This confirms your shapefile is valid and can be processed and displayed by React-Leaflet.
+Validate the core data-join and visualization logic. This proves you can link health data to the geographic shapes and represent it meaningfully with color.
 
 ### Context
-We have successfully completed Sprint 1.1, which involved setting up the basic React project, installing dependencies, creating a Map component, rendering a map with OpenStreetMap tiles, setting up a GitHub repository, and connecting to Vercel.
+We have successfully completed Sprint 1.2, which involved processing the shapefile and adding the GeoJSON layer to the map component.
 
 ### Next Steps
-1. Data Prep: Download the ZCTA shapefile for your target state.
-2. Scripting: Write a simple Python script using geopandas to read the shapefile and export it as a GeoJSON file (shapes.geojson). This file should contain only the geometry and the ZCTA code for each feature.
-3. Frontend: Place shapes.geojson into your React project's /public directory.
-4. Frontend: In your Map.jsx component, add a `<GeoJSON>` layer that loads shapes.geojson.
+1. Data Prep: Download the health indicator data (e.g., PLACES CSV).
+2. Scripting: Update your Python script. Use pandas to read the CSV and geopandas to join it with your shapefile on the ZCTA code.
+3. Scripting: Create and add a single, calculated RiskScore property to each feature in the GeoJSON.
+4. Frontend: Update the `<GeoJSON>` component's style prop. Write a function that takes a feature as input and returns a fill color based on its RiskScore value.
 
 ### Success Criteria
-The live Vercel application now shows the uncolored outlines of all zip codes in your target state overlaid on the base map.
+The map on the live Vercel application is now a choropleth map. Each zip code is color-coded, clearly visualizing high- and low-risk areas based on your calculated score.
