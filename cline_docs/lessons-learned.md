@@ -41,3 +41,36 @@ Analyzed the distribution of the calculated RiskScores using Python script stati
 
 ### Lessons Learned
 Ensure that the data ranges used for visualization (e.g., color scales in a choropleth map) accurately reflect the actual range and distribution of the data being visualized. Use data statistics to inform the design of visualization scales.
+
+## 2025-06-13 - Vercel Build Failure due to Duplicate Imports
+
+### Description
+The Vercel build failed with an error indicating that the symbol "Map" had already been declared in `src/App.jsx`.
+
+### Root Cause
+A previous `replace_in_file` operation on `src/App.jsx` resulted in duplicate import statements for `React`, `useState`, and `Map`.
+
+### Solution
+Modified `src/App.jsx` using `replace_in_file` to remove the duplicate import statements.
+
+### Lessons Learned
+When using `replace_in_file`, carefully craft SEARCH blocks to avoid unintentionally duplicating existing code, especially import statements. Always review the `final_file_content` after using file modification tools to catch such errors early.
+
+## 2025-06-13 - Unresolved Food Insecurity Data Discrepancy
+
+### Description
+Observed that "Food Insecurity Crude Prevalence" consistently displays as 0% in the frontend sidebar for all clicked zip codes, despite the original CSV containing non-zero values for this metric.
+
+### Status
+Unresolved.
+
+### Investigation
+- Python script correctly includes and processes the `FOODINSECU_CrudePrev` column and applies `fillna(0)`.
+- Sample output from the Python script shows `FOODINSECU_CrudePrev` as 0.0 for sample features.
+- Frontend console output of fetched GeoJSON data shows that the `FOODINSECU_CrudePrev` property is missing from the `properties` object received by the frontend.
+- Discrepancy exists between Python script's internal state and the data received by the frontend.
+
+### Potential Next Steps
+- Further investigate the GeoJSON export process in the Python script to ensure all properties are being written correctly.
+- Examine the original CSV data more thoroughly for the specific New York zip codes to confirm if the data is truly missing or zero for this column in that subset.
+- Explore potential limitations or behaviors of `geopandas.to_file` or the GeoJSON format itself regarding how properties are handled.
