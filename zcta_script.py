@@ -42,13 +42,17 @@ for col in weights.keys():
 merged_gdf['RiskScore'] = sum(merged_gdf[col] * weights[col] for col in weights.keys())
 
 # Select relevant columns for the output GeoJSON
-# Keep geometry, original ZCTA code, RiskScore, and raw health data columns
-raw_data_cols = list(weights.keys()) # Get the list of raw data columns from the weights dictionary
-output_cols = ['geometry', 'ZCTA5CE10', 'RiskScore'] + raw_data_cols
+# Keep geometry, rename ZCTA5CE10 to zip_code, and include RiskScore and all raw data columns
+output_cols = ['geometry', 'ZCTA5CE10', 'RiskScore'] + list(weights.keys())
 output_gdf = merged_gdf[output_cols]
 
-# Rename the ZCTA code column to 'zip_code' for clarity in the frontend
+# Rename ZCTA5CE10 to zip_code for frontend consistency
 output_gdf = output_gdf.rename(columns={'ZCTA5CE10': 'zip_code'})
+
+# Print properties of the first few features for inspection
+print("\nSample Feature Properties after merge and fillna(0):")
+for i in range(min(5, len(output_gdf))):
+    print(output_gdf.iloc[i].drop('geometry').to_dict())
 
 # Print statistics about the calculated RiskScore
 print("\nRiskScore Statistics:")
