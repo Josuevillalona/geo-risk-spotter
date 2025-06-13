@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
+import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 
 const Map = ({ setSelectedArea }) => {
@@ -61,6 +62,29 @@ const Map = ({ setSelectedArea }) => {
                 if (fullFeatureData) {
                   // Use the properties from the full feature data to set the selected area
                   setSelectedArea(fullFeatureData);
+
+                  // Call the backend API for analysis
+                  axios.post('https://geo-risk-spotter.onrender.com/api/analyze', {
+                    zip_code: fullFeatureData.properties.zip_code,
+                    RiskScore: fullFeatureData.properties.RiskScore,
+                    DIABETES_CrudePrev: fullFeatureData.properties.DIABETES_CrudePrev,
+                    OBESITY_CrudePrev: fullFeatureData.properties.OBESITY_CrudePrev,
+                    LPA_CrudePrev: fullFeatureData.properties.LPA_CrudePrev,
+                    CSMOKING_CrudePrev: fullFeatureData.properties.CSMOKING_CrudePrev,
+                    BPHIGH_CrudePrev: fullFeatureData.properties.BPHIGH_CrudePrev,
+                    FOODINSECU_CrudePrev: fullFeatureData.properties.FOODINSECU_CrudePrev,
+                    ACCESS2_CrudePrev: fullFeatureData.properties.ACCESS2_CrudePrev,
+                    // Include other raw data properties as needed
+                  })
+                  .then(response => {
+                    console.log("Backend API Response:", response.data);
+                    // TODO: Handle and display the AI summary in the sidebar
+                  })
+                  .catch(error => {
+                    console.error("Error calling backend API:", error);
+                    // TODO: Handle API call errors
+                  });
+
                 } else {
                   console.error("Full feature data not found for zip code:", clickedZipCode);
                   setSelectedArea(null); // Clear sidebar if data not found
