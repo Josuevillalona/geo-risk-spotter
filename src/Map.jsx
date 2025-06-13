@@ -6,7 +6,7 @@ const Map = () => {
   const [geojsonData, setGeojsonData] = useState(null);
 
   useEffect(() => {
-    fetch('/public/ny_new_york_zip_codes_health.geojson')
+    fetch('https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson')
       .then(response => response.json())
       .then(data => setGeojsonData(data))
       .catch(error => console.error('Error loading GeoJSON data:', error));
