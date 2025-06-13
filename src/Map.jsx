@@ -6,7 +6,7 @@ const Map = () => {
   const [geojsonData, setGeojsonData] = useState(null);
 
   useEffect(() => {
-    fetch('/ny_new_york_zip_codes_health_data.geojson')
+    fetch('/ny_new_york_zip_codes_geo.min.json')
       .then(response => response.json())
       .then(data => setGeojsonData(data))
       .catch(error => console.error('Error loading GeoJSON data:', error));
@@ -22,17 +22,11 @@ const Map = () => {
       {geojsonData && (
         <GeoJSON
           data={geojsonData}
-          style={(feature) => {
-            const riskScore = feature.properties.RiskScore;
-            // Simple linear interpolation for color from green to red
-            const color = riskScore ? `rgb(${riskScore * 255}, ${255 - riskScore * 255}, 0)` : '#808080'; // Gray for no data
-
+          style={() => {
             return {
-              fillColor: color,
-              weight: 1,
-              opacity: 1,
-              color: '#1f2021', // Dark gray outline
-              fillOpacity: 0.7,
+              color: '#1f2021', // Dark gray outline color
+              weight: 1, // Thin line weight
+              fillOpacity: 0, // No fill
             };
           }}
         />
