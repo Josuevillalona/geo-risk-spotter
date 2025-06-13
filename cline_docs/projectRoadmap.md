@@ -2,8 +2,8 @@
 
 ### Phase 1: The Foundational MVP (Target: 1 Week)
 - [x] Sprint 1.1: The "Map on a Screen" Slice
-- [x] Sprint 1.2: The "Shapes on the Map" Slice (with minified GeoJSON from public directory)
-- [ ] Sprint 1.3: The "Single-Metric Choropleth" Slice
+- [x] Sprint 1.2: The "Shapes on the Map" Slice (using minified GeoJSON from public directory and local file removed)
+- [x] Sprint 1.3: The "Single-Metric Choropleth" Slice
 - [ ] Sprint 1.4: The "Interactive Raw Data" Slice
 - [ ] Sprint 1.5: The "Full MVP Hookup" Slice
 
@@ -17,3 +17,4 @@
 - [x] Created project-specific .clinerules files
 - [x] Completed Sprint 1.1: The "Map on a Screen" Slice
 - [x] Completed Sprint 1.2: The "Shapes on the Map" Slice (using minified GeoJSON from public directory and local file removed)
+- [x] Completed Sprint 1.3: The "Single-Metric Choropleth" Slice

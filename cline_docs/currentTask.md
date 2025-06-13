@@ -1,16 +1,18 @@
-## Current Task: Phase 1 - Sprint 1.3: The "Single-Metric Choropleth" Slice
+## Current Task: Phase 1 - Sprint 1.4: The "Interactive Raw Data" Slice
 
 ### Objective
-Validate the core data-join and visualization logic. This proves you can link health data to the geographic shapes and represent it meaningfully with color.
+Validate the client-side interactivity and state management. This ensures the user interaction flow is working smoothly before introducing the complexity of a backend API call.
 
 ### Context
-We have successfully completed Sprint 1.2, which involved processing the shapefile, adding the GeoJSON layer to the map component, configuring the application to fetch the minified GeoJSON data (`ny_new_york_zip_codes_geo.min.json`) from the public directory, and adding basic styling to make the zip code outlines visible. We also removed the conflicting local `shapes.geojson` file from the project root.
+We have successfully completed Sprint 1.3, which involved integrating health data and color-coding the zip codes based on a calculated risk score to create a choropleth map.
 
 ### Next Steps
-1. Data Prep: Download the health indicator data (e.g., PLACES CSV).
-2. Scripting: Update your Python script. Use pandas to read the CSV and geopandas to join it with your shapefile on the ZCTA code.
-3. Scripting: Create and add a single, calculated RiskScore property to each feature in the GeoJSON.
-4. Frontend: Update the `<GeoJSON>` component's style prop. Write a function that takes a feature as input and returns a fill color based on its RiskScore value.
+1. Scripting: Update your Python script to include all relevant raw metrics (poverty, inactivity, etc.) as properties in the final data.geojson.
+2. Frontend: Create a Sidebar.jsx component.
+3. Frontend: In your main App.jsx, use the useState hook to create a selectedArea state variable.
+4. Frontend: Implement the onEachFeature prop for the `<GeoJSON>` layer. Attach an onClick event to each zip code polygon.
+5. Frontend: When a polygon is clicked, update the selectedArea state with the clicked feature's properties object.
+6. Frontend: Pass the selectedArea data to the Sidebar component and display the raw metrics.
 
 ### Success Criteria
-The map on the live Vercel application is now a choropleth map. Each zip code is color-coded, clearly visualizing high- and low-risk areas based on your calculated score.
+When you click any zip code on the map, a sidebar appears and displays the raw data (e.g., "Poverty Rate: 0.25", "Inactivity: 0.30") for that specific area. This entire interaction happens instantly, with no loading spinner, as it's all client-side.
