@@ -16,4 +16,4 @@
 ### Completed Tasks
 - [x] Created project-specific .clinerules files
 - [x] Completed Sprint 1.1: The "Map on a Screen" Slice
-- [x] Completed Sprint 1.2: The "Shapes on the Map" Slice (with minified GeoJSON from public directory)
+- [x] Completed Sprint 1.2: The "Shapes on the Map" Slice (using minified GeoJSON from public directory and local file removed)
