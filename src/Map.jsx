@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 
-const Map = () => {
+const Map = ({ setSelectedArea }) => {
   const [geojsonData, setGeojsonData] = useState(null);
 
   useEffect(() => {
@@ -45,6 +45,13 @@ const Map = () => {
         <GeoJSON
           data={geojsonData}
           style={geoJsonStyle}
+          onEachFeature={(feature, layer) => {
+            layer.on({
+              click: (event) => {
+                setSelectedArea(feature); // Update selectedArea state in App.jsx
+              },
+            });
+          }}
         />
       )}
     </MapContainer>
