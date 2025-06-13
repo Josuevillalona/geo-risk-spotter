@@ -6,7 +6,7 @@ const Map = () => {
   const [geojsonData, setGeojsonData] = useState(null);
 
   useEffect(() => {
-    fetch('https://media.githubusercontent.com/media/Josuevillalona/geo-risk-spotter/master/public/shapes.geojson')
+    fetch('/ny_new_york_zip_codes_geo.min.json')
       .then(response => response.json())
       .then(data => setGeojsonData(data))
       .catch(error => console.error('Error loading GeoJSON data:', error));
