@@ -19,11 +19,11 @@
 ### Recent Significant Changes
 - Initial project setup with Vite and React.
 - Added Map component with OpenStreetMap tiles.
-- Completed Sprint 1.2: Integrated minified New York zip code GeoJSON data (`ny_new_york_zip_codes_health_data.geojson`) hosted on GitHub Pages for zip code boundaries. Added basic styling to make outlines visible. Removed conflicting local `shapes.geojson` file.
-- Completed Sprint 1.3: Integrated health data, calculated a risk score based on provided weights, and implemented choropleth styling to color-code zip codes based on risk score.
+- Completed Sprint 1.2: Integrated minified New York zip code GeoJSON data (`ny_new_york_zip_codes_health_data.geojson`) and added basic styling to make outlines visible. Removed conflicting local `shapes.geojson` file.
+- Completed Sprint 1.3: Integrated health data, calculated a risk score based on provided weights, and implemented choropleth styling to color-code zip codes based on risk score. The minified GeoJSON data is now hosted on jsDelivr CDN to address file serving issues.
 
 ### User Feedback Integration and Its Impact on Development
 - User feedback on the map not displaying led to extensive debugging of Vercel deployment, file serving issues, and Git LFS configuration.
-- Based on user feedback and investigation, we adopted a strategy of using a minified GeoJSON file hosted on GitHub Pages to overcome Vercel's limitations with serving large static files directly.
+- Based on user feedback and investigation, we adopted a strategy of using a minified GeoJSON file hosted on jsDelivr CDN to overcome Vercel's limitations with serving large static files directly.
 - User feedback on console errors helped diagnose issues with fetching and parsing the GeoJSON data.
 </+++++++ REPLACE
