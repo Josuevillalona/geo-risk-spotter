@@ -4,7 +4,7 @@
 Validate the core data-join and visualization logic. This proves you can link health data to the geographic shapes and represent it meaningfully with color.
 
 ### Context
-We have successfully completed Sprint 1.2, which involved processing the shapefile, adding the GeoJSON layer to the map component, configuring the application to fetch the GeoJSON data from the GitHub LFS media URL, removing the conflicting local GeoJSON file, and adding basic styling to make the zip code outlines visible.
+We have successfully completed Sprint 1.2, which involved processing the shapefile, adding the GeoJSON layer to the map component, configuring the application to fetch the minified GeoJSON data from the public directory, and adding basic styling to make the zip code outlines visible.
 
 ### Next Steps
 1. Data Prep: Download the health indicator data (e.g., PLACES CSV).
