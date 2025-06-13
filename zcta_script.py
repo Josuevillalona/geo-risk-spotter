@@ -48,7 +48,11 @@ output_gdf = merged_gdf[['geometry', 'ZCTA5CE10', 'RiskScore']]
 # Rename the ZCTA code column to 'zip_code' for clarity in the frontend
 output_gdf = output_gdf.rename(columns={'ZCTA5CE10': 'zip_code'})
 
+# Print statistics about the calculated RiskScore
+print("\nRiskScore Statistics:")
+print(merged_gdf['RiskScore'].describe())
+
 # Save the updated GeoDataFrame to a new GeoJSON file in the public directory
 output_gdf.to_file(output_geojson_path, driver='GeoJSON')
 
-print(f"Successfully created GeoJSON with health data: {output_geojson_path}")
+print(f"\nSuccessfully created GeoJSON with health data: {output_geojson_path}")

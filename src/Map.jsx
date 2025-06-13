@@ -12,15 +12,15 @@ const Map = () => {
       .catch(error => console.error('Error loading GeoJSON data:', error));
   }, []);
 
-  // Function to determine color based on RiskScore
+  // Function to determine color based on RiskScore (Green-Yellow-Red scale)
   const getRiskScoreColor = (score) => {
-    return score > 0.6 ? '#800026' :
-           score > 0.5 ? '#BD0026' :
-           score > 0.4 ? '#E31A1C' :
-           score > 0.3 ? '#FC4E2A' :
-           score > 0.2 ? '#FD8D3C' :
-           score > 0.1 ? '#FEB24C' :
-                         '#FFEDA0';
+    return score > 25.0 ? '#a50f15' : // Darkest Red (Highest Risk)
+           score > 20.01 ? '#de2d26' : // Red (High Risk - above 75th percentile)
+           score > 18.48 ? '#fb6a4a' : // Orange-Red (Moderately High Risk - above median)
+           score > 16.34 ? '#fcae91' : // Light Orange (Moderate Risk - above 25th percentile)
+           score > 10.0 ? '#fee613' : // Yellow (Moderately Low Risk)
+           score > 5.0 ? '#a1d99b' : // Light Green (Low Risk)
+                         '#41ab5d'; // Darker Green (Lowest Risk - approaching min)
   };
 
   const geoJsonStyle = (feature) => {
