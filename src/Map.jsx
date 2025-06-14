@@ -3,7 +3,7 @@ import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 
-const Map = ({ setSelectedArea }) => {
+const Map = ({ setSelectedArea, setIsLoading, setAiSummary }) => {
   const [geojsonData, setGeojsonData] = useState(null);
 
   useEffect(() => {
@@ -78,11 +78,13 @@ const Map = ({ setSelectedArea }) => {
                   })
                   .then(response => {
                     console.log("Backend API Response:", response.data);
-                    // TODO: Handle and display the AI summary in the sidebar
+                    setAiSummary(response.data.summary);
+                    setIsLoading(false);
                   })
                   .catch(error => {
                     console.error("Error calling backend API:", error);
-                    // TODO: Handle API call errors
+                    setAiSummary(null); // Clear summary on error
+                    setIsLoading(false);
                   });
 
                 } else {
