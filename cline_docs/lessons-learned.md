@@ -74,3 +74,84 @@ Unresolved.
 - Further investigate the GeoJSON export process in the Python script to ensure all properties are being written correctly.
 - Examine the original CSV data more thoroughly for the specific New York zip codes to confirm if the data is truly missing or zero for this column in that subset.
 - Explore potential limitations or behaviors of `geopandas.to_file` or the GeoJSON format itself regarding how properties are handled.
+
+## 2025-06-14 - Troubleshooting Backend Environment Variable Loading
+
+### Description
+Encountered issues with the backend not loading the `OPENROUTER_API_KEY` from the `.env` file when running locally using `uvicorn --app-dir .`.
+
+### Root Cause
+The `load_dotenv()` function by default looks for `.env` in the current working directory or its parents. When running with `--app-dir .` from the project root, it was not finding the `.env` file located in the `backend/` subdirectory.
+
+### Solution
+Modified the `load_dotenv()` call in `backend/main.py` to explicitly specify the path to the `.env` file: `load_dotenv('backend/.env')`.
+
+### Lessons Learned
+When using `python-dotenv` and running a Python application from a different working directory than where the `.env` file is located, explicitly provide the path to the `.env` file in the `load_dotenv()` call.
+
+## 2025-06-14 - Troubleshooting Render Backend Deployment
+
+### Description
+Encountered multiple issues during backend deployment to Render, including "No such file or directory: 'requirements.txt'", "ModuleNotFoundError: No module named 'backend'", and service shutdown after startup.
+
+### Root Cause
+- Missing `requirements.txt` file for dependency installation on Render.
+- Incorrect Uvicorn start command expecting `backend` as a top-level module even with "Root Directory" set to `backend/`.
+- Potential issues with Uvicorn not correctly picking up the `$PORT` environment variable provided by Render.
+
+### Solution
+- Created a `backend/requirements.txt` file listing all Python dependencies.
+- Set Render's "Root Directory" to `backend/`.
+- Updated Render's "Build Command" to `pip install -r requirements.txt`.
+- Updated Render's "Start Command" to `env PORT=$PORT uvicorn main:app --host 0.0.0.0 --port $PORT` to explicitly pass the port.
+
+### Lessons Learned
+- Always include a `requirements.txt` file for Python project deployments to ensure dependencies are installed correctly.
+- Carefully configure the "Root Directory", "Build Command", and "Start Command" in deployment platforms like Render, ensuring they are compatible with the project structure and how the application is started.
+- Explicitly passing environment variables like `$PORT` in the start command using `env` can help ensure they are correctly picked up by the application.
+
+## 2025-06-14 - OpenRouter API Rate Limits
+
+### Description
+Encountered 429 Too Many Requests errors from the OpenRouter API when using the `google/gemini-2.0-flash-exp:free` model.
+
+### Root Cause
+The free tier of the `google/gemini-2.0-flash-exp:free` model on OpenRouter has strict rate limits, and these limits were being hit.
+
+### Solution
+Switched the AI model used in the backend to `mistralai/mistral-7b-instruct`, which may have different or less strict rate limits.
+
+### Lessons Learned
+Be aware of API rate limits, especially when using free tiers of external services. Have a strategy for handling rate limits (e.g., retries, switching models, upgrading plans).
+
+## 2025-06-14 - Frontend Network Errors and Backend Accessibility
+
+### Description
+Initially encountered `net::ERR_INTERNET_DISCONNECTED` errors in the frontend when trying to call the deployed backend on Render.
+
+### Root Cause
+This was a client-side network connectivity issue preventing the frontend from reaching the Render URL.
+
+### Solution
+Troubleshooted local internet connection and confirmed accessibility of the Render URL directly in the browser.
+
+### Lessons Learned
+Network errors in the frontend console when calling a deployed backend often indicate a client-side network issue rather than a problem with the deployed service itself. Always verify network connectivity and try accessing the deployed service URL directly.
+
+## 2025-06-14 - Frontend Component Structure and Data Display
+
+### Description
+Refactored the frontend component structure to use a `Dashboard` component and a tabbed `Sidebar` for displaying AI insights and raw data. Initially had confusion regarding where raw data was being displayed (sidebar vs. popover).
+
+### Root Cause
+The frontend structure evolved with the introduction of new components and a tabbed interface in the sidebar, changing how raw data and AI insights are presented compared to earlier iterations. The `DataPopover` component, initially intended for raw data on the map, became redundant with the tabbed sidebar.
+
+### Solution
+- Updated `src/App.jsx` to render the `Dashboard` component and pass state down.
+- Updated `src/components/Dashboard.jsx` to render the `Map` and the top-level `src/Sidebar.jsx`.
+- Updated the top-level `src/Sidebar.jsx` to implement the tabbed interface and render raw data as a table.
+- Modified `src/Map.jsx` to remove `DataPopover` control logic and `layer.bindPopup`.
+- Removed the `src/DataPopover.jsx` component.
+
+### Lessons Learned
+Maintain clear documentation of the frontend component structure and data flow as the project evolves to avoid confusion. Regularly review and refactor components to ensure a clear separation of concerns and avoid redundant functionality.
