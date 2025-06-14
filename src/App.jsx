@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 import Dashboard from "./components/Dashboard";
+import TopBar from "./components/TopBar";
 
 function App() {
   const [selectedArea, setSelectedArea] = useState(null);
@@ -8,19 +9,27 @@ function App() {
   const [aiSummary, setAiSummary] = useState(null);
 
   return (
-    <Dashboard
-      mapProps={{
-        selectedArea: selectedArea,
-        setSelectedArea: setSelectedArea,
-        setIsLoading: setIsLoading,
-        setAiSummary: setAiSummary
-      }}
-      sidebarProps={{
-        selectedArea,
-        isLoading,
-        aiSummary
-      }}
-    />
+    <div className="app-container">
+      <TopBar
+        setSelectedArea={setSelectedArea}
+        setIsLoading={setIsLoading}
+        setAiSummary={setAiSummary}
+      />
+      <div className="content-container">
+        <Dashboard
+          mapProps={{
+            setSelectedArea: setSelectedArea,
+            setIsLoading: setIsLoading,
+            setAiSummary: setAiSummary
+          }}
+          sidebarProps={{
+            selectedArea,
+            isLoading,
+            aiSummary
+          }}
+        />
+      </div>
+    </div>
   );
 }
 
