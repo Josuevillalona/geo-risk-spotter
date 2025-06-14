@@ -1,18 +1,33 @@
-## Current Task: Phase 1 - Sprint 1.4: The "Interactive Raw Data" Slice
+## Current Task: Phase 1 - Sprint 1.5: The "Full MVP Hookup" Slice
 
 ### Objective
-Validate the client-side interactivity and state management. This ensures the user interaction flow is working smoothly before introducing the complexity of a backend API call.
+Integrate the frontend with the deployed backend API for AI analysis and display both raw data and AI insights in the sidebar.
 
 ### Context
-We have successfully completed Sprint 1.3, which involved integrating health data and creating a choropleth map visualizing diabetes risk hotspots by zip code using a minified GeoJSON file.
+We have successfully completed Sprint 1.4, which validated client-side interactivity and raw data display in the sidebar. In Sprint 1.5, we have:
+
+- Set up the backend with FastAPI.
+- Implemented the `/api/analyze` endpoint to call the OpenRouter API.
+- Configured CORS for frontend communication.
+- Set up local environment variable loading for the OpenRouter API key.
+- Deployed the backend to Render with correct configuration and environment variables.
+- Integrated the frontend (`src/Map.jsx`) to call the deployed backend API on zip code click.
+- Updated the frontend (`src/Sidebar.jsx`) to include a tabbed interface for "AI Analysis" and "Raw Data" and display raw data in a table format.
+- Removed the `DataPopover` component as raw data is now in the sidebar.
 
 ### Next Steps
-1. Scripting: Update your Python script to include all relevant raw metrics (poverty, inactivity, etc.) as properties in the final data.geojson.
-2. Frontend: Create a Sidebar.jsx component.
-3. Frontend: In your main App.jsx, use the useState hook to create a selectedArea state variable.
-4. Frontend: Implement the onEachFeature prop for the `<GeoJSON>` layer. Attach an onClick event to each zip code polygon.
-5. Frontend: When a polygon is clicked, update the selectedArea state with the clicked feature's properties object.
-6. Frontend: Pass the selectedArea data to the Sidebar component and display the raw metrics.
+1. Implement frontend loading states and display the AI summary received from the backend in the sidebar's "AI Analysis" tab. (Partially completed by setting up state and conditional rendering, needs verification after deployment).
+2. Address the unresolved Food Insecurity data discrepancy.
+3. Document the AI prompt format.
+4. Update `cline_docs/projectRoadmap.md` to reflect completed tasks in Sprint 1.5.
+5. Update `cline_docs/lessons-learned.md` with any new lessons learned during Sprint 1.5.
 
 ### Success Criteria
-When you click any zip code on the map, a sidebar appears and displays the raw data (e.g., "Poverty Rate: 0.25", "Inactivity: 0.30") for that specific area. This entire interaction happens instantly, with no loading spinner, as it's all client-side.
+When a zip code is clicked on the map:
+- A loading indicator appears in the sidebar's "AI Analysis" tab.
+- The frontend successfully calls the deployed backend API.
+- The backend successfully calls the OpenRouter API and returns an AI summary.
+- The loading indicator is replaced by the AI summary in the sidebar's "AI Analysis" tab.
+- The "Raw Data" tab in the sidebar accurately displays the raw health data for the selected zip code in a table format.
+- The Food Insecurity data discrepancy is resolved.
+- The AI prompt format is documented.
