@@ -2,9 +2,14 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
+import DataPopover from './DataPopover'; // Import the new component
 
 const Map = ({ setSelectedArea, setIsLoading, setAiSummary }) => {
   const [geojsonData, setGeojsonData] = useState(null);
+  const [popoverData, setPopoverData] = useState(null);
+  const [popoverPosition, setPopoverPosition] = useState({ x: 0, y: 0 });
+  const [popoverVisible, setPopoverVisible] = useState(false);
+  const [popoverPinned, setPopoverPinned] = useState(false);
 
   useEffect(() => {
     fetch('https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson')
@@ -51,6 +56,18 @@ const Map = ({ setSelectedArea, setIsLoading, setAiSummary }) => {
           style={geoJsonStyle}
           onEachFeature={(feature, layer) => {
             layer.on({
+              mouseover: (event) => {
+                if (!popoverPinned) {
+                  setPopoverData(feature);
+                  setPopoverPosition({ x: event.originalEvent.clientX, y: event.originalEvent.clientY });
+                  setPopoverVisible(true);
+                }
+              },
+              mouseout: (event) => {
+                if (!popoverPinned) {
+                  setPopoverVisible(false);
+                }
+              },
               click: (event) => {
                 console.log("Clicked Feature Properties:", feature.properties); // Keep for debugging for now
                 // Find the full feature object in the original geojsonData based on zip_code
@@ -59,11 +76,26 @@ const Map = ({ setSelectedArea, setIsLoading, setAiSummary }) => {
                   (item) => item.properties.zip_code === clickedZipCode
                 );
 
+                if (popoverPinned) {
+                  setPopoverPinned(false);
+                  setPopoverVisible(false);
+                } else {
+                   if (fullFeatureData) {
+                    setPopoverPinned(true);
+                    setPopoverData(fullFeatureData);
+                    setPopoverPosition({ x: event.originalEvent.clientX, y: event.originalEvent.clientY });
+                    setPopoverVisible(true);
+                   }
+                }
+
+
                 if (fullFeatureData) {
                   // Use the properties from the full feature data to set the selected area
                   setSelectedArea(fullFeatureData);
 
                   // Call the backend API for analysis
+                  setIsLoading(true);
+                  setAiSummary(null); // Clear previous summary
                   axios.post('https://geo-risk-spotter.onrender.com/api/analyze', {
                     zip_code: fullFeatureData.properties.zip_code,
                     RiskScore: fullFeatureData.properties.RiskScore,
@@ -96,6 +128,16 @@ const Map = ({ setSelectedArea, setIsLoading, setAiSummary }) => {
           }}
         />
       )}
+      {/* Render the DataPopover */}
+      <DataPopover
+        data={popoverData}
+        position={popoverPosition}
+        visible={popoverVisible}
+        onClose={() => {
+          setPopoverVisible(false);
+          setPopoverPinned(false);
+        }}
+      />
     </MapContainer>
   );
 };
