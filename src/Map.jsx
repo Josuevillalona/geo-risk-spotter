@@ -43,6 +43,79 @@ const Map = ({ setSelectedArea, setIsLoading, setAiSummary }) => {
     };
   };
 
+  const onEachFeature = (feature, layer) => {
+    layer.bindPopup(() => {
+      const props = feature.properties;
+      return `
+        <div>
+          <strong>Zip Code: ${props.zip_code}</strong>
+        </div>
+      `;
+    });
+    layer.on({
+      mouseover: (event) => {
+        // Removed hover logic to prevent raw data display on hover
+      },
+      mouseout: (event) => {
+        // Removed hover logic to prevent raw data display on hover
+      },
+      click: (event) => {
+        console.log("Clicked Feature Properties:", feature.properties); // Keep for debugging for now
+        // Find the full feature object in the original geojsonData based on zip_code
+        const clickedZipCode = feature.properties.zip_code;
+        const fullFeatureData = geojsonData.features.find(
+          (item) => item.properties.zip_code === clickedZipCode
+        );
+
+        if (popoverPinned && popoverData && popoverData.properties.zip_code === clickedZipCode) {
+          // If the same pinned popover is clicked, unpin and hide it
+          setPopoverPinned(false);
+          setPopoverVisible(false);
+          setPopoverData(null); // Clear popover data
+        } else if (fullFeatureData) {
+          // Otherwise, set/update the popover data and pin it
+          setPopoverPinned(true);
+          setPopoverData(fullFeatureData);
+          setPopoverPosition({ x: event.originalEvent.clientX, y: event.originalEvent.clientY });
+          setPopoverVisible(true);
+
+          // Use the properties from the full feature data to set the selected area
+          setSelectedArea(fullFeatureData);
+
+          // Call the backend API for analysis
+          setIsLoading(true);
+          setAiSummary(null); // Clear previous summary
+          axios.post('https://geo-risk-spotter.onrender.com/api/analyze', {
+            zip_code: fullFeatureData.properties.zip_code,
+            RiskScore: fullFeatureData.properties.RiskScore,
+            DIABETES_CrudePrev: fullFeatureData.properties.DIABETES_CrudePrev,
+            OBESITY_CrudePrev: fullFeatureData.properties.OBESITY_CrudePrev,
+            LPA_CrudePrev: fullFeatureData.properties.LPA_CrudePrev,
+            CSMOKING_CrudePrev: fullFeatureData.properties.CSMOKING_CrudePrev,
+            BPHIGH_CrudePrev: fullFeatureData.properties.BPHIGH_CrudePrev,
+            FOODINSECU_CrudePrev: fullFeatureData.properties.FOODINSECU_CrudePrev,
+            ACCESS2_CrudePrev: fullFeatureData.properties.ACCESS2_CrudePrev,
+            // Include other raw data properties as needed
+          })
+          .then(response => {
+            console.log("Backend API Response:", response.data);
+            setAiSummary(response.data.summary);
+            setIsLoading(false);
+          })
+          .catch(error => {
+            console.error("Error calling backend API:", error);
+            setAiSummary(null); // Clear summary on error
+            setIsLoading(false);
+          });
+
+        } else {
+          console.error("Full feature data not found for zip code:", clickedZipCode);
+          setSelectedArea(null); // Clear sidebar if data not found
+        }
+      },
+    });
+  };
+
   return (
     <MapContainer center={[40.7128, -74.0060]} zoom={10} style={{ height: '500px', width: '100%' }}>
       <TileLayer
@@ -54,78 +127,7 @@ const Map = ({ setSelectedArea, setIsLoading, setAiSummary }) => {
         <GeoJSON
           data={geojsonData}
           style={geoJsonStyle}
-          onEachFeature={(feature, layer) => {
-            layer.on({
-              mouseover: (event) => {
-                if (!popoverPinned) {
-                  setPopoverData(feature);
-                  setPopoverPosition({ x: event.originalEvent.clientX, y: event.originalEvent.clientY });
-                  setPopoverVisible(true);
-                }
-              },
-              mouseout: (event) => {
-                if (!popoverPinned) {
-                  setPopoverVisible(false);
-                }
-              },
-              click: (event) => {
-                console.log("Clicked Feature Properties:", feature.properties); // Keep for debugging for now
-                // Find the full feature object in the original geojsonData based on zip_code
-                const clickedZipCode = feature.properties.zip_code;
-                const fullFeatureData = geojsonData.features.find(
-                  (item) => item.properties.zip_code === clickedZipCode
-                );
-
-                if (popoverPinned) {
-                  setPopoverPinned(false);
-                  setPopoverVisible(false);
-                } else {
-                   if (fullFeatureData) {
-                    setPopoverPinned(true);
-                    setPopoverData(fullFeatureData);
-                    setPopoverPosition({ x: event.originalEvent.clientX, y: event.originalEvent.clientY });
-                    setPopoverVisible(true);
-                   }
-                }
-
-
-                if (fullFeatureData) {
-                  // Use the properties from the full feature data to set the selected area
-                  setSelectedArea(fullFeatureData);
-
-                  // Call the backend API for analysis
-                  setIsLoading(true);
-                  setAiSummary(null); // Clear previous summary
-                  axios.post('https://geo-risk-spotter.onrender.com/api/analyze', {
-                    zip_code: fullFeatureData.properties.zip_code,
-                    RiskScore: fullFeatureData.properties.RiskScore,
-                    DIABETES_CrudePrev: fullFeatureData.properties.DIABETES_CrudePrev,
-                    OBESITY_CrudePrev: fullFeatureData.properties.OBESITY_CrudePrev,
-                    LPA_CrudePrev: fullFeatureData.properties.LPA_CrudePrev,
-                    CSMOKING_CrudePrev: fullFeatureData.properties.CSMOKING_CrudePrev,
-                    BPHIGH_CrudePrev: fullFeatureData.properties.BPHIGH_CrudePrev,
-                    FOODINSECU_CrudePrev: fullFeatureData.properties.FOODINSECU_CrudePrev,
-                    ACCESS2_CrudePrev: fullFeatureData.properties.ACCESS2_CrudePrev,
-                    // Include other raw data properties as needed
-                  })
-                  .then(response => {
-                    console.log("Backend API Response:", response.data);
-                    setAiSummary(response.data.summary);
-                    setIsLoading(false);
-                  })
-                  .catch(error => {
-                    console.error("Error calling backend API:", error);
-                    setAiSummary(null); // Clear summary on error
-                    setIsLoading(false);
-                  });
-
-                } else {
-                  console.error("Full feature data not found for zip code:", clickedZipCode);
-                  setSelectedArea(null); // Clear sidebar if data not found
-                }
-              },
-            });
-          }}
+          onEachFeature={onEachFeature}
         />
       )}
       {/* Render the DataPopover */}

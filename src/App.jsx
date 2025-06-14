@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import Map from './Map';
-import Sidebar from './Sidebar';
+import Dashboard from "./components/Dashboard";
 
 function App() {
   const [selectedArea, setSelectedArea] = useState(null);
@@ -9,10 +8,18 @@ function App() {
   const [aiSummary, setAiSummary] = useState(null);
 
   return (
-    <div className="app-container">
-      <Map setSelectedArea={setSelectedArea} setIsLoading={setIsLoading} setAiSummary={setAiSummary} />
-      <Sidebar selectedArea={selectedArea} isLoading={isLoading} aiSummary={aiSummary} />
-    </div>
+    <Dashboard
+      mapProps={{
+        setSelectedArea: setSelectedArea,
+        setIsLoading: setIsLoading,
+        setAiSummary: setAiSummary
+      }}
+      sidebarProps={{
+        selectedArea,
+        isLoading,
+        aiSummary
+      }}
+    />
   );
 }
 
