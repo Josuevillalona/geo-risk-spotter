@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 
 const DataPopover = ({ data, position, visible, onClose }) => {
   if (!visible || !data) {
@@ -19,9 +20,9 @@ const DataPopover = ({ data, position, visible, onClose }) => {
     // Include other raw data properties as needed
   } = data.properties;
 
-  return (
+  return createPortal(
     <div
-      className="absolute z-10 bg-white p-4 rounded-lg shadow-lg border border-gray-200"
+      className="fixed z-50 bg-white p-4 rounded-lg shadow-lg border border-gray-200"
       style={{ top: position.y, left: position.x }}
     >
       <div className="flex justify-between items-center mb-2">
@@ -45,7 +46,8 @@ const DataPopover = ({ data, position, visible, onClose }) => {
           {/* Add more data points as needed */}
         </tbody>
       </table>
-    </div>
+    </div>,
+    document.body
   );
 };
 
