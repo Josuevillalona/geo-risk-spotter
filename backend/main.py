@@ -80,7 +80,7 @@ async def analyze_health_data(data: HealthData):
                     "X-Title": "YOUR_SITE_NAME" # Optional. Site title for rankings on openrouter.ai.
                 },
                 json={
-                    "model": "google/gemini-2.0-flash-exp:free",
+                    "model": "mistralai/mistral-7b-instruct",
                     "messages": [{"role": "user", "content": prompt}]
                 },
                 timeout=60.0 # Add a timeout for the API call
