@@ -167,24 +167,22 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
 
   return (
     <div className="dashboard-ai-content" style={{ textAlign: 'left' }}>
-      <div className="tabs">
-        <button 
+      <div className="tabs">        <button 
           className={`tab ${activeTab === 'ai' ? 'active' : ''}`}
           onClick={() => setActiveTab('ai')}
         >
-          AI Analysis
+          AI Summary
+        </button>
+        <button          className={`tab ${activeTab === 'recommendations' ? 'active' : ''}`}
+          onClick={() => setActiveTab('recommendations')}
+        >
+          AI Chat Bot
         </button>
         <button 
           className={`tab ${activeTab === 'data' ? 'active' : ''}`}
           onClick={() => setActiveTab('data')}
         >
           Raw Data
-        </button>
-        <button 
-          className={`tab ${activeTab === 'recommendations' ? 'active' : ''}`}
-          onClick={() => setActiveTab('recommendations')}
-        >
-          Recommendations
         </button>
       </div>
       <div className="ai-content-scroll" style={{ textAlign: 'left' }}>

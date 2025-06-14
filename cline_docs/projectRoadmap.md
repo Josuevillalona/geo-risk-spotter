@@ -28,3 +28,4 @@
     - [x] Integrated frontend to call deployed backend API on click.
     - [x] Updated frontend sidebar with tabbed interface and raw data table.
     - [x] Removed DataPopover component.
+    - [x] Enabled map response when pressing Enter in the zip code search bar.
