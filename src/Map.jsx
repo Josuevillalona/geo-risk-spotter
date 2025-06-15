@@ -3,42 +3,31 @@ import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 
-const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, geojsonData, setGeojsonData, mapMoveEvent }) => { // Accept mapMoveEvent prop
+const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, geojsonData, setGeojsonData, mapMoveEvent }) => {
   const map = useMap();
   const [clickedZipCode, setClickedZipCode] = useState(null);
   const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
-    fetch('https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson')
-      .then(response => response.json())
-      .then(data => {
-        setGeojsonData(data);
-      })
-      .catch(error => console.error('Error loading GeoJSON data:', error));
-  }, [setGeojsonData]); // Added setGeojsonData to dependency array
-
-  // Effect to trigger map move when mapMoveEvent changes
-  useEffect(() => {
     if (selectedArea && mapMoveEvent) {
-      // Calculate the bounding box of the selected area's GeoJSON feature
       const bounds = L.geoJSON(selectedArea).getBounds();
       if (bounds.isValid()) {
-        map.flyToBounds(bounds, { padding: [50, 50] }); // Zoom and center with padding
+        map.flyToBounds(bounds, { padding: [50, 50] });
       }
     }
-  }, [mapMoveEvent, selectedArea, map]); // Watch mapMoveEvent, selectedArea, and map
+  }, [mapMoveEvent, selectedArea, map]);
 
   // Function to determine color based on RiskScore (Green-Yellow-Red scale)
   const getRiskScoreColor = (score) => {
-    if (score == null || isNaN(score)) return '#cccccc'; // Gray for missing data
+    if (score == null || isNaN(score)) return '#cccccc';
     
-    return score > 25.0 ? '#a50f15' : // Darkest Red (Highest Risk)
-           score > 20.01 ? '#de2d26' : // Red (High Risk - above 75th percentile)
-           score > 18.48 ? '#fb6a4a' : // Orange-Red (Moderately High Risk - above median)
-           score > 16.34 ? '#fcae91' : // Light Orange (Moderate Risk - above 25th percentile)
-           score > 10.0 ? '#fee613' : // Yellow (Moderately Low Risk)
-           score > 5.0 ? '#a1d99b' : // Light Green (Low Risk)
-                         '#41ab5d'; // Darker Green (Lowest Risk - approaching min)
+    return score > 25.0 ? '#a50f15' :
+           score > 20.01 ? '#de2d26' :
+           score > 18.48 ? '#fb6a4a' :
+           score > 16.34 ? '#fcae91' :
+           score > 10.0 ? '#fee613' :
+           score > 5.0 ? '#a1d99b' :
+                        '#41ab5d';
   };
 
   const geoJsonStyle = (feature) => {
@@ -57,9 +46,6 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
       click: async (e) => {
         // Get click position for popup
         const containerPoint = e.containerPoint;
-        const mapContainer = e.target._map.getContainer();
-        const mapRect = mapContainer.getBoundingClientRect();
-        
         setClickPosition({
           x: containerPoint.x,
           y: containerPoint.y
@@ -93,7 +79,6 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         }
       },
       mouseover: (e) => {
-        // Optional: Add hover effect
         const layer = e.target;
         layer.setStyle({
           weight: 2,
@@ -104,22 +89,10 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         layer.bringToFront();
       },
       mouseout: (e) => {
-        // Reset style on mouse out
         const layer = e.target;
         layer.setStyle(geoJsonStyle(feature));
       }
     });
-
-    // Remove any default popup binding to prevent conflicts
-    layer.unbindPopup();
-  };
-
-  // Handle clicking outside to close zip code popup
-  const handleMapClick = (e) => {
-    // Close zip code popup when clicking on empty areas
-    if (e.originalEvent.target.tagName === 'svg' || e.originalEvent.target.classList.contains('leaflet-zoom-animated')) {
-      setClickedZipCode(null);
-    }
   };
 
   return (
@@ -129,17 +102,15 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
           data={geojsonData}
           style={geoJsonStyle}
           onEachFeature={onEachFeature}
-          key={JSON.stringify(geojsonData)} // Force re-render when data changes
         />
       )}
-
-      {/* Zip Code Popup */}
+      {/* Simple Zip Code Popup */}
       {clickedZipCode && (
         <div
           style={{
             position: 'absolute',
             left: `${clickPosition.x}px`,
-            top: `${clickPosition.y - 60}px`, // Position above click point
+            top: `${clickPosition.y - 60}px`,
             backgroundColor: 'white',
             padding: '8px 12px',
             borderRadius: '6px',
@@ -149,12 +120,11 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
             fontWeight: '500',
             color: '#333',
             border: '1px solid #ddd',
-            pointerEvents: 'none', // Allow clicks to pass through
-            transform: 'translateX(-50%)', // Center horizontally
+            pointerEvents: 'none',
+            transform: 'translateX(-50%)'
           }}
         >
           Zip Code: {clickedZipCode}
-          {/* Small arrow pointing down */}
           <div
             style={{
               position: 'absolute',
@@ -165,7 +135,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
               height: '0',
               borderLeft: '6px solid transparent',
               borderRight: '6px solid transparent',
-              borderTop: '6px solid white',
+              borderTop: '6px solid white'
             }}
           />
         </div>
@@ -174,8 +144,17 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
   );
 };
 
-const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary }) => {
+const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMoveEvent }) => {
   const [geojsonData, setGeojsonData] = useState(null);
+
+  useEffect(() => {
+    fetch('https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson')
+      .then(response => response.json())
+      .then(data => {
+        setGeojsonData(data);
+      })
+      .catch(error => console.error('Error loading GeoJSON data:', error));
+  }, []);
 
   return (
     <div style={{ position: 'relative', height: '500px', width: '100%' }}>
@@ -195,6 +174,7 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary }) => {
           setAiSummary={setAiSummary}
           geojsonData={geojsonData}
           setGeojsonData={setGeojsonData}
+          mapMoveEvent={mapMoveEvent}
         />
       </MapContainer>
     </div>

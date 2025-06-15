@@ -20,10 +20,10 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
 
     return (
       <div style={{
-        backgroundColor: '#f0fdf4', // Light green background
+        backgroundColor: '#f0fdf4',
         padding: '16px',
         borderRadius: '8px',
-        color: '#1f2937' // Dark gray text
+        color: '#1f2937'
       }}>
         <h3 style={{
           color: '#1f2937',
@@ -141,39 +141,17 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
     );
   };
 
-  const renderAiSummary = () => {
-    if (isLoading) {
-      return <p className="ai-loading">Please wait while the AI analyzes the data.</p>;
-    }
-
-    return (      <div style={{
-        backgroundColor: '#f0fdf4',
-        padding: '16px',
-        borderRadius: '8px',
-        color: '#1f2937',
-        whiteSpace: 'pre-line',
-        lineHeight: '1.6',
-        textAlign: 'left'
-      }}>
-        <div style={{
-          fontSize: '14px',
-          textAlign: 'left'
-        }}>
-          {aiSummary}
-        </div>
-      </div>
-    );
-  };
-
   return (
     <div className="dashboard-ai-content" style={{ textAlign: 'left' }}>
-      <div className="tabs">        <button 
+      <div className="tabs">
+        <button 
           className={`tab ${activeTab === 'ai' ? 'active' : ''}`}
           onClick={() => setActiveTab('ai')}
         >
           AI Summary
         </button>
-        <button          className={`tab ${activeTab === 'recommendations' ? 'active' : ''}`}
+        <button
+          className={`tab ${activeTab === 'recommendations' ? 'active' : ''}`}
           onClick={() => setActiveTab('recommendations')}
         >
           AI Chat Bot
@@ -190,7 +168,20 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
           isLoading ? (
             <p className="ai-loading">Please wait while the AI analyzes the data.</p>
           ) : (
-            <p className="ai-summary">{aiSummary}</p>
+            <div style={{
+              backgroundColor: '#f0fdf4',
+              padding: '16px',
+              borderRadius: '8px',
+              color: '#1f2937',
+              whiteSpace: 'pre-line',
+              lineHeight: '1.6'
+            }}>
+              <div style={{
+                fontSize: '14px'
+              }}>
+                {aiSummary}
+              </div>
+            </div>
           )
         ) : activeTab === 'data' ? (
           renderRawData()

@@ -15,6 +15,7 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
   }
 
   if (aiSummary) {
+<<<<<<< HEAD
     // Split the summary into paragraphs
     const paragraphs = aiSummary.split('\n\n').filter(p => p.trim());
     
@@ -25,6 +26,11 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
             {paragraph.trim()}
           </p>
         ))}
+=======
+    return (
+      <div className="dashboard-ai-content">
+        <p className="ai-summary">{aiSummary}</p>
+>>>>>>> 6b9ce304dc1cdd8950782a1cac627dde18698df4
       </div>
     );
   }
