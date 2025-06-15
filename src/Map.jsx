@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, GeoJSON } from 'react-leaflet';
+import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 
-const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary }) => {
-  const [geojsonData, setGeojsonData] = useState(null);
+const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, geojsonData, setGeojsonData, mapMoveEvent }) => { // Accept mapMoveEvent prop
+  const map = useMap();
   const [clickedZipCode, setClickedZipCode] = useState(null);
   const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
 
@@ -12,11 +12,21 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary }) => {
     fetch('https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson')
       .then(response => response.json())
       .then(data => {
-        console.log("Fetched GeoJSON Data:", data);
         setGeojsonData(data);
       })
       .catch(error => console.error('Error loading GeoJSON data:', error));
-  }, []);
+  }, [setGeojsonData]); // Added setGeojsonData to dependency array
+
+  // Effect to trigger map move when mapMoveEvent changes
+  useEffect(() => {
+    if (selectedArea && mapMoveEvent) {
+      // Calculate the bounding box of the selected area's GeoJSON feature
+      const bounds = L.geoJSON(selectedArea).getBounds();
+      if (bounds.isValid()) {
+        map.flyToBounds(bounds, { padding: [50, 50] }); // Zoom and center with padding
+      }
+    }
+  }, [mapMoveEvent, selectedArea, map]); // Watch mapMoveEvent, selectedArea, and map
 
   // Function to determine color based on RiskScore (Green-Yellow-Red scale)
   const getRiskScoreColor = (score) => {
@@ -113,27 +123,16 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary }) => {
   };
 
   return (
-    <div style={{ position: 'relative', height: '500px', width: '100%' }}>
-      <MapContainer 
-        center={[40.7128, -74.0060]} 
-        zoom={10} 
-        style={{ height: '100%', width: '100%' }}
-        onClick={handleMapClick}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+    <>
+      {geojsonData && (
+        <GeoJSON
+          data={geojsonData}
+          style={geoJsonStyle}
+          onEachFeature={onEachFeature}
+          key={JSON.stringify(geojsonData)} // Force re-render when data changes
         />
-        {geojsonData && (
-          <GeoJSON
-            data={geojsonData}
-            style={geoJsonStyle}
-            onEachFeature={onEachFeature}
-            key={JSON.stringify(geojsonData)} // Force re-render when data changes
-          />
-        )}
-      </MapContainer>
-      
+      )}
+
       {/* Zip Code Popup */}
       {clickedZipCode && (
         <div
@@ -171,8 +170,33 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary }) => {
           />
         </div>
       )}
+    </>
+  );
+};
 
+const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary }) => {
+  const [geojsonData, setGeojsonData] = useState(null);
 
+  return (
+    <div style={{ position: 'relative', height: '500px', width: '100%' }}>
+      <MapContainer
+        center={[40.7128, -74.0060]}
+        zoom={10}
+        style={{ height: '100%', width: '100%' }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        <MapContent
+          selectedArea={selectedArea}
+          setSelectedArea={setSelectedArea}
+          setIsLoading={setIsLoading}
+          setAiSummary={setAiSummary}
+          geojsonData={geojsonData}
+          setGeojsonData={setGeojsonData}
+        />
+      </MapContainer>
     </div>
   );
 };
