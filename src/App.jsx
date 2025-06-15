@@ -7,11 +7,11 @@ function App() {
   const [selectedArea, setSelectedArea] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [aiSummary, setAiSummary] = useState(null);
-  const [mapMoveEvent, setMapMoveEvent] = useState(null); // New state for map move event
+  const [mapMoveEvent, setMapMoveEvent] = useState(null);
 
   // Function to trigger map move
   const triggerMapMove = () => {
-    setMapMoveEvent({}); // Update state to trigger effect in Map
+    setMapMoveEvent({});
   };
 
   return (
@@ -20,16 +20,16 @@ function App() {
         setSelectedArea={setSelectedArea}
         setIsLoading={setIsLoading}
         setAiSummary={setAiSummary}
-        triggerMapMove={triggerMapMove} // Pass triggerMapMove to TopBar
+        triggerMapMove={triggerMapMove}
       />
       <div className="content-container">
         <Dashboard
           mapProps={{
-            selectedArea: selectedArea, // Pass selectedArea to mapProps
-            setSelectedArea: setSelectedArea,
-            setIsLoading: setIsLoading,
-            setAiSummary: setAiSummary,
-            mapMoveEvent: mapMoveEvent // Pass mapMoveEvent to mapProps
+            selectedArea,
+            setSelectedArea,
+            setIsLoading,
+            setAiSummary,
+            mapMoveEvent
           }}
           sidebarProps={{
             selectedArea,

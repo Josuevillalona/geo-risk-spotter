@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { FaSearch, FaHeartbeat, FaSpinner } from 'react-icons/fa';
 
-const TopBar = ({ setSelectedArea, setIsLoading, setAiSummary }) => {
+const TopBar = ({ setSelectedArea, setIsLoading, setAiSummary, triggerMapMove }) => { // Accept triggerMapMove prop
   const [searchInput, setSearchInput] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
@@ -20,6 +20,7 @@ const TopBar = ({ setSelectedArea, setIsLoading, setAiSummary }) => {
       
       if (feature) {
         setSelectedArea(feature);
+        triggerMapMove(); // Trigger map move after setting selected area
         
         try {
           const aiResponse = await axios.post('/api/analyze', {
