@@ -1,6 +1,11 @@
 import { useState } from 'react';
 import { create } from 'zustand';
 
+// API endpoints
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://geo-risk-spotter.onrender.com' 
+  : 'http://localhost:8000';
+
 // Zustand store for chat state
 const useChatStore = create((set) => ({
   messages: [
@@ -34,7 +39,11 @@ const Chatbot = ({ selectedArea }) => {
     addMessage({ role: 'user', content: messageText });
 
     try {
-      const response = await fetch('https://geo-risk-spotter.vercel.app/api/chat', {
+      if (!navigator.onLine) {
+        throw new Error('offline');
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -56,8 +65,10 @@ const Chatbot = ({ selectedArea }) => {
       console.error('Chat error:', error);
       let errorMessage = 'Sorry, I had trouble processing your message. ';
       
-      if (!navigator.onLine || error.message.includes('Failed to fetch')) {
+      if (error.message === 'offline' || !navigator.onLine) {
         errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
+      } else if (error.message.includes('HTTP error! status: 404')) {
+        errorMessage = 'Chat service is currently unavailable. Please try again later.';
       } else if (error.message.includes('HTTP error')) {
         errorMessage = 'The server encountered an error. Please try again later.';
       }

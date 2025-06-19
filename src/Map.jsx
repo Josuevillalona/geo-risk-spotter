@@ -3,6 +3,11 @@ import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
 
+// API endpoints
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'https://geo-risk-spotter.onrender.com' 
+  : 'http://localhost:8000';
+
 const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, geojsonData, setGeojsonData, mapMoveEvent }) => {
   const map = useMap();
   const [clickedZipCode, setClickedZipCode] = useState(null);
@@ -48,7 +53,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         throw new Error('offline');
       }
 
-      const response = await axios.post('https://geo-risk-spotter.onrender.com/api/analyze', {
+      const response = await axios.post(`${API_BASE_URL}/api/analyze`, {
         zip_code: feature.properties.zip_code,
         RiskScore: feature.properties.RiskScore,
         DIABETES_CrudePrev: feature.properties.DIABETES_CrudePrev,
@@ -65,8 +70,10 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
       console.error('Error fetching AI analysis:', error);
       let errorMessage = 'Failed to generate AI analysis. ';
       
-      if (error.message === 'offline' || error.message.includes('Network Error')) {
+      if (error.message === 'offline' || !navigator.onLine) {
         errorMessage = 'Unable to connect to the analysis server. Please check your internet connection and try again.';
+      } else if (error.response?.status === 404) {
+        errorMessage = 'Analysis service is currently unavailable. Please try again later.';
       } else if (error.response) {
         errorMessage = 'The analysis server encountered an error. Please try again later.';
       }
