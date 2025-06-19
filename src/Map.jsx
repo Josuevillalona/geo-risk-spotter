@@ -59,7 +59,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         setIsLoading(true);
         
         try {
-          const response = await axios.post('/api/analyze', {
+          const response = await axios.post('https://geo-risk-spotter.onrender.com/api/analyze', {
             zip_code: feature.properties.zip_code,
             RiskScore: feature.properties.RiskScore,
             DIABETES_CrudePrev: feature.properties.DIABETES_CrudePrev,

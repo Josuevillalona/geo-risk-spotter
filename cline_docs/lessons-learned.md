@@ -169,3 +169,20 @@ Unable to resolve the issue with the browser tool. Proceeded with the task based
 
 ### Lessons Learned
 Be aware that tool failures can occur. When a tool is consistently failing and preventing verification, proceed with the task based on available information (e.g., code analysis) and document the tool failure.
+
+## 2025-06-18 - Render Deployment Failure due to Git LFS Budget
+
+### Description
+Encountered repeated deployment failures on Render with an "exceeded LFS budget" error when cloning the repository. The error logs indicated that Render was attempting to download large GeoJSON files tracked by Git LFS from the repository history.
+
+### Root Cause
+Multiple large GeoJSON files (`dist/ny_new_york_zip_codes_health_data.geojson`, `dist/shapes.geojson`, and `public/ny_new_york_zip_codes_health.geojson`) were present in the repository's history and tracked by Git LFS. The cumulative size of these files exceeded the available Git LFS budget on the GitHub account, preventing Render from successfully cloning the repository during the backend build process.
+
+### Solution
+Used `git-filter-repo` to rewrite the repository's history and remove the large GeoJSON files from Git LFS tracking and history. This involved running `git-filter-repo` for each file, followed by `git lfs prune` to clean up local LFS objects, re-adding the 'origin' remote (as `git-filter-repo` removes it), and force pushing the rewritten history to the remote repository. Clearing the build cache on Render was also necessary to ensure a fresh clone of the updated history.
+
+### Lessons Learned
+- Large files tracked by Git LFS can quickly consume the available budget and cause issues with cloning and deployment on platforms that require accessing the full repository history.
+- Removing unnecessary large files from repository history using tools like `git-filter-repo` is crucial for managing repository size and LFS usage.
+- Rewriting Git history is a powerful operation that requires caution and understanding of its implications (e.g., force pushing, impacting collaborators).
+- Deployment platforms may cache repository contents, and clearing the cache might be necessary after a history rewrite to ensure the platform uses the updated history.
