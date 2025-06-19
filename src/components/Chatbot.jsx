@@ -24,43 +24,63 @@ const useChatStore = create((set) => ({
 
 const Chatbot = ({ selectedArea }) => {
   const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
   const { messages, addMessage, clearMessages } = useChatStore();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!input.trim()) return;
+    const messageText = typeof e === 'string' ? e : input;
+    if (!messageText.trim()) return;
 
     // Add user message to chat
-    const userMessage = { role: 'user', content: input };
+    const userMessage = { role: 'user', content: messageText };
     addMessage(userMessage);
     setInput('');
+    setIsLoading(true);
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch('https://geo-risk-spotter.vercel.app/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-        },      body: JSON.stringify({
-          message: input,
+        },
+        body: JSON.stringify({
+          message: messageText,
           messages: messages, // Send conversation history for context
           selected_area: selectedArea?.properties, // Include selected area data if available
         }),
       });
 
-      if (!response.ok) throw new Error('Failed to get response');
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       const data = await response.json();
-      
-      // Add AI response to chat
       addMessage({ role: 'assistant', content: data.response });
     } catch (error) {
       console.error('Chat error:', error);
+      let errorMessage = 'Sorry, I had trouble processing your message. ';
+      
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
+      } else if (error.message.includes('HTTP error')) {
+        errorMessage = 'The server encountered an error. Please try again later.';
+      }
+      
       addMessage({
         role: 'system',
-        content: 'Sorry, I had trouble processing your message. Please try again.',
+        content: errorMessage
       });
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const handleQuickAction = (question) => {
+    setInput(question);
+    handleSubmit(question);
+  };
+
   return (
     <div className="chatbot-container">
       <div className="chat-header">
@@ -78,37 +98,29 @@ const Chatbot = ({ selectedArea }) => {
             {msg.content}
           </div>
         ))}
-      </div>      <div className="chat-controls">
+        {isLoading && (
+          <div className="message system loading">
+            Thinking...
+          </div>
+        )}
+      </div>
+      <div className="chat-controls">
         <div className="quick-actions">
           <button 
             type="button" 
             className="quick-action-button"
-            onClick={() => {
-              setInput("What are some intervention ideas for this area?");
-              handleSubmit({ preventDefault: () => {} });
-            }}
+            onClick={() => handleQuickAction("What are some intervention ideas for this area?")}
+            disabled={isLoading}
           >
             Intervention ideas
           </button>
           <button 
             type="button" 
             className="quick-action-button"
-            onClick={() => {
-              setInput("What can people do at an individual level to reduce diabetes risk?");
-              handleSubmit({ preventDefault: () => {} });
-            }}
+            onClick={() => handleQuickAction("What can people do at an individual level to reduce diabetes risk?")}
+            disabled={isLoading}
           >
-            Individual actions
-          </button>
-          <button 
-            type="button" 
-            className="quick-action-button"
-            onClick={() => {
-              setInput("What are the main risk factors in this area?");
-              handleSubmit({ preventDefault: () => {} });
-            }}
-          >
-            Risk factors
+            Diabetes prevention
           </button>
         </div>
         <form onSubmit={handleSubmit} className="chat-input-form">
@@ -116,10 +128,10 @@ const Chatbot = ({ selectedArea }) => {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Ask about diabetes risk factors..."
-            className="chat-input"
+            placeholder="Type your question..."
+            disabled={isLoading}
           />
-          <button type="submit" className="chat-send-button">
+          <button type="submit" disabled={isLoading || !input.trim()}>
             Send
           </button>
         </form>
