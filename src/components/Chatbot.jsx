@@ -27,16 +27,11 @@ const Chatbot = ({ selectedArea }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { messages, addMessage, clearMessages } = useChatStore();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const messageText = typeof e === 'string' ? e : input;
+  const sendMessage = async (messageText) => {
     if (!messageText.trim()) return;
-
-    // Add user message to chat
-    const userMessage = { role: 'user', content: messageText };
-    addMessage(userMessage);
-    setInput('');
+    
     setIsLoading(true);
+    addMessage({ role: 'user', content: messageText });
 
     try {
       const response = await fetch('https://geo-risk-spotter.vercel.app/api/chat', {
@@ -46,8 +41,8 @@ const Chatbot = ({ selectedArea }) => {
         },
         body: JSON.stringify({
           message: messageText,
-          messages: messages, // Send conversation history for context
-          selected_area: selectedArea?.properties, // Include selected area data if available
+          messages: messages,
+          selected_area: selectedArea?.properties,
         }),
       });
 
@@ -61,7 +56,7 @@ const Chatbot = ({ selectedArea }) => {
       console.error('Chat error:', error);
       let errorMessage = 'Sorry, I had trouble processing your message. ';
       
-      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+      if (!navigator.onLine || error.message.includes('Failed to fetch')) {
         errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
       } else if (error.message.includes('HTTP error')) {
         errorMessage = 'The server encountered an error. Please try again later.';
@@ -76,9 +71,19 @@ const Chatbot = ({ selectedArea }) => {
     }
   };
 
-  const handleQuickAction = (question) => {
-    setInput(question);
-    handleSubmit(question);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (input.trim()) {
+      await sendMessage(input);
+      setInput('');
+    }
+  };
+
+  const handleQuickAction = async (question) => {
+    if (!isLoading) {
+      setInput(question);
+      await sendMessage(question);
+    }
   };
 
   return (
@@ -88,6 +93,7 @@ const Chatbot = ({ selectedArea }) => {
           onClick={clearMessages}
           className="clear-chat-button"
           type="button"
+          disabled={isLoading}
         >
           Clear Chat
         </button>

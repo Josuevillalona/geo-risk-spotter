@@ -41,6 +41,42 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
     };
   };
 
+  const analyzeArea = async (feature) => {
+    setIsLoading(true);
+    try {
+      if (!navigator.onLine) {
+        throw new Error('offline');
+      }
+
+      const response = await axios.post('https://geo-risk-spotter.onrender.com/api/analyze', {
+        zip_code: feature.properties.zip_code,
+        RiskScore: feature.properties.RiskScore,
+        DIABETES_CrudePrev: feature.properties.DIABETES_CrudePrev,
+        OBESITY_CrudePrev: feature.properties.OBESITY_CrudePrev,
+        LPA_CrudePrev: feature.properties.LPA_CrudePrev,
+        CSMOKING_CrudePrev: feature.properties.CSMOKING_CrudePrev,
+        BPHIGH_CrudePrev: feature.properties.BPHIGH_CrudePrev,
+        FOODINSECU_CrudePrev: feature.properties.FOODINSECU_CrudePrev,
+        ACCESS2_CrudePrev: feature.properties.ACCESS2_CrudePrev,
+      });
+      
+      setAiSummary(response.data.summary);
+    } catch (error) {
+      console.error('Error fetching AI analysis:', error);
+      let errorMessage = 'Failed to generate AI analysis. ';
+      
+      if (error.message === 'offline' || error.message.includes('Network Error')) {
+        errorMessage = 'Unable to connect to the analysis server. Please check your internet connection and try again.';
+      } else if (error.response) {
+        errorMessage = 'The analysis server encountered an error. Please try again later.';
+      }
+      
+      setAiSummary(errorMessage);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const onEachFeature = (feature, layer) => {
     layer.on({
       click: async (e) => {
@@ -56,27 +92,8 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         
         // Set selected area and trigger AI analysis
         setSelectedArea(feature);
-        setIsLoading(true);
         
-        try {
-          const response = await axios.post('https://geo-risk-spotter.onrender.com/api/analyze', {
-            zip_code: feature.properties.zip_code,
-            RiskScore: feature.properties.RiskScore,
-            DIABETES_CrudePrev: feature.properties.DIABETES_CrudePrev,
-            OBESITY_CrudePrev: feature.properties.OBESITY_CrudePrev,
-            LPA_CrudePrev: feature.properties.LPA_CrudePrev,
-            CSMOKING_CrudePrev: feature.properties.CSMOKING_CrudePrev,
-            BPHIGH_CrudePrev: feature.properties.BPHIGH_CrudePrev,
-            FOODINSECU_CrudePrev: feature.properties.FOODINSECU_CrudePrev,
-            ACCESS2_CrudePrev: feature.properties.ACCESS2_CrudePrev,
-          });
-          setAiSummary(response.data.summary);
-        } catch (error) {
-          console.error('Error fetching AI analysis:', error);
-          setAiSummary('Failed to generate AI analysis');
-        } finally {
-          setIsLoading(false);
-        }
+        await analyzeArea(feature);
       },
       mouseover: (e) => {
         const layer = e.target;
