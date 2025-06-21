@@ -186,3 +186,72 @@ Used `git-filter-repo` to rewrite the repository's history and remove the large 
 - Removing unnecessary large files from repository history using tools like `git-filter-repo` is crucial for managing repository size and LFS usage.
 - Rewriting Git history is a powerful operation that requires caution and understanding of its implications (e.g., force pushing, impacting collaborators).
 - Deployment platforms may cache repository contents, and clearing the cache might be necessary after a history rewrite to ensure the platform uses the updated history.
+
+## 2025-06-20 - Save & Persist Feature: Hybrid State Management Approach
+
+### Description
+Implemented a "Save Analysis" feature for diabetes risk analyses using Zustand store with localStorage persistence. Chose a hybrid approach (existing props + Zustand for new features) over full state migration.
+
+### Challenge
+Initial attempt to migrate Sidebar.jsx to use Zustand directly broke zip code selection functionality because the rest of the app still used local state and prop-drilling.
+
+### Root Cause
+**State Source Disconnect**: When only one component (Sidebar) reads from Zustand but other components (App, Map) still update local state, the two state systems become disconnected. Clicking a zip code updated local state, but Sidebar was reading from Zustand store (which wasn't being updated).
+
+### Solution
+**Hybrid Approach**: 
+1. Keep existing prop-drilling architecture unchanged (zero regression risk)
+2. Add Zustand store ONLY for new save/persist functionality
+3. Pass current props to store for saving (bridge between the two systems)
+4. Use Zustand selectors only for saved analyses management
+
+### Key Implementation
+```javascript
+// In Sidebar.jsx - bridge between props and store
+const handleSave = () => {
+  saveCurrentAnalysis({
+    selectedArea,    // from props
+    aiSummary,      // from props  
+    chatHistory: [] // default
+  });
+};
+```
+
+### Lessons Learned
+
+#### 1. Partial State Migration Risk
+**Never migrate only some components to a new state system while others remain on the old system.** This creates state synchronization issues and broken data flow.
+
+#### 2. Hybrid Approach Benefits
+- **Zero regression risk** - existing functionality unchanged
+- **Immediate value delivery** - new features work without touching existing code
+- **Future migration path** - store architecture ready for full migration later
+- **Reduced complexity** - smaller surface area for bugs
+
+#### 3. Testing Strategy for State Changes
+Always test the complete user workflow after state management changes:
+1. Select zip code → AI analysis → Save → View saved → Delete
+2. Browser refresh to test persistence
+3. Edge cases (no selection, rapid operations, storage limits)
+
+#### 4. Error Handling for Storage Operations
+localStorage operations can fail due to:
+- Storage quota exceeded
+- Private browsing mode restrictions  
+- Browser security policies
+- Storage corruption
+
+Always wrap in try/catch with user-friendly error messages.
+
+#### 5. Gradual Feature Rollout
+Start with minimal viable functionality (save/load) before adding complex features (search, export, etc.). This allows for user feedback and validation before investing in advanced features.
+
+### Code Quality Patterns That Worked
+1. **Parameter-based store actions** - `saveCurrentAnalysis(data)` accepts data instead of reading from store
+2. **Targeted Zustand selectors** - Only subscribe to specific store slices
+3. **Status feedback patterns** - Immediate user feedback with auto-clearing timeouts
+4. **Versioned data structures** - Include version field for future migrations
+5. **Storage quota checking** - Proactive limit checking before operations
+
+### Recommendation
+For future state management changes, prefer gradual hybrid approaches over "big bang" migrations, especially in production applications with complex state dependencies.

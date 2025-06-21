@@ -1,4 +1,4 @@
-## Geospatial Risk Hotspot Project Roadmap
+## RiskPulse: Diabetes Project Roadmap
 
 ### Phase 1: The Foundational MVP (Target: 1 Week)
 - [x] Sprint 1.1: The "Map on a Screen" Slice

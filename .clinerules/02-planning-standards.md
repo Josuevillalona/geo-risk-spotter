@@ -1,6 +1,6 @@
 ## Planning Standards Guidelines
 
-This document outlines project-specific planning standards for the Geospatial Risk Hotspot project, adhering to the Cline AI Development Framework principles.
+This document outlines project-specific planning standards for the RiskPulse: Diabetes project, adhering to the Cline AI Development Framework principles.
 
 ### Task Breakdown Approach
 - **Iterative and Layered**: Break down tasks into small, testable units that build upon each other. Each layer should validate a specific part of the system (e.g., map rendering, data loading, AI integration).

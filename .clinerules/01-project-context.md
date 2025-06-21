@@ -1,9 +1,9 @@
 ## Project Context Guidelines
 
-This document outlines project-specific context, goals, and constraints for the Geospatial Risk Hotspot project, adhering to the Cline AI Development Framework principles.
+This document outlines project-specific context, goals, and constraints for the RiskPulse: Diabetes project, adhering to the Cline AI Development Framework principles.
 
 ### Project Overview
-- **Name**: Geospatial Risk Hotspot
+- **Name**: RiskPulse: Diabetes
 - **Type**: Web App
 - **Goals**:
   - Provide public health analysts with an interactive map to visually identify diabetes risk hotspots by zip code.

@@ -10,7 +10,7 @@ const Dashboard = ({ mapProps, sidebarProps }) => (
       <div className="dashboard-box map-box">
         <div className="dashboard-box-header">
           <FaMapMarkerAlt className="dashboard-icon" />
-          <span className="dashboard-title">Geospatial Risk Hotspot</span>
+          <span className="dashboard-title">RiskPulse: Diabetes</span>
         </div>
         <div className="dashboard-map-content">
           <Map {...mapProps} />

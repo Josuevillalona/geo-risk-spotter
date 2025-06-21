@@ -1,6 +1,6 @@
 ## Coding Standards Guidelines
 
-This document outlines project-specific coding standards for the Geospatial Risk Hotspot project, adhering to the Cline AI Development Framework principles.
+This document outlines project-specific coding standards for the RiskPulse: Diabetes project, adhering to the Cline AI Development Framework principles.
 
 ### General Principles
 - **Readability**: Code should be easy to understand and maintain.

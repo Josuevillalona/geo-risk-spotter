@@ -1,6 +1,6 @@
 ## Documentation Requirements Guidelines
 
-This document outlines project-specific documentation standards for the Geospatial Risk Hotspot project, adhering to the Cline AI Development Framework principles.
+This document outlines project-specific documentation standards for the RiskPulse: Diabetes project, adhering to the Cline AI Development Framework principles.
 
 ### General Principles
 - **Comprehensive**: Document all critical aspects of the project, including architecture, code, testing, and deployment.
