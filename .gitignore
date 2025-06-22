@@ -27,5 +27,3 @@ dist-ssr
 
 /backend/.env
 public/ny_new_york_zip_codes_geo.min.json
-eslint.config.js
-src/App.jsx
