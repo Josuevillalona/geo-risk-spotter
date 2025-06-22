@@ -265,38 +265,28 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
       </div>
     );
   };
-
   return (
-    <div className="dashboard-ai-content" style={{ textAlign: 'left' }}>
+    <div className="sidebar-wrapper">
       {/* Save Analysis Button */}
-      <div style={{ marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className="save-section">
         <button
           onClick={handleSave}
           disabled={!selectedArea || isLoading}
-          style={{
-            backgroundColor: (!selectedArea || isLoading) ? '#cccccc' : '#3b82f6',
-            color: 'white',
-            border: 'none',
-            padding: '8px 16px',
-            borderRadius: '4px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: (!selectedArea || isLoading) ? 'not-allowed' : 'pointer',
-            transition: 'background-color 0.2s'
-          }}
+          className={`save-button ${
+            saveStatus === 'success' ? 'save-success' : 
+            saveStatus === 'error' ? 'save-error' : 
+            saveStatus === 'deleted' ? 'save-deleted' : ''
+          }`}
+          title={!aiSummary ? 'AI analysis required to save' : 'Save current analysis'}
         >
-          Save Analysis
-        </button>        {saveStatus === 'success' && (
-          <span style={{ color: '#16a34a', fontSize: '12px' }}>Analysis saved!</span>
-        )}
-        {saveStatus === 'deleted' && (
-          <span style={{ color: '#f59e0b', fontSize: '12px' }}>Analysis deleted!</span>
-        )}
-        {saveStatus === 'error' && (
-          <span style={{ color: '#dc2626', fontSize: '12px' }}>Operation failed</span>
-        )}
+          {saveStatus === 'success' ? '✓ Saved!' : 
+           saveStatus === 'error' ? '✗ Error' : 
+           saveStatus === 'deleted' ? '✓ Deleted' : 
+           'Save Analysis'}
+        </button>
       </div>
       
+      {/* Tabs */}
       <div className="tabs">
         <button 
           className={`tab ${activeTab === 'ai' ? 'active' : ''}`}
@@ -323,22 +313,15 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
           Saved
         </button>
       </div>
-      <div className="ai-content-scroll" style={{ textAlign: 'left' }}>
+      
+      {/* Tab Content */}
+      <div className="tab-content">
         {activeTab === 'ai' ? (
           isLoading ? (
             <p className="ai-loading">Please wait while the AI analyzes the data.</p>
           ) : (
-            <div style={{
-              backgroundColor: '#f0fdf4',
-              padding: '16px',
-              borderRadius: '8px',
-              color: '#1f2937',
-              whiteSpace: 'pre-line',
-              lineHeight: '1.6'
-            }}>
-              <div style={{
-                fontSize: '14px'
-              }}>
+            <div className="ai-summary-container">
+              <div className="ai-summary">
                 {aiSummary}
               </div>
             </div>

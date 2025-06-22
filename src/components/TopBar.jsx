@@ -10,9 +10,17 @@ const TopBar = ({ setSelectedArea, setIsLoading, setAiSummary, triggerMapMove })
   const handleSearch = async (zipCode) => {
     setSearchLoading(true);
     setIsLoading(true);
-    setErrorMessage('');
-    try {
-      const response = await fetch('https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson');
+    setErrorMessage('');    try {
+      // Try remote URL first, fallback to local file
+      let response;
+      try {
+        response = await fetch('https://geo-risk-spotter-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson');
+        if (!response.ok) throw new Error('Remote fetch failed');
+      } catch (remoteError) {
+        console.warn('Remote GeoJSON failed, using local file:', remoteError);
+        response = await fetch('/ny_new_york_zip_codes_geo.min.json');
+      }
+      
       const data = await response.json();
       const feature = data.features.find(f => f.properties.zip_code === zipCode);
       if (feature) {
