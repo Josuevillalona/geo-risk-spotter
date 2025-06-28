@@ -3,6 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import httpx
 import os
+import time
+from typing import Optional, List, Dict
 from dotenv import load_dotenv
 from enum import Enum
 
@@ -14,6 +16,16 @@ print("OPENROUTER_API_KEY:", os.getenv("OPENROUTER_API_KEY"))
 
 # Get OpenRouter API key from environment variables
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+
+# Feature flag for interventions
+ENABLE_INTERVENTIONS = os.getenv("ENABLE_INTERVENTIONS", "true").lower() == "true"
+
+# Global intervention cache (prevents repeated S3 calls)
+intervention_cache = {
+    "data": None,
+    "timestamp": None,
+    "max_age": 1800  # 30 minutes
+}
 
 app = FastAPI()
 
@@ -137,6 +149,91 @@ RECOMMENDATION_PROMPTS = {    QuestionType.LIFESTYLE: """
     Format your response with clear headings and actionable bullet points.
     """
 }
+
+async def fetch_interventions() -> List[Dict]:
+    """
+    Fetch interventions from S3 with caching and error handling
+    Uses existing S3 pattern from GeoJSON
+    """
+    current_time = time.time()
+    
+    # Check cache first
+    if (intervention_cache["data"] and 
+        intervention_cache["timestamp"] and 
+        current_time - intervention_cache["timestamp"] < intervention_cache["max_age"]):
+        return intervention_cache["data"]
+    
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            response = await client.get(
+                "https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/interventions/interventions-db.json"
+            )
+            response.raise_for_status()
+            
+            data = response.json()
+            interventions = data.get("interventions", [])
+            
+            # Update cache
+            intervention_cache["data"] = interventions
+            intervention_cache["timestamp"] = current_time
+            
+            print(f"Loaded {len(interventions)} interventions from S3")
+            return interventions
+            
+    except Exception as e:
+        print(f"Warning: Could not fetch interventions: {e}")
+        return []  # Graceful degradation
+
+def get_relevant_interventions(health_data: dict, query: str = "", max_results: int = 3) -> List[Dict]:
+    """
+    Filter interventions based on health profile using keyword matching
+    Simple, reliable approach for MVP
+    """
+    if not intervention_cache.get("data"):
+        return []
+    
+    # Identify high-risk health areas
+    risk_keywords = []
+    
+    if health_data.get('DIABETES_CrudePrev', 0) > 15:
+        risk_keywords.extend(['diabetes', 'blood_sugar'])
+    if health_data.get('OBESITY_CrudePrev', 0) > 25:
+        risk_keywords.extend(['obesity', 'weight'])
+    if health_data.get('LPA_CrudePrev', 0) > 20:
+        risk_keywords.extend(['physical', 'activity', 'exercise'])
+    if health_data.get('CSMOKING_CrudePrev', 0) > 15:
+        risk_keywords.extend(['smoking', 'tobacco'])
+    if health_data.get('FOODINSECU_CrudePrev', 0) > 10:
+        risk_keywords.extend(['food', 'nutrition', 'food_security'])
+    if health_data.get('ACCESS2_CrudePrev', 0) > 15:
+        risk_keywords.extend(['healthcare', 'access', 'mobile'])
+    
+    # Add query-based keywords
+    if query:
+        query_words = query.lower().split()
+        risk_keywords.extend([word for word in query_words if len(word) > 3])
+    
+    # Score and filter interventions
+    scored_interventions = []
+    for intervention in intervention_cache["data"]:
+        score = 0
+        
+        # Match health issues
+        for issue in intervention.get("health_issues", []):
+            if any(keyword in issue.lower() for keyword in risk_keywords):
+                score += 3
+        
+        # Match keywords
+        for keyword in intervention.get("keywords", []):
+            if keyword.lower() in risk_keywords:
+                score += 1
+        
+        if score > 0:
+            scored_interventions.append((score, intervention))
+    
+    # Return top matches
+    scored_interventions.sort(key=lambda x: x[0], reverse=True)
+    return [intervention for score, intervention in scored_interventions[:max_results]]
 
 @app.get("/")
 def read_root():
@@ -276,6 +373,32 @@ async def chat(request: ChatRequest):
     for msg in request.messages:
         messages.append({"role": msg["role"], "content": msg["content"]})
 
+    # NEW: Add intervention context when relevant
+    if (ENABLE_INTERVENTIONS and request.selected_area and 
+        any(keyword in request.message.lower() for keyword in ['intervention', 'recommendation', 'program', 'help', 'ideas', 'solution'])):
+        
+        # Fetch interventions (with caching)
+        if not intervention_cache.get("data"):
+            await fetch_interventions()
+        
+        relevant_interventions = get_relevant_interventions(
+            request.selected_area, 
+            request.message,
+            max_results=3
+        )
+        
+        if relevant_interventions:
+            intervention_context = "\n\n### Evidence-Based Intervention Options:\n"
+            for i, intervention in enumerate(relevant_interventions, 1):
+                intervention_context += f"\n**{i}. {intervention['title']}** ({intervention['category']})\n"
+                intervention_context += f"- {intervention['description'][:180]}...\n"
+                intervention_context += f"- Target: {intervention.get('target_population', 'General population').replace('_', ' ')}\n"
+                intervention_context += f"- Timeline: {intervention.get('timeframe', 'Varies')}\n"
+                intervention_context += f"- Cost: {intervention.get('implementation_cost', 'Medium').title()}\n"
+            
+            intervention_context += "\n*Base your recommendations on these proven interventions and explain how they address the specific health risks in this area.*"
+            messages.append({"role": "system", "content": intervention_context})
+
     # If there's selected area data, add it as context
     if request.selected_area:
         context = f"\nContext for the selected area (ZIP code {request.selected_area.get('zip_code', 'unknown')}):\n"
@@ -312,3 +435,11 @@ async def chat(request: ChatRequest):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# Initialize intervention cache on startup
+@app.on_event("startup")
+async def startup_event():
+    """Load interventions into cache on startup"""
+    if ENABLE_INTERVENTIONS:
+        await fetch_interventions()
+        print("✅ Intervention cache initialized")

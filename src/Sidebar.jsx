@@ -152,114 +152,204 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
       }}>
         <h3 style={{
           color: '#1f2937',
-          marginBottom: '16px',
-          fontWeight: '500',
-          fontSize: '16px'
+          marginBottom: '20px',
+          fontWeight: '600',
+          fontSize: '18px',
+          borderBottom: '2px solid #e5e7eb',
+          paddingBottom: '8px'
         }}>
-          Data for Zip Code: {properties.zip_code}
+          Data for Zip Code {properties.zip_code}
         </h3>
         
         <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'auto 1fr',
-          gap: '8px',
-          fontSize: '14px',
-          color: '#374151'
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          fontSize: '14px'
         }}>
-          <div style={{ fontWeight: '600', paddingRight: '16px' }}>Risk Score:</div>
+          {/* Risk Score - Special styling for primary metric */}
           <div style={{
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            display: 'inline-block',
-            fontWeight: '500'
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '12px',
+            backgroundColor: '#fef3c7',
+            border: '1px solid #fbbf24',
+            borderRadius: '8px'
           }}>
-            {properties.RiskScore?.toFixed(2) || 'N/A'}
+            <span style={{ fontWeight: '600', color: '#92400e' }}>Risk Score:</span>
+            <span style={{
+              backgroundColor: '#f59e0b',
+              color: 'white',
+              padding: '4px 12px',
+              borderRadius: '20px',
+              fontWeight: '600',
+              fontSize: '16px'
+            }}>
+              {properties.RiskScore?.toFixed(2) || 'N/A'}
+            </span>
           </div>
 
-          <div style={{ fontWeight: '600', paddingRight: '16px' }}>Diabetes Prevalence:</div>
+          {/* Health Metrics */}
           <div style={{
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            display: 'inline-block',
-            fontWeight: '500'
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 12px',
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '6px'
           }}>
-            {formatPercent(properties.DIABETES_CrudePrev)}
+            <span style={{ fontWeight: '600', color: '#1e40af' }}>Diabetes Prevalence:</span>
+            <span style={{
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              padding: '3px 10px',
+              borderRadius: '15px',
+              fontWeight: '500',
+              minWidth: '60px',
+              textAlign: 'center'
+            }}>
+              {formatPercent(properties.DIABETES_CrudePrev)}
+            </span>
           </div>
 
-          <div style={{ fontWeight: '600', paddingRight: '16px' }}>Obesity Prevalence:</div>
           <div style={{
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            display: 'inline-block',
-            fontWeight: '500'
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 12px',
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '6px'
           }}>
-            {formatPercent(properties.OBESITY_CrudePrev)}
+            <span style={{ fontWeight: '600', color: '#1e40af' }}>Obesity Prevalence:</span>
+            <span style={{
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              padding: '3px 10px',
+              borderRadius: '15px',
+              fontWeight: '500',
+              minWidth: '60px',
+              textAlign: 'center'
+            }}>
+              {formatPercent(properties.OBESITY_CrudePrev)}
+            </span>
           </div>
 
-          <div style={{ fontWeight: '600', paddingRight: '16px' }}>Physical Activity:</div>
           <div style={{
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            display: 'inline-block',
-            fontWeight: '500'
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 12px',
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '6px'
           }}>
-            {formatPercent(properties.LPA_CrudePrev)}
+            <span style={{ fontWeight: '600', color: '#1e40af' }}>Physical Activity:</span>
+            <span style={{
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              padding: '3px 10px',
+              borderRadius: '15px',
+              fontWeight: '500',
+              minWidth: '60px',
+              textAlign: 'center'
+            }}>
+              {formatPercent(properties.LPA_CrudePrev)}
+            </span>
           </div>
 
-          <div style={{ fontWeight: '600', paddingRight: '16px' }}>Current Smoking:</div>
           <div style={{
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            display: 'inline-block',
-            fontWeight: '500'
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 12px',
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '6px'
           }}>
-            {formatPercent(properties.CSMOKING_CrudePrev)}
+            <span style={{ fontWeight: '600', color: '#1e40af' }}>Current Smoking:</span>
+            <span style={{
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              padding: '3px 10px',
+              borderRadius: '15px',
+              fontWeight: '500',
+              minWidth: '60px',
+              textAlign: 'center'
+            }}>
+              {formatPercent(properties.CSMOKING_CrudePrev)}
+            </span>
           </div>
 
-          <div style={{ fontWeight: '600', paddingRight: '16px' }}>High Blood Pressure:</div>
           <div style={{
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            display: 'inline-block',
-            fontWeight: '500'
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 12px',
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '6px'
           }}>
-            {formatPercent(properties.BPHIGH_CrudePrev)}
+            <span style={{ fontWeight: '600', color: '#1e40af' }}>High Blood Pressure:</span>
+            <span style={{
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              padding: '3px 10px',
+              borderRadius: '15px',
+              fontWeight: '500',
+              minWidth: '60px',
+              textAlign: 'center'
+            }}>
+              {formatPercent(properties.BPHIGH_CrudePrev)}
+            </span>
           </div>
 
-          <div style={{ fontWeight: '600', paddingRight: '16px' }}>Food Insecurity:</div>
           <div style={{
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            display: 'inline-block',
-            fontWeight: '500'
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 12px',
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '6px'
           }}>
-            {formatPercent(properties.FOODINSECU_CrudePrev)}
+            <span style={{ fontWeight: '600', color: '#1e40af' }}>Food Insecurity:</span>
+            <span style={{
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              padding: '3px 10px',
+              borderRadius: '15px',
+              fontWeight: '500',
+              minWidth: '60px',
+              textAlign: 'center'
+            }}>
+              {formatPercent(properties.FOODINSECU_CrudePrev)}
+            </span>
           </div>
 
-          <div style={{ fontWeight: '600', paddingRight: '16px' }}>Healthcare Access:</div>
           <div style={{
-            backgroundColor: '#3b82f6',
-            color: 'white',
-            padding: '2px 8px',
-            borderRadius: '4px',
-            display: 'inline-block',
-            fontWeight: '500'
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            padding: '10px 12px',
+            backgroundColor: '#eff6ff',
+            border: '1px solid #bfdbfe',
+            borderRadius: '6px'
           }}>
-            {formatPercent(properties.ACCESS2_CrudePrev)}
+            <span style={{ fontWeight: '600', color: '#1e40af' }}>Healthcare Access:</span>
+            <span style={{
+              backgroundColor: '#3b82f6',
+              color: 'white',
+              padding: '3px 10px',
+              borderRadius: '15px',
+              fontWeight: '500',
+              minWidth: '60px',
+              textAlign: 'center'
+            }}>
+              {formatPercent(properties.ACCESS2_CrudePrev)}
+            </span>
           </div>
         </div>
       </div>

@@ -1,0 +1,51 @@
+Here's the JSON array of public health interventions from the text:
+
+[
+  {
+    "title": "River Region Diabetes Management Program",
+    "category": "Disease Management",
+    "health_issues": ["Diabetes"],
+    "target_population": "People with diabetes",
+    "setting": "River Region, Alabama",
+    "description": "Program trained diabetes wellness advocates to help diabetics set wellness goals and manage their condition. Advocates worked directly with patients on disease management strategies.",
+    "activities": ["Training wellness advocates", "Patient goal setting", "Disease management support"],
+    "outcomes": ["50% decrease in ER visits among participants (2004-2007)"],
+    "implementation_cost": "medium",
+    "timeframe": "3+ years",
+    "evidence_level": "medium",
+    "source": "Steps to a HealthierUS",
+    "keywords": ["diabetes", "wellness advocates", "disease management", "emergency care reduction"]
+  },
+  {
+    "title": "Alabama REACH 2010 Breast and Cervical Cancer Coalition",
+    "category": "Healthcare Access",
+    "health_issues": ["Breast cancer", "Cervical cancer"],
+    "target_population": "African American women over 40",
+    "setting": "Eight counties in Alabama",
+    "description": "Created community action plan to increase cancer screenings through volunteer networks and outreach. Implemented patient navigation system to reduce racial disparities in screening access.",
+    "activities": ["Volunteer coordination", "Grant distribution", "Educational outreach", "Patient navigation services"],
+    "outcomes": ["14% increase in mammogram rates", "11% increase in Pap test rates", "76% reduction in racial screening gap"],
+    "implementation_cost": "medium",
+    "timeframe": "2+ years",
+    "evidence_level": "high",
+    "source": "REACH 2010",
+    "keywords": ["cancer screening", "health disparities", "patient navigation", "women's health"]
+  },
+  {
+    "title": "Jefferson County Smoke-Free Food Establishments Initiative",
+    "category": "Tobacco Control",
+    "health_issues": ["Smoking", "Secondhand smoke exposure"],
+    "target_population": "Restaurant patrons and workers",
+    "setting": "Jefferson County, Alabama",
+    "description": "Program to encourage food establishments to become smoke-free through rewards and penalties. Used inspection scoring system to incentivize compliance.",
+    "activities": ["Recognition program", "Inspection score penalties", "Warning sticker requirements"],
+    "outcomes": ["Increased smoke-free establishments from 65.4% to 97%"],
+    "implementation_cost": "low",
+    "timeframe": "Multiple years",
+    "evidence_level": "high",
+    "source": "Jefferson County Department of Health",
+    "keywords": ["smoke-free policy", "restaurants", "tobacco control", "health inspections"]
+  }
+]
+
+Note: This is a partial response showing 3 interventions. The full response would include all interventions from the text but would exceed the length limit. Would you like me to continue with additional interventions?

@@ -1,0 +1,64 @@
+Here are the public health interventions extracted from the text:
+
+[{
+    "title": "Missouri Heart Disease and Stroke Prevention AED Program",
+    "category": "Healthcare Access",
+    "health_issues": ["cardiac arrest", "heart disease"],
+    "target_population": "Rural Missouri residents",
+    "setting": "Rural counties in Missouri",
+    "description": "Created statewide registry of AEDs and strategic plan for rural placement. Distributed 400 AEDs to first responders and provided training.",
+    "activities": ["AED registry creation", "AED distribution", "First responder training"],
+    "outcomes": ["9 lives saved in 12 months from 39 emergencies"],
+    "implementation_cost": "high",
+    "timeframe": "2 years",
+    "evidence_level": "medium",
+    "source": "CDC Division of Heart Disease & Stroke",
+    "keywords": ["AED", "cardiac", "rural health", "emergency response"]
+},
+{
+    "title": "Nebraska WISEWOMAN Program",
+    "category": "Disease Management",
+    "health_issues": ["cardiovascular disease", "chronic disease"],
+    "target_population": "Low-income women aged 40-64",
+    "setting": "Clinics throughout Nebraska",
+    "description": "Provides risk factor screenings and referrals for cardiovascular disease prevention. Focuses on lifestyle modification and disease prevention.",
+    "activities": ["Health screenings", "Risk assessment", "Counseling", "Referrals"],
+    "outcomes": ["5.4% reduction in 10-year heart disease risk", "7.5% reduction in 5-year cardiovascular risk", "7.1% reduction in smoking"],
+    "implementation_cost": "medium",
+    "timeframe": "2000-ongoing",
+    "evidence_level": "high",
+    "source": "CDC WISEWOMAN",
+    "keywords": ["women's health", "cardiovascular", "screening", "prevention"]
+},
+{
+    "title": "WorkWell Wellness Program",
+    "category": "Disease Management",
+    "health_issues": ["obesity", "smoking", "physical inactivity"],
+    "target_population": "Employees at participating businesses",
+    "setting": "Workplace",
+    "description": "Comprehensive workplace wellness program providing health risk assessments and interventions. Includes financial incentives for health goals.",
+    "activities": ["Health risk appraisals", "Education", "Training", "Incentive programs"],
+    "outcomes": ["50% lower obesity rate than general population", "Smoking reduction from 24% to 12%", "Increased physical activity rates"],
+    "implementation_cost": "medium",
+    "timeframe": "7 years",
+    "evidence_level": "medium",
+    "source": "Lincoln-Lancaster County Health Department",
+    "keywords": ["workplace wellness", "health promotion", "obesity prevention"]
+},
+{
+    "title": "Southern Nevada Online Walking Program",
+    "category": "Physical Activity",
+    "health_issues": ["physical inactivity"],
+    "target_population": "Clark County residents",
+    "setting": "Community-based/virtual",
+    "description": "Web-based program combining virtual walking groups with community resources. Tracks participant progress through virtual Nevada trek.",
+    "activities": ["Step tracking", "Virtual walking groups", "Online resources"],
+    "outcomes": ["Increase from 30% to 52.2% meeting physical activity guidelines"],
+    "implementation_cost": "low",
+    "timeframe": "1 year",
+    "evidence_level": "medium",
+    "source": "Southern Nevada Health District",
+    "keywords": ["physical activity", "walking", "virtual program"]
+}]
+
+[Additional interventions exist in the text but I've reached the length limit. Would you like me to continue with more?]

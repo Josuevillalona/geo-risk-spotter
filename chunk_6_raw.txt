@@ -1,0 +1,115 @@
+Here are the public health interventions extracted from the text:
+
+[{
+    "title": "Cleveland H1N1 Emergency Response Coordination",
+    "category": "Disease Management",
+    "health_issues": ["H1N1 influenza", "infectious disease"],
+    "target_population": "Greater Cleveland/Cuyahoga County residents",
+    "setting": "County-wide",
+    "description": "Coordinated emergency response to H1N1 outbreak involving multiple agencies and stakeholders. Focused on information dissemination, response plan activation, and surge capacity management.",
+    "activities": [
+        "Regular conference calls with community partners",
+        "Email briefings to officials",
+        "Media communications",
+        "Emergency response coordination",
+        "Staff mobilization"
+    ],
+    "outcomes": null,
+    "implementation_cost": "medium",
+    "timeframe": "During H1N1 outbreak",
+    "evidence_level": "medium",
+    "source": "Cuyahoga County Health Department",
+    "keywords": ["emergency response", "H1N1", "pandemic", "coordination", "communication"]
+},
+{
+    "title": "Cherokee Nation School Health Index Program",
+    "category": "Tobacco Control",
+    "health_issues": ["tobacco use", "nutrition", "physical activity"],
+    "target_population": "American Indian youth",
+    "setting": "Schools",
+    "description": "Implementation of School Health Index to create tobacco-free environments and improve school health policies. Program provided training and support for school policy changes.",
+    "activities": [
+        "SHI training for school staff",
+        "Implementation of 24/7 tobacco-free policies",
+        "Wellness policy development",
+        "Improving food choices",
+        "Expanding exercise facility access"
+    ],
+    "outcomes": "9 schools implemented tobacco-free policies, 19 schools made health improvements",
+    "implementation_cost": "medium",
+    "timeframe": "Started 2004",
+    "evidence_level": "medium",
+    "source": "Cherokee Nation Steps Program",
+    "keywords": ["tobacco prevention", "school health", "American Indian", "wellness policy"]
+},
+{
+    "title": "Oklahoma Cares Cancer Screening Program",
+    "category": "Healthcare Access",
+    "health_issues": ["breast cancer", "cervical cancer"],
+    "target_population": "Low-income uninsured Oklahoma women",
+    "setting": "Statewide healthcare system",
+    "description": "Comprehensive program providing access to cancer screening and treatment through Medicaid coverage. Includes outreach efforts to expand provider network.",
+    "activities": [
+        "Cancer screening services",
+        "Medicaid coverage for treatment",
+        "Provider network expansion",
+        "Outreach to eligible women"
+    ],
+    "outcomes": [
+        "15% improvement in screening rates",
+        "9000+ women served",
+        "1000+ received treatment"
+    ],
+    "implementation_cost": "high",
+    "timeframe": "Ongoing",
+    "evidence_level": "high",
+    "source": "Oklahoma State Department of Health",
+    "keywords": ["cancer screening", "Medicaid", "women's health", "healthcare access"]
+},
+{
+    "title": "Pennsylvania Fresh Food Financing Initiative",
+    "category": "Food Environment",
+    "health_issues": ["nutrition access", "food insecurity"],
+    "target_population": "Residents of underserved communities",
+    "setting": "Statewide",
+    "description": "Grant and loan program to encourage supermarket development in underserved areas. Public-private partnership leveraging state funds with private investment.",
+    "activities": [
+        "Providing grants and loans for food retailers",
+        "Supermarket development",
+        "Creating fresh food access points"
+    ],
+    "outcomes": [
+        "68 new/improved stores",
+        "3,734 jobs created",
+        "1.44 million sq ft of retail space",
+        "$63.3M in grants/loans distributed"
+    ],
+    "implementation_cost": "high",
+    "timeframe": "2004-ongoing",
+    "evidence_level": "high",
+    "source": "The Food Trust/Pennsylvania Legislature",
+    "keywords": ["food access", "supermarkets", "economic development", "healthy food retail"]
+},
+{
+    "title": "Philadelphia Lead Poisoning Prevention Program",
+    "category": "Environmental Policy",
+    "health_issues": ["lead poisoning"],
+    "target_population": "Children in Philadelphia",
+    "setting": "City-wide",
+    "description": "Comprehensive lead poisoning prevention program including testing, remediation, education and policy work. Coordinates across multiple agencies and stakeholders.",
+    "activities": [
+        "Child blood lead testing",
+        "Home lead hazard remediation",
+        "Community outreach",
+        "Policy advocacy",
+        "Case management"
+    ],
+    "outcomes": "Reduced elevated lead levels from 80% (1989) to 4% (2008)",
+    "implementation_cost": "high",
+    "timeframe": "1989-ongoing",
+    "evidence_level": "high",
+    "source": "Philadelphia Department of Public Health",
+    "keywords": ["lead poisoning", "environmental health", "children's health", "prevention"]
+}]
+
+Note: I've included 5 major interventions but there are more in the text. Let me know if you would like me to continue extracting the remaining interventions.

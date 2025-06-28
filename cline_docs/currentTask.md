@@ -1,6 +1,63 @@
-# Current Task: Save & Persist Feature - COMPLETED ✅
+# Current Task: Contextualized Intervention Recommendations (Feature 1) - IN PROGRESS 🚧
 
-## Phase 1 - Sprint 2.1: Save & Persist Analysis Feature
+## Phase 2 - Sprint 2.2: Evidence-Based Intervention Recommendations
+
+### 🎯 OBJECTIVE
+Enhance the existing chatbot with evidence-based intervention recommendations by integrating a knowledge base of proven public health interventions, providing users with actionable solutions alongside data analysis.
+
+### 📋 IMPLEMENTATION STRATEGY
+**Approach**: Incremental enhancement using proven S3 + chatbot patterns  
+**Timeline**: 2-3 weeks  
+**Risk Level**: LOW (builds on existing, stable infrastructure)
+
+### 🔧 TECHNICAL APPROACH
+- **Knowledge Base**: JSON file hosted on existing S3 infrastructure
+- **Retrieval**: Keyword-based matching (no vector DB initially) 
+- **Integration**: Enhance existing `/api/chat` endpoint
+- **Frontend**: Add single quick action button to existing chatbot
+- **Caching**: Server-side intervention caching for performance
+
+### 📊 SUCCESS CRITERIA
+- [ ] Zero regressions in existing functionality
+- [ ] Intervention button provides relevant, helpful recommendations  
+- [ ] Production deployment successful and stable
+- [ ] Performance impact < 400ms additional response time
+- [ ] Error handling graceful in all failure scenarios
+- [ ] User feedback positive on intervention relevance
+
+### 🚀 IMPLEMENTATION PHASES
+
+#### Week 1: Foundation & Risk Mitigation
+- [x] Create 10-intervention JSON knowledge base
+- [ ] Upload to S3 with CORS configuration  
+- [x] Implement backend intervention fetching with caching
+- [x] Add keyword-based matching logic
+- [x] Enhance `/api/chat` endpoint safely
+- [x] Add intervention quick action button
+- [ ] Complete local testing
+
+#### Week 2: Testing & Deployment
+- [ ] Deploy backend to Render
+- [ ] Deploy frontend to Vercel  
+- [ ] Test production S3 access
+- [ ] Performance and error handling validation
+- [ ] User acceptance testing
+
+#### Week 3: Enhancement & Polish
+- [ ] Expand to 25 interventions
+- [ ] Optimize keyword matching
+- [ ] UI polish and documentation
+- [ ] Feature flag implementation
+
+### 🛡️ RISK MITIGATION
+- **S3 CORS**: Use existing proven S3 configuration pattern
+- **Performance**: Server-side caching + smart intervention limiting  
+- **Token Costs**: Limit to 3 interventions per response
+- **Rollback**: Feature flag for immediate disable if needed
+
+---
+
+## Previous Task: Save & Persist Feature - COMPLETED ✅
 
 ### ✅ COMPLETED OBJECTIVES
 Successfully implemented a comprehensive "Save Analysis" feature that allows users to:
@@ -10,7 +67,6 @@ Successfully implemented a comprehensive "Save Analysis" feature that allows use
 - Persist data across browser sessions
 
 ### ✅ IMPLEMENTATION SUMMARY
-
 #### Core Features Delivered
 1. **Zustand Store with Persistence** - Global state management with localStorage
 2. **Save Analysis UI** - Button with real-time feedback in sidebar
@@ -46,36 +102,3 @@ Successfully implemented a comprehensive "Save Analysis" feature that allows use
 2. **Search/Filter** - Find analyses by zip code or date  
 3. **Export/Import** - JSON export for data portability
 4. **Full Zustand Migration** - Eliminate remaining prop-drilling (optional)
-
----
-
-## Previous Task: Phase 1 - Sprint 1.5: The "Full MVP Hookup" Slice ✅
-
-### ✅ COMPLETED OBJECTIVES
-Integrated frontend with deployed backend API for AI analysis and raw data display.
-
-### ✅ ACHIEVEMENTS
-- Backend API integration with FastAPI
-- AI analysis endpoint (`/api/analyze`) calling OpenRouter API  
-- CORS configuration for frontend communication
-- Deployment to Render with environment variables
-- Frontend loading states and AI summary display
-- Tabbed interface for "AI Analysis" and "Raw Data"
-- Enhanced error handling for offline/server issues
-
-**Status**: Production deployment successful and stable
-2. Address the unresolved Food Insecurity data discrepancy.
-3. Document the AI prompt format.
-4. Update `cline_docs/projectRoadmap.md` to reflect completed tasks in Sprint 1.5.
-5. Update `cline_docs/lessons-learned.md` with any new lessons learned during Sprint 1.5, including the issue with the browser tool.
-
-### Success Criteria
-When a zip code is clicked on the map or entered in the search bar and Enter is pressed:
-- The map updates to show the area of the selected zip code.
-- A loading indicator appears in the sidebar's "AI Analysis" tab.
-- The frontend successfully calls the deployed backend API.
-- The backend successfully calls the OpenRouter API and returns an AI summary.
-- The loading indicator is replaced by the AI summary in the sidebar's "AI Analysis" tab.
-- The "Raw Data" tab in the sidebar accurately displays the raw health data for the selected zip code in a table format.
-- The Food Insecurity data discrepancy is resolved.
-- The AI prompt format is documented.

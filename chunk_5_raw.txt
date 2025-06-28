@@ -1,0 +1,52 @@
+Here are the first few interventions extracted from the text (I'll break it into multiple responses due to length):
+
+[
+  {
+    "title": "Chautauqua County Tobacco Cessation Initiative",
+    "category": "Tobacco Control",
+    "health_issues": ["Smoking", "Tobacco Use"],
+    "target_population": "Hospital patients who smoke",
+    "setting": "Healthcare facilities in Chautauqua County, NY",
+    "description": "Program partnered with local hospital to implement tobacco use screening and brief cessation intervention policy. Included provider referrals to state quitline.",
+    "activities": [
+      "Tobacco use screening",
+      "2-minute cessation intervention",
+      "Referrals to NY State Smokers' Quitline"
+    ],
+    "outcomes": [
+      "4x increase in quitline referrals (2005-2006)",
+      "Smoking rates decreased from 29% to 24% (2004-2006)"
+    ],
+    "implementation_cost": "low",
+    "timeframe": "2004-2006",
+    "evidence_level": "medium",
+    "source": "Steps Program",
+    "keywords": ["tobacco", "smoking", "cessation", "healthcare", "screening", "referral"]
+  },
+  {
+    "title": "Bronx Health REACH Coalition Nutrition Initiative",
+    "category": "Food Environment",
+    "health_issues": ["Nutrition", "Obesity"],
+    "target_population": "Bronx residents",
+    "setting": "Schools, grocery stores, restaurants, churches",
+    "description": "Coalition working with churches to promote healthy lifestyles and improve access to healthy foods. Created environmental changes in schools, stores and restaurants.",
+    "activities": [
+      "Church-based health education",
+      "School milk policy changes",
+      "Grocery store healthy food initiatives",
+      "Restaurant menu labeling"
+    ],
+    "outcomes": [
+      "Schools switched to low-fat milk",
+      "Increased availability of healthy foods in stores",
+      "Enhanced healthy menu options in restaurants"
+    ],
+    "implementation_cost": "medium",
+    "timeframe": "Ongoing",
+    "evidence_level": "medium",
+    "source": "Bronx Health REACH Coalition",
+    "keywords": ["nutrition", "healthy food access", "policy change", "community", "faith-based"]
+  }
+]
+
+Would you like me to continue with the remaining interventions? There are many more to extract from the text.

@@ -1,0 +1,464 @@
+{
+  "version": "1.0",
+  "last_updated": "2025-06-27",
+  "total_interventions": 14,
+  "interventions": [
+    {
+      "id": "int_001",
+      "title": "Community Walking Programs",
+      "category": "Physical Activity",
+      "health_issues": [
+        "diabetes",
+        "obesity",
+        "physical_inactivity",
+        "cardiovascular"
+      ],
+      "target_population": "adults",
+      "setting": "community",
+      "description": "Organize guided walks and designate safe walking routes in partnership with community centers. These programs create social support networks while increasing physical activity levels in a structured, accessible format.",
+      "activities": [
+        "Establish regular walking groups with trained leaders",
+        "Map safe walking routes throughout the community",
+        "Partner with community centers for indoor alternatives",
+        "Provide pedometers and tracking materials"
+      ],
+      "outcomes": "25% increase in physical activity participation, 70% participant retention",
+      "implementation_cost": "low",
+      "timeframe": "3-6 months",
+      "evidence_level": "high",
+      "source": "CDC Community Guide",
+      "keywords": [
+        "walking",
+        "physical",
+        "activity",
+        "community",
+        "exercise",
+        "cardiovascular",
+        "diabetes",
+        "obesity"
+      ]
+    },
+    {
+      "id": "int_002",
+      "title": "Diabetes Self-Management Education Programs",
+      "category": "Disease Management",
+      "health_issues": [
+        "diabetes",
+        "blood_sugar",
+        "medication_adherence"
+      ],
+      "target_population": "adults_with_diabetes",
+      "setting": "healthcare_community",
+      "description": "Structured education programs that teach people with diabetes how to manage their condition through proper diet, exercise, medication management, and blood glucose monitoring.",
+      "activities": [
+        "Weekly group education sessions",
+        "Individual coaching and goal setting",
+        "Blood glucose monitoring training",
+        "Nutrition counseling and meal planning"
+      ],
+      "outcomes": "0.8% reduction in A1C levels, improved self-care behaviors",
+      "implementation_cost": "medium",
+      "timeframe": "6-12 weeks per cohort",
+      "evidence_level": "high",
+      "source": "American Diabetes Association",
+      "keywords": [
+        "diabetes",
+        "self-management",
+        "education",
+        "blood_sugar",
+        "A1C",
+        "medication",
+        "monitoring"
+      ]
+    },
+    {
+      "id": "int_003",
+      "title": "Community Gardens Initiative",
+      "category": "Nutrition Access",
+      "health_issues": [
+        "food_insecurity",
+        "nutrition",
+        "obesity",
+        "diabetes"
+      ],
+      "target_population": "families_low_income",
+      "setting": "community",
+      "description": "Establish community gardens that provide fresh produce access while teaching nutrition and cooking skills. Creates food security and builds community connections around healthy eating.",
+      "activities": [
+        "Establish garden plots in community spaces",
+        "Provide gardening tools and seeds",
+        "Offer nutrition education workshops",
+        "Host community harvest and cooking events"
+      ],
+      "outcomes": "40% increase in fruit/vegetable consumption, improved food security",
+      "implementation_cost": "medium",
+      "timeframe": "6-12 months setup, ongoing",
+      "evidence_level": "medium",
+      "source": "USDA Community Food Projects",
+      "keywords": [
+        "nutrition",
+        "food_security",
+        "gardens",
+        "vegetables",
+        "cooking",
+        "community",
+        "fresh_food"
+      ]
+    },
+    {
+      "id": "int_004",
+      "title": "Workplace Wellness Programs",
+      "category": "Policy Environment",
+      "health_issues": [
+        "obesity",
+        "physical_inactivity",
+        "smoking",
+        "stress"
+      ],
+      "target_population": "working_adults",
+      "setting": "workplace",
+      "description": "Comprehensive workplace programs that promote healthy behaviors through policy changes, environmental modifications, and employee education initiatives.",
+      "activities": [
+        "Implement smoke-free workplace policies",
+        "Create fitness facilities or gym partnerships",
+        "Offer healthy food options in cafeterias",
+        "Provide stress management workshops"
+      ],
+      "outcomes": "15% reduction in healthcare costs, improved employee health metrics",
+      "implementation_cost": "medium",
+      "timeframe": "12-18 months",
+      "evidence_level": "high",
+      "source": "CDC Workplace Health Promotion",
+      "keywords": [
+        "workplace",
+        "wellness",
+        "smoking",
+        "fitness",
+        "stress",
+        "policy",
+        "employee_health"
+      ]
+    },
+    {
+      "id": "int_005",
+      "title": "Mobile Health Clinics",
+      "category": "Healthcare Access",
+      "health_issues": [
+        "healthcare_access",
+        "diabetes",
+        "hypertension",
+        "preventive_care"
+      ],
+      "target_population": "underserved_communities",
+      "setting": "mobile_community",
+      "description": "Deploy mobile health units to provide basic healthcare services, screenings, and health education in underserved areas with limited healthcare access.",
+      "activities": [
+        "Regular mobile clinic schedules in target areas",
+        "Basic health screenings and tests",
+        "Medication management and counseling",
+        "Health education and referral services"
+      ],
+      "outcomes": "60% increase in preventive care utilization, earlier disease detection",
+      "implementation_cost": "high",
+      "timeframe": "6-12 months planning, ongoing service",
+      "evidence_level": "medium",
+      "source": "HRSA Mobile Health Programs",
+      "keywords": [
+        "mobile",
+        "healthcare",
+        "access",
+        "screening",
+        "preventive",
+        "underserved",
+        "clinic"
+      ]
+    },
+    {
+      "id": "int_006",
+      "title": "Smoking Cessation Support Groups",
+      "category": "Tobacco Control",
+      "health_issues": [
+        "smoking",
+        "tobacco",
+        "cardiovascular",
+        "diabetes_complications"
+      ],
+      "target_population": "adult_smokers",
+      "setting": "community_healthcare",
+      "description": "Structured group-based smoking cessation programs that combine behavioral support, peer encouragement, and access to cessation aids.",
+      "activities": [
+        "Weekly group support meetings",
+        "Individual counseling sessions",
+        "Nicotine replacement therapy access",
+        "Relapse prevention strategies"
+      ],
+      "outcomes": "30% quit rate at 6 months, reduced cardiovascular risk",
+      "implementation_cost": "low",
+      "timeframe": "8-12 weeks per group",
+      "evidence_level": "high",
+      "source": "CDC Tobacco Control Programs",
+      "keywords": [
+        "smoking",
+        "tobacco",
+        "cessation",
+        "quit",
+        "nicotine",
+        "support_group",
+        "behavioral"
+      ]
+    },
+    {
+      "id": "int_007",
+      "title": "School-Based Nutrition Education",
+      "category": "Youth Prevention",
+      "health_issues": [
+        "childhood_obesity",
+        "nutrition",
+        "diabetes_prevention"
+      ],
+      "target_population": "children_adolescents",
+      "setting": "school",
+      "description": "Comprehensive nutrition education programs in schools that teach healthy eating habits, cooking skills, and promote lifelong wellness behaviors.",
+      "activities": [
+        "Curriculum-based nutrition education",
+        "School garden and cooking programs",
+        "Healthy school meal improvements",
+        "Family engagement workshops"
+      ],
+      "outcomes": "Improved dietary knowledge, healthier food choices, reduced BMI",
+      "implementation_cost": "medium",
+      "timeframe": "1-2 school years",
+      "evidence_level": "medium",
+      "source": "USDA School Nutrition Programs",
+      "keywords": [
+        "school",
+        "nutrition",
+        "children",
+        "education",
+        "cooking",
+        "prevention",
+        "family"
+      ]
+    },
+    {
+      "id": "int_008",
+      "title": "Community Health Worker Programs",
+      "category": "Community Outreach",
+      "health_issues": [
+        "diabetes",
+        "hypertension",
+        "healthcare_navigation",
+        "medication_adherence"
+      ],
+      "target_population": "chronic_disease_patients",
+      "setting": "community_home",
+      "description": "Train and deploy community health workers to provide culturally appropriate health education, support, and navigation services to community members with chronic conditions.",
+      "activities": [
+        "Train community members as health workers",
+        "Provide ongoing supervision and support",
+        "Conduct home visits and community outreach",
+        "Connect patients to healthcare resources"
+      ],
+      "outcomes": "Improved medication adherence, reduced hospitalizations, better disease management",
+      "implementation_cost": "medium",
+      "timeframe": "3-6 months training, ongoing service",
+      "evidence_level": "high",
+      "source": "Community Health Worker Evidence",
+      "keywords": [
+        "community_health_worker",
+        "outreach",
+        "navigation",
+        "chronic_disease",
+        "cultural",
+        "support"
+      ]
+    },
+    {
+      "id": "int_009",
+      "title": "Built Environment Improvements",
+      "category": "Environmental Policy",
+      "health_issues": [
+        "physical_inactivity",
+        "pedestrian_safety",
+        "community_wellbeing"
+      ],
+      "target_population": "community_residents",
+      "setting": "community_infrastructure",
+      "description": "Implement infrastructure changes that promote physical activity, such as sidewalks, bike lanes, parks, and safe pedestrian crossings.",
+      "activities": [
+        "Install or improve sidewalks and crosswalks",
+        "Create dedicated bike lanes",
+        "Develop parks and recreational spaces",
+        "Improve street lighting and safety features"
+      ],
+      "outcomes": "Increased walking and biking, reduced injury rates, improved community health",
+      "implementation_cost": "high",
+      "timeframe": "1-3 years",
+      "evidence_level": "medium",
+      "source": "CDC Built Environment Resources",
+      "keywords": [
+        "built_environment",
+        "infrastructure",
+        "sidewalks",
+        "bike_lanes",
+        "parks",
+        "safety",
+        "walkability"
+      ]
+    },
+    {
+      "id": "int_010",
+      "title": "Healthy Food Retail Initiatives",
+      "category": "Food Environment",
+      "health_issues": [
+        "food_insecurity",
+        "nutrition",
+        "obesity",
+        "diabetes"
+      ],
+      "target_population": "community_residents",
+      "setting": "retail_community",
+      "description": "Work with local retailers to increase availability and affordability of healthy foods in underserved communities through incentives and policy changes.",
+      "activities": [
+        "Partner with corner stores and small markets",
+        "Provide incentives for stocking healthy foods",
+        "Implement point-of-purchase nutrition education",
+        "Support farmers markets and mobile markets"
+      ],
+      "outcomes": "Increased healthy food access, improved dietary patterns in community",
+      "implementation_cost": "medium",
+      "timeframe": "6-18 months",
+      "evidence_level": "medium",
+      "source": "Healthy Food Retail Research",
+      "keywords": [
+        "food_retail",
+        "healthy_food",
+        "access",
+        "corner_stores",
+        "farmers_market",
+        "nutrition"
+      ]
+    },
+    {
+      "id": "int_011",
+      "title": "Diabetes Wellness Advocates Program",
+      "category": "Disease Management",
+      "health_issues": [
+        "diabetes"
+      ],
+      "target_population": "Diabetic patients in River Region of Alabama",
+      "setting": "community",
+      "description": "Training program that prepared diabetes wellness advocates to help diabetics set wellness goals and manage their condition. The program focused on personalized support and condition management strategies.",
+      "activities": [
+        "Wellness advocate training",
+        "One-on-one patient counseling",
+        "Goal setting sessions",
+        "Condition management education"
+      ],
+      "outcomes": "50% decrease in emergency room visits among participants (2004-2007)",
+      "implementation_cost": "medium",
+      "timeframe": "3 years",
+      "evidence_level": "high",
+      "source": "Steps to a HealthierUS program",
+      "keywords": [
+        "diabetes",
+        "wellness advocates",
+        "emergency care reduction",
+        "patient education",
+        "Alabama"
+      ]
+    },
+    {
+      "id": "int_012",
+      "title": "Smoke-Free Food Establishments Initiative",
+      "category": "Tobacco Control",
+      "health_issues": [
+        "smoking",
+        "secondhand smoke exposure"
+      ],
+      "target_population": "Jefferson County, AL food establishments and patrons",
+      "setting": "community restaurants",
+      "description": "Two-phase program to encourage smoke-free food establishments through initial rewards followed by inspection penalties. Program included recognition plaques and enforcement through food inspection scoring.",
+      "activities": [
+        "Distribution of smoke-free recognition plaques",
+        "Implementation of inspection point penalties",
+        "Mandatory warning sticker placement",
+        "Compliance monitoring"
+      ],
+      "outcomes": "Increased smoke-free establishments from 65.4% to 97%",
+      "implementation_cost": "low",
+      "timeframe": "2006-ongoing",
+      "evidence_level": "high",
+      "source": "Jefferson County Department of Health",
+      "keywords": [
+        "smoking ban",
+        "restaurants",
+        "public health",
+        "tobacco control",
+        "enforcement"
+      ]
+    },
+    {
+      "id": "int_013",
+      "title": "Alaska 10,000 Steps Walking Program",
+      "category": "Physical Activity",
+      "health_issues": [
+        "obesity",
+        "cardiovascular disease",
+        "diabetes"
+      ],
+      "target_population": "Hospital program patients",
+      "setting": "community",
+      "description": "Free walking program implemented through Central Peninsula General Hospital. Participants were given step counters and committed to walking 10,000 steps daily while tracking various health metrics.",
+      "activities": [
+        "Daily step counting",
+        "Weight and blood pressure monitoring",
+        "Quarterly events and screenings",
+        "Progress reporting"
+      ],
+      "outcomes": "304,336,058 total steps walked, 766 pounds group weight loss, 62% of participants exercising 30+ minutes 3x weekly",
+      "implementation_cost": "low",
+      "timeframe": "1 year",
+      "evidence_level": "medium",
+      "source": "Alaska Department of Health & Social Services",
+      "keywords": [
+        "walking program",
+        "step counting",
+        "physical activity",
+        "weight loss",
+        "cardiovascular health"
+      ]
+    },
+    {
+      "id": "int_014",
+      "title": "Alaska Comprehensive Tobacco Control Program",
+      "category": "Tobacco Control",
+      "health_issues": [
+        "smoking",
+        "tobacco use"
+      ],
+      "target_population": "Alaska residents",
+      "setting": "community",
+      "description": "Multi-component tobacco control program based on CDC best practices. Program included countermarketing, community programs, youth initiatives, and cessation services including a free quitline.",
+      "activities": [
+        "Quitline operation",
+        "Counter-marketing campaigns",
+        "Youth prevention programs",
+        "Community-based initiatives",
+        "Secondhand smoke prevention"
+      ],
+      "outcomes": "40% quit rate via quitline, 21.5% reduction in adult smokers since 1996, estimated $300M in averted medical costs",
+      "implementation_cost": "high",
+      "timeframe": "2002-ongoing",
+      "evidence_level": "high",
+      "source": "Alaska Department of Health and Social Services",
+      "keywords": [
+        "tobacco control",
+        "smoking cessation",
+        "quitline",
+        "prevention",
+        "public health"
+      ]
+    }
+  ]
+}

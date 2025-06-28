@@ -157,7 +157,7 @@ button:focus-visible {
   position: fixed;
   top: 70px; /* Below top bar */
   right: 0;
-  width: 400px;
+  width: 600px;
   height: calc(100vh - 70px);
   background: white;
   box-shadow: -4px 0 16px rgba(0, 0, 0, 0.1);
@@ -312,6 +312,13 @@ button:focus-visible {
   bottom: 0;
   background: rgba(0, 0, 0, 0.3);
   z-index: 1001;
+}
+
+/* Tablet responsiveness */
+@media (max-width: 1024px) and (min-width: 769px) {
+  .sidebar-overlay {
+    width: 480px;
+  }
 }
 
 /* Mobile responsiveness */
