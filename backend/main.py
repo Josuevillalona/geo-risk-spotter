@@ -29,6 +29,8 @@ intervention_cache = {
 
 app = FastAPI()
 
+app = FastAPI()
+
 # Configure CORS middleware
 origins = [
     "https://geo-risk-spotter.vercel.app",
@@ -277,7 +279,7 @@ async def analyze_health_data(data: HealthData):
                     "X-Title": "YOUR_SITE_NAME" # Optional. Site title for rankings on openrouter.ai.
                 },
                 json={
-                    "model": "mistralai/mistral-7b-instruct",
+                    "model": "mistralai/mistral-7b-instruct:free",
                     "messages": [{"role": "user", "content": prompt}]
                 },
                 timeout=60.0 # Add a timeout for the API call
@@ -328,7 +330,7 @@ async def get_recommendations(request: RecommendationRequest):
                     "X-Title": "YOUR_SITE_NAME"
                 },
                 json={
-                    "model": "mistralai/mistral-7b-instruct",
+                    "model": "mistralai/mistral-7b-instruct:free",
                     "messages": [{"role": "user", "content": prompt}]
                 },
                 timeout=60.0
@@ -350,7 +352,10 @@ async def get_recommendations(request: RecommendationRequest):
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
     if not OPENROUTER_API_KEY:
-        raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+        print("❌ ERROR: OPENROUTER_API_KEY environment variable not set")
+        raise HTTPException(status_code=500, detail="OpenRouter API key not configured. Please check environment variables.")
+    
+    print(f"✅ Using OpenRouter API key: {OPENROUTER_API_KEY[:10]}...")
     
     # Prepare the system message with context about the project and data
     system_message = """You are a helpful assistant that answers questions about diabetes risk factors and health data. Format your responses clearly with:
@@ -424,7 +429,7 @@ async def chat(request: ChatRequest):
                     "Content-Type": "application/json"
                 },
                 json={
-                    "model": "mistralai/mistral-7b-instruct",  # Using Mistral as it's a capable and cost-effective model
+                    "model": "mistralai/mistral-7b-instruct:free",  # Free model available on OpenRouter
                     "messages": messages
                 }
             )
@@ -437,19 +442,26 @@ async def chat(request: ChatRequest):
             return {"response": data["choices"][0]["message"]["content"]}
 
     except httpx.RequestError as e:
-        print(f"Request error: {e}")
+        print(f"❌ Request error: {e}")
         raise HTTPException(status_code=500, detail="Failed to connect to AI service")
     except httpx.HTTPStatusError as e:
-        print(f"HTTP error: {e}")
-        raise HTTPException(status_code=500, detail="AI service returned an error")
+        print(f"❌ HTTP error: {e.response.status_code} - {e.response.text}")
+        if e.response.status_code == 401:
+            raise HTTPException(status_code=500, detail="AI service authentication failed. Please check API key configuration.")
+        raise HTTPException(status_code=500, detail=f"AI service error: {e.response.status_code}")
     except Exception as e:
-        print(f"Unexpected error in chat endpoint: {e}")
+        print(f"❌ Unexpected error in chat endpoint: {e}")
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 # Initialize intervention cache on startup
 @app.on_event("startup")
 async def startup_event():
     """Load interventions into cache on startup"""
+    print(f"🚀 Starting RiskPulse: Diabetes backend...")
+    print(f"📍 Environment check:")
+    print(f"   - OPENROUTER_API_KEY: {'✅ Set' if OPENROUTER_API_KEY else '❌ Missing'}")
+    print(f"   - ENABLE_INTERVENTIONS: {ENABLE_INTERVENTIONS}")
+    
     if ENABLE_INTERVENTIONS:
         try:
             await fetch_interventions()
@@ -457,3 +469,7 @@ async def startup_event():
         except Exception as e:
             print(f"⚠️ Failed to initialize intervention cache: {e}")
             # Don't fail startup if interventions can't be loaded
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
