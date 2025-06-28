@@ -350,7 +350,9 @@ async def get_recommendations(request: RecommendationRequest):
 @app.post("/api/chat")
 async def chat(request: ChatRequest):
     if not OPENROUTER_API_KEY:
-        raise HTTPException(status_code=500, detail="OpenRouter API key not configured")    # Prepare the system message with context about the project and data
+        raise HTTPException(status_code=500, detail="OpenRouter API key not configured")
+    
+    # Prepare the system message with context about the project and data
     system_message = """You are a helpful assistant that answers questions about diabetes risk factors and health data. Format your responses clearly with:
     - Use headers (###) for main sections
     - Break information into clear paragraphs
@@ -413,7 +415,7 @@ async def chat(request: ChatRequest):
     messages.append({"role": "user", "content": request.message})
 
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=30.0) as client:
             response = await client.post(
                 "https://openrouter.ai/api/v1/chat/completions",
                 headers={
@@ -428,18 +430,30 @@ async def chat(request: ChatRequest):
             )
             
             if response.status_code != 200:
+                print(f"OpenRouter API error: {response.status_code} - {response.text}")
                 raise HTTPException(status_code=response.status_code, detail="Error from OpenRouter API")
             
             data = response.json()
             return {"response": data["choices"][0]["message"]["content"]}
 
+    except httpx.RequestError as e:
+        print(f"Request error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to connect to AI service")
+    except httpx.HTTPStatusError as e:
+        print(f"HTTP error: {e}")
+        raise HTTPException(status_code=500, detail="AI service returned an error")
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Unexpected error in chat endpoint: {e}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 # Initialize intervention cache on startup
 @app.on_event("startup")
 async def startup_event():
     """Load interventions into cache on startup"""
     if ENABLE_INTERVENTIONS:
-        await fetch_interventions()
-        print("✅ Intervention cache initialized")
+        try:
+            await fetch_interventions()
+            print("✅ Intervention cache initialized")
+        except Exception as e:
+            print(f"⚠️ Failed to initialize intervention cache: {e}")
+            # Don't fail startup if interventions can't be loaded
