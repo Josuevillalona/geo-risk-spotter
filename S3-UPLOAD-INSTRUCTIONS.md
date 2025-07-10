@@ -1,12 +1,30 @@
-# S3 Upload Instructions for Intervention Database
+# S3 Upload Instructions for RiskPulse: Diabetes
 
-## Step 1: Upload to S3
-Upload the `interventions-db.json` file to your S3 bucket with the following path:
+## Step 1: Upload Files to S3
+Upload the following files to your S3 bucket:
+
+1. **GeoJSON File** - Upload `public/ny_new_york_zip_codes_geo.min.json` to:
 ```
-https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/interventions/interventions-db.json
+https://geo-risk-spotter-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson
 ```
 
-## Step 2: Verify CORS Configuration
+2. **Interventions Database** - Upload `interventions-db.json` to:
+```
+https://geo-risk-spotter-geojson.s3.us-east-1.amazonaws.com/interventions/interventions-db.json
+```
+
+## Step 2: AWS CLI Upload Commands
+Use these commands to upload the files (requires AWS CLI installed and configured):
+
+```bash
+# Upload GeoJSON file
+aws s3 cp public/ny_new_york_zip_codes_geo.min.json s3://geo-risk-spotter-geojson/ny_new_york_zip_codes_health.geojson --content-type application/json
+
+# Upload interventions database
+aws s3 cp interventions-db.json s3://geo-risk-spotter-geojson/interventions/interventions-db.json --content-type application/json
+```
+
+## Step 3: Verify CORS Configuration
 Ensure your S3 bucket has the following CORS policy to allow access from your application:
 
 ```json
@@ -23,11 +41,12 @@ Ensure your S3 bucket has the following CORS policy to allow access from your ap
 ]
 ```
 
-## Step 3: Test S3 Access
-You can test the file is accessible by visiting:
-https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/interventions/interventions-db.json
+## Step 4: Test S3 Access
+You can test the files are accessible by visiting:
+- https://geo-risk-spotter-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson
+- https://geo-risk-spotter-geojson.s3.us-east-1.amazonaws.com/interventions/interventions-db.json
 
-## Step 4: Local Testing
+## Step 5: Local Testing
 Once uploaded, test locally with:
 ```bash
 cd backend
