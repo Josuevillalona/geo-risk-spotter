@@ -31,11 +31,20 @@ const getMetricRisk = (value, type) => {
 };
 
 /**
- * MapPopup: Shows metrics for a selected zip code on the map.
+ * MapPopup: Shows metrics for a selected zip code or borough on the map.
  * Props: clickedZipCode, selectedFeature, clickPosition
  */
 const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition }) => {
   if (!clickedZipCode || !selectedFeature) return null;
+  
+  const isBorough = selectedFeature.properties.borough;
+  const props = selectedFeature.properties;
+  
+  // Get appropriate values based on whether this is a borough or zip code
+  const getRiskScore = () => isBorough ? props.avgRiskScore : props.RiskScore;
+  const getDiabetesRate = () => isBorough ? props.avgDiabetesRate : props.DIABETES_CrudePrev;
+  const getObesityRate = () => isBorough ? props.avgObesityRate : props.OBESITY_CrudePrev;
+  
   return (
     <div
       style={{
@@ -68,8 +77,17 @@ const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition }) => {
           alignItems: 'center',
           gap: '8px',
         }}>
-          📍 Zip Code {clickedZipCode}
+          {isBorough ? '🏙️' : '📍'} {isBorough ? `${clickedZipCode} Borough` : `Zip Code ${clickedZipCode}`}
         </div>
+        {isBorough && (
+          <div style={{
+            fontSize: '12px',
+            color: '#6b7280',
+            marginTop: '4px',
+          }}>
+            {props.zipCodeCount} zip codes included
+          </div>
+        )}
       </div>
 
       {/* Metrics */}
@@ -85,17 +103,17 @@ const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition }) => {
           borderRadius: '6px',
         }}>
           <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>
-            Risk Score:
+            {isBorough ? 'Average Risk Score:' : 'Risk Score:'}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <span style={{
               fontSize: '16px',
               fontWeight: '600',
-              color: getRiskLevel(selectedFeature.properties.RiskScore).color,
+              color: getRiskLevel(getRiskScore()).color,
             }}>
-              {selectedFeature.properties.RiskScore?.toFixed(1) || 'N/A'}
+              {getRiskScore()?.toFixed(1) || 'N/A'}
             </span>
-            <span>{getRiskLevel(selectedFeature.properties.RiskScore).icon}</span>
+            <span>{getRiskLevel(getRiskScore()).icon}</span>
           </div>
         </div>
 
@@ -107,18 +125,18 @@ const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition }) => {
             alignItems: 'center',
           }}>
             <span style={{ fontSize: '13px', color: '#6b7280' }}>
-              Diabetes:
+              {isBorough ? 'Avg. Diabetes:' : 'Diabetes:'}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span style={{
                 fontSize: '14px',
                 fontWeight: '500',
-                color: getMetricRisk(selectedFeature.properties.DIABETES_CrudePrev, 'diabetes').color,
+                color: getMetricRisk(getDiabetesRate(), 'diabetes').color,
               }}>
-                {formatPercent(selectedFeature.properties.DIABETES_CrudePrev)}
+                {formatPercent(getDiabetesRate())}
               </span>
               <span style={{ fontSize: '12px' }}>
-                {getMetricRisk(selectedFeature.properties.DIABETES_CrudePrev, 'diabetes').icon}
+                {getMetricRisk(getDiabetesRate(), 'diabetes').icon}
               </span>
             </div>
           </div>
@@ -129,18 +147,18 @@ const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition }) => {
             alignItems: 'center',
           }}>
             <span style={{ fontSize: '13px', color: '#6b7280' }}>
-              Obesity:
+              {isBorough ? 'Avg. Obesity:' : 'Obesity:'}
             </span>
             <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
               <span style={{
                 fontSize: '14px',
                 fontWeight: '500',
-                color: getMetricRisk(selectedFeature.properties.OBESITY_CrudePrev, 'obesity').color,
+                color: getMetricRisk(getObesityRate(), 'obesity').color,
               }}>
-                {formatPercent(selectedFeature.properties.OBESITY_CrudePrev)}
+                {formatPercent(getObesityRate())}
               </span>
               <span style={{ fontSize: '12px' }}>
-                {getMetricRisk(selectedFeature.properties.OBESITY_CrudePrev, 'obesity').icon}
+                {getMetricRisk(getObesityRate(), 'obesity').icon}
               </span>
             </div>
           </div>

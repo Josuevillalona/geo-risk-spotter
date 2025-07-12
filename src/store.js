@@ -4,17 +4,44 @@ import { persist, createJSONStorage } from 'zustand/middleware';
 export const useAppStore = create(
   persist(
     (set, get) => ({
-      // State
+      // Existing State
       selectedArea: null,
       isLoading: false,
       aiSummary: null,
       chatHistory: [],
       savedAnalyses: [],
 
-      // Actions
+      // Borough State
+      selectedBorough: 'All',
+      viewMode: 'zipcode', // 'zipcode' or 'borough'
+      boroughData: null,
+      boroughBoundaries: null,
+      isBoroughDataLoading: false,
+      isBoroughBoundariesLoading: false,
+      isZipCodeDataLoading: false,
+
+      // Existing Actions
       setAndAnalyzeArea: (area) => set({ selectedArea: area, isLoading: true, aiSummary: null, chatHistory: [] }),
       setAnalysisComplete: (summary) => set({ isLoading: false, aiSummary: summary }),
       setChatHistory: (history) => set({ chatHistory: history }),
+
+      // Borough Actions
+      setSelectedBorough: (borough) => set({ selectedBorough: borough }),
+      setViewMode: (mode) => set({ viewMode: mode }),
+      setBoroughData: (data) => set({ boroughData: data }),
+      setBoroughBoundaries: (boundaries) => set({ boroughBoundaries: boundaries }),
+      setIsBoroughDataLoading: (loading) => set({ isBoroughDataLoading: loading }),
+      setIsBoroughBoundariesLoading: (loading) => set({ isBoroughBoundariesLoading: loading }),
+      setIsZipCodeDataLoading: (loading) => set({ isZipCodeDataLoading: loading }),
+
+      // Get filtered data based on current borough selection
+      getFilteredZipCodes: () => {
+        const { selectedBorough, boroughData } = get();
+        if (selectedBorough === 'All' || !boroughData) {
+          return null; // Return all data
+        }
+        return boroughData[selectedBorough]?.zipCodes || [];
+      },
       
       saveCurrentAnalysis: (analysisData = null) => {
         try {

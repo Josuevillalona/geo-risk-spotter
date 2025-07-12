@@ -11,6 +11,9 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
   const [enhancedLoading, setEnhancedLoading] = useState(false);
   const [showEnhancedRAG, setShowEnhancedRAG] = useState(false);
 
+  // Get borough state from store
+  const { selectedBorough, viewMode, boroughData, isBoroughDataLoading, isZipCodeDataLoading } = useAppStore();
+
   const formatPercent = (value) => {
     if (value === undefined || value === null || value === '') return '0.00%';
     const num = Number(value);
@@ -18,25 +21,108 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
     return `${num.toFixed(2)}%`;
   };
 
+  // Determine if we're showing borough-level data
+  const isBoroughView = viewMode === 'borough';
+  const isBoroughSelected = selectedBorough !== 'All';
+
+  // Get display data based on view mode and selection
+  const getDisplayData = () => {
+    if (isBoroughView && selectedArea?.properties?.borough) {
+      // Borough view mode with borough selected
+      return {
+        type: 'borough',
+        name: selectedArea.properties.borough,
+        data: selectedArea.properties
+      };
+    } else if (isBoroughSelected && boroughData && boroughData[selectedBorough]) {
+      // Zip code view with borough filter
+      return {
+        type: 'borough-summary',
+        name: selectedBorough,
+        data: boroughData[selectedBorough]
+      };
+    } else if (selectedArea?.properties) {
+      // Regular zip code view
+      return {
+        type: 'zipcode',
+        name: selectedArea.properties.zip_code,
+        data: selectedArea.properties
+      };
+    }
+    return null;
+  };
+
+  const displayData = getDisplayData();
+
   // Memoize key metrics for performance - ALWAYS call this hook
   const keyMetrics = useMemo(() => {
-    if (!selectedArea?.properties) return null;
+    // Handle borough-level data when in borough view or borough selected
+    if (displayData?.type === 'borough' && selectedArea?.properties?.borough) {
+      // Borough selected in borough view mode
+      const props = selectedArea.properties;
+      return {
+        riskScore: props.risk_score_avg?.toFixed(2) || 'N/A',
+        diabetes: formatPercent(props.diabetes_avg),
+        obesity: formatPercent(props.obesity_avg),
+        hypertension: formatPercent(props.hypertension_avg),
+        physicalActivity: formatPercent(props.physical_inactivity_avg),
+        smoking: formatPercent(props.smoking_avg),
+        foodInsecurity: formatPercent(props.food_insecurity_avg),
+        healthcareAccess: formatPercent(props.healthcare_access_avg)
+      };
+    } else if (displayData?.type === 'borough-summary' && boroughData && selectedBorough !== 'All') {
+      // Borough filter applied in zipcode view
+      const boroughStats = boroughData[selectedBorough];
+      return {
+        riskScore: boroughStats?.risk_score_avg?.toFixed(2) || 'N/A',
+        diabetes: formatPercent(boroughStats?.diabetes_avg),
+        obesity: formatPercent(boroughStats?.obesity_avg),
+        hypertension: formatPercent(boroughStats?.hypertension_avg),
+        physicalActivity: formatPercent(boroughStats?.physical_inactivity_avg),
+        smoking: formatPercent(boroughStats?.smoking_avg),
+        foodInsecurity: formatPercent(boroughStats?.food_insecurity_avg),
+        healthcareAccess: formatPercent(boroughStats?.healthcare_access_avg)
+      };
+    } else if (selectedArea?.properties) {
+      // Regular zip code view
+      const { properties } = selectedArea;
+      return {
+        riskScore: properties.RiskScore?.toFixed(2) || 'N/A',
+        diabetes: formatPercent(properties.DIABETES_CrudePrev),
+        obesity: formatPercent(properties.OBESITY_CrudePrev),
+        hypertension: formatPercent(properties.BPHIGH_CrudePrev),
+        physicalActivity: formatPercent(properties.LPA_CrudePrev),
+        smoking: formatPercent(properties.CSMOKING_CrudePrev),
+        foodInsecurity: formatPercent(properties.FOODINSECU_CrudePrev),
+        healthcareAccess: formatPercent(properties.ACCESS2_CrudePrev)
+      };
+    }
     
-    const { properties } = selectedArea;
-    return {
-      riskScore: properties.RiskScore?.toFixed(2) || 'N/A',
-      diabetes: formatPercent(properties.DIABETES_CrudePrev),
-      obesity: formatPercent(properties.OBESITY_CrudePrev),
-      hypertension: formatPercent(properties.BPHIGH_CrudePrev),
-      physicalActivity: formatPercent(properties.LPA_CrudePrev),
-      smoking: formatPercent(properties.CSMOKING_CrudePrev),
-      foodInsecurity: formatPercent(properties.FOODINSECU_CrudePrev),
-      healthcareAccess: formatPercent(properties.ACCESS2_CrudePrev)
-    };
-  }, [selectedArea?.properties]);
+    return null;
+  }, [selectedArea?.properties, displayData, boroughData, selectedBorough]);
 
   // Early return AFTER all hooks are declared
-  if (!selectedArea) {
+  if (!selectedArea && !displayData) {
+    // Show loading state if any data is still loading
+    if (isBoroughDataLoading || isZipCodeDataLoading) {
+      return (
+        <div className="sidebar-empty-state">
+          <div className="empty-state-content">
+            <div className="loading-spinner large"></div>
+            <h3>Loading RiskPulse Data</h3>
+            <p>Preparing diabetes risk analysis tools...</p>
+            <div className="loading-progress">
+              <small>
+                {isBoroughDataLoading && '🏢 Loading borough data...'}
+                {isZipCodeDataLoading && '📍 Loading zip code data...'}
+                {!isBoroughDataLoading && !isZipCodeDataLoading && '✅ Data loaded successfully'}
+              </small>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     return (
       <div className="sidebar-empty-state">
         <div className="empty-state-content">
@@ -61,12 +147,19 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
           <MdTrendingUp className="section-icon" />
           <h3>AI Analysis</h3>
         </div>
-        {isLoading ? (
+        {isLoading || 
+         (viewMode === 'borough' && isBoroughDataLoading) || 
+         (viewMode === 'zipcode' && isZipCodeDataLoading) ? (
           <div className="ai-loading-state">
             <div className="loading-spinner"></div>
             <span>🧠 Analyzing diabetes risk patterns...</span>
             <small style={{ display: 'block', marginTop: '4px', opacity: 0.7 }}>
-              Processing 8 health indicators with AI insights
+              {viewMode === 'borough' && isBoroughDataLoading ? 
+                'Loading borough data for analysis...' :
+                viewMode === 'zipcode' && isZipCodeDataLoading ?
+                'Loading zip code data for analysis...' :
+                'Processing 8 health indicators with AI insights'
+              }
             </small>
           </div>
         ) : (
@@ -83,8 +176,18 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
         <div className="section-header">
           <MdBarChart className="section-icon" />
           <h3>Key Health Metrics</h3>
+          {(displayData?.type === 'borough' || displayData?.type === 'borough-summary') && (
+            <small className="metrics-context">
+              Borough averages across {displayData?.type === 'borough-summary' ? 
+                boroughData?.[selectedBorough]?.zipCodeCount || 0 : 
+                selectedArea?.properties?.zipCodeCount || 0
+              } zip codes
+            </small>
+          )}
         </div>
-        {isLoading ? (
+        {isLoading || 
+         (viewMode === 'borough' && isBoroughDataLoading) || 
+         (viewMode === 'zipcode' && isZipCodeDataLoading) ? (
           <div className="metrics-loading">
             <div className="metric-skeleton"></div>
             <div className="metric-skeleton"></div>

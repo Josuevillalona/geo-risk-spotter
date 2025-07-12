@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { create } from 'zustand';
 import ChatMessage from './chat/ChatMessage';
+import EnhancedChatbot from './chat/EnhancedChatbot';
+import { useAppStore } from '../store';
 
 // API endpoints
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
@@ -28,11 +30,30 @@ const useChatStore = create((set) => ({
   }),
 }));
 
-const Chatbot = ({ selectedArea }) => {
+const Chatbot = ({ selectedArea, enhanced = false }) => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { messages, addMessage, clearMessages } = useChatStore();
+  
+  // Get context for enhanced mode detection
+  const { viewMode, selectedBorough } = useAppStore();
+  
+  // Auto-enable enhanced mode for borough context
+  const shouldUseEnhanced = enhanced || viewMode === 'borough' || selectedBorough !== 'All';
 
+  // If enhanced mode, use the new component
+  if (shouldUseEnhanced) {
+    return (
+      <EnhancedChatbot
+        selectedArea={selectedArea}
+        messages={messages}
+        onAddMessage={addMessage}
+        onClearMessages={clearMessages}
+      />
+    );
+  }
+
+  // Original chatbot logic for basic mode
   const sendMessage = async (messageText) => {
     if (!messageText.trim()) return;
     

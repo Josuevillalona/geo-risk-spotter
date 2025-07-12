@@ -1,4 +1,4 @@
-# PowerShell script to upload GeoJSON file to S3
+# PowerShell script to upload GeoJSON files to S3
 # Requirements: AWS CLI installed and configured
 
 Write-Host "🚀 RiskPulse: Diabetes S3 Upload Script" -ForegroundColor Green
@@ -14,40 +14,68 @@ try {
     exit 1
 }
 
-# Check if local file exists
-$localFile = "public/ny_new_york_zip_codes_geo.min.json"
-if (Test-Path $localFile) {
-    $fileSize = (Get-Item $localFile).Length
-    Write-Host "✅ Local file found: $localFile ($([math]::Round($fileSize/1MB, 2)) MB)" -ForegroundColor Green
-} else {
-    Write-Host "❌ Local file not found: $localFile" -ForegroundColor Red
-    exit 1
+# S3 bucket name
+$bucketName = "geo-risk-spotter-geojson"
+
+# Function to upload file to S3
+function Upload-FileToS3 {
+    param(
+        [string]$LocalFile,
+        [string]$S3Key,
+        [string]$Description
+    )
+    
+    if (Test-Path $LocalFile) {
+        $fileSize = (Get-Item $LocalFile).Length
+        Write-Host "✅ $Description found: $LocalFile ($([math]::Round($fileSize/1MB, 2)) MB)" -ForegroundColor Green
+        
+        $s3Path = "s3://$bucketName/$S3Key"
+        
+        Write-Host "`n🔄 Uploading $Description to S3..." -ForegroundColor Yellow
+        Write-Host "Source: $LocalFile" -ForegroundColor Cyan
+        Write-Host "Destination: $s3Path" -ForegroundColor Cyan
+        
+        try {
+            aws s3 cp $LocalFile $s3Path --content-type "application/json"
+            Write-Host "✅ $Description upload successful!" -ForegroundColor Green
+            
+            Write-Host "🌐 File accessible at:" -ForegroundColor Green
+            Write-Host "https://$bucketName.s3.us-east-1.amazonaws.com/$S3Key" -ForegroundColor Cyan
+            
+        } catch {
+            Write-Host "❌ $Description upload failed: $_" -ForegroundColor Red
+            return $false
+        }
+    } else {
+        Write-Host "❌ $Description not found: $LocalFile" -ForegroundColor Red
+        return $false
+    }
+    return $true
 }
 
-# S3 bucket and path
-$bucketName = "geo-risk-spotter-geojson"
-$s3Path = "s3://$bucketName/ny_new_york_zip_codes_health.geojson"
+# Upload zip code health data
+$success1 = Upload-FileToS3 -LocalFile "public/ny_new_york_zip_codes_geo.min.json" -S3Key "ny_new_york_zip_codes_health.geojson" -Description "Zip Code Health Data"
 
-Write-Host "`n🔄 Uploading to S3..." -ForegroundColor Yellow
-Write-Host "Source: $localFile" -ForegroundColor Cyan
-Write-Host "Destination: $s3Path" -ForegroundColor Cyan
+# Upload borough boundaries
+$success2 = Upload-FileToS3 -LocalFile "public/nyc_borough_boundaries.geojson" -S3Key "nyc_borough_boundaries.geojson" -Description "Borough Boundaries"
 
-# Upload with proper content-type
-try {
-    aws s3 cp $localFile $s3Path --content-type "application/json"
-    Write-Host "✅ Upload successful!" -ForegroundColor Green
-    
-    # Verify upload
-    Write-Host "`n🔍 Verifying upload..." -ForegroundColor Yellow
-    $s3Size = aws s3 ls $s3Path --summarize | Select-String "Total Size"
-    Write-Host "S3 file info: $s3Size" -ForegroundColor Cyan
-    
-    Write-Host "`n🌐 File accessible at:" -ForegroundColor Green
-    Write-Host "https://$bucketName.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson" -ForegroundColor Cyan
-    
-} catch {
-    Write-Host "❌ Upload failed: $_" -ForegroundColor Red
-    exit 1
+Write-Host "`n📊 Upload Summary:" -ForegroundColor Yellow
+if ($success1) {
+    Write-Host "✅ Zip Code Health Data uploaded successfully" -ForegroundColor Green
+} else {
+    Write-Host "❌ Zip Code Health Data upload failed" -ForegroundColor Red
+}
+
+if ($success2) {
+    Write-Host "✅ Borough Boundaries uploaded successfully" -ForegroundColor Green
+} else {
+    Write-Host "❌ Borough Boundaries upload failed" -ForegroundColor Red
+}
+
+if ($success1 -and $success2) {
+    Write-Host "`n🎉 All files uploaded successfully!" -ForegroundColor Green
+} else {
+    Write-Host "`n⚠️  Some uploads failed. Check errors above." -ForegroundColor Yellow
 }
 
 Write-Host "`n✅ Upload complete! Don't forget to configure CORS on your S3 bucket." -ForegroundColor Green

@@ -2,8 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
 import { useAppStore } from './store';
 import MapPopup from './MapPopup';
+import { aggregateBoroughData, loadBoroughBoundaries, mergeBoroughDataWithBoundaries } from './services/boroughService';
 
 // API endpoints
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
@@ -16,6 +18,9 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
   const [clickedZipCode, setClickedZipCode] = useState(null);
   const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
   const [selectedFeature, setSelectedFeature] = useState(null);
+  
+  // Borough state from store
+  const { selectedBorough, viewMode, boroughData, getFilteredZipCodes, isBoroughBoundariesLoading } = useAppStore();
 
   useEffect(() => {
     if (selectedArea && mapMoveEvent) {
@@ -25,6 +30,18 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
       }
     }
   }, [mapMoveEvent, selectedArea, map]);
+
+  // Auto-zoom to borough bounds when borough is selected
+  useEffect(() => {
+    if (selectedBorough !== 'All' && boroughData && boroughData[selectedBorough]) {
+      const boroughBounds = boroughData[selectedBorough].bounds;
+      if (boroughBounds && boroughBounds.length === 2) {
+        // Convert bounds to Leaflet format
+        const bounds = L.latLngBounds(boroughBounds);
+        map.flyToBounds(bounds, { padding: [50, 50] });
+      }
+    }
+  }, [selectedBorough, boroughData, map]);
 
   // Handle search popup positioning when area is selected
   useEffect(() => {
@@ -61,22 +78,102 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
       '#41ab5d';
   };
 
-  const geoJsonStyle = (feature) => ({
-    fillColor: getRiskScoreColor(feature.properties.RiskScore),
-    weight: 1,
-    opacity: 1,
-    color: 'white',
-    dashArray: '3',
-    fillOpacity: 0.7,
-  });
+  // Filter GeoJSON data based on selected borough
+  const getFilteredGeoJSONData = () => {
+    if (!geojsonData) return null;
+    
+    if (selectedBorough === 'All') {
+      return geojsonData;
+    }
+    
+    const filteredZipCodes = getFilteredZipCodes();
+    if (!filteredZipCodes || filteredZipCodes.length === 0) {
+      return geojsonData;
+    }
+    
+    // Filter features to only include zip codes in selected borough
+    const filteredFeatures = geojsonData.features.filter(feature => {
+      const zipCode = feature.properties.zip_code;
+      return filteredZipCodes.includes(zipCode);
+    });
+    
+    return {
+      ...geojsonData,
+      features: filteredFeatures
+    };
+  };
+
+  // Generate borough-level aggregated data for visualization
+  const getBoroughGeoJSONData = () => {
+    if (!geojsonData || !boroughData) return null;
+    
+    // Use actual borough boundaries stored in the store
+    const { boroughBoundaries } = useAppStore.getState();
+    
+    if (!boroughBoundaries) {
+      console.warn('Borough boundaries not loaded yet');
+      return null;
+    }
+    
+    console.log('Creating borough visualization with boundaries:', boroughBoundaries.features?.length, 'features');
+    
+    const aggregatedHealthData = aggregateBoroughData(geojsonData.features);
+    const mergedData = mergeBoroughDataWithBoundaries(boroughBoundaries, aggregatedHealthData);
+    
+    console.log('Merged borough data:', mergedData.features?.length, 'features');
+    return mergedData;
+  };
+
+  // Get appropriate data based on view mode
+  const getVisualizationData = () => {
+    console.log('Getting visualization data - viewMode:', viewMode, 'selectedBorough:', selectedBorough);
+    
+    if (viewMode === 'borough') {
+      const boroughData = getBoroughGeoJSONData();
+      console.log('Borough data for visualization:', boroughData?.features?.length, 'features');
+      return boroughData;
+    } else {
+      const filteredData = getFilteredGeoJSONData();
+      console.log('Filtered zip code data:', filteredData?.features?.length, 'features');
+      return filteredData;
+    }
+  };
+
+  const geoJsonStyle = (feature) => {
+    const isBorough = feature.properties.borough;
+    const riskScore = isBorough ? feature.properties.avgRiskScore : feature.properties.RiskScore;
+    
+    return {
+      fillColor: getRiskScoreColor(riskScore),
+      weight: 1, // Same weight for both zip codes and boroughs
+      opacity: 1,
+      color: 'white',
+      dashArray: isBorough ? '0' : '3', // Keep dashes for zip codes, solid for boroughs
+      fillOpacity: 0.7,
+    };
+  };
 
   // Only handles API and state, not popup rendering
   const analyzeArea = async (feature) => {
     setIsLoading(true);
     try {
       if (!navigator.onLine) throw new Error('offline');
-      const response = await axios.post(`${API_BASE_URL}/api/analyze`, {
-        zip_code: feature.properties.zip_code,
+      
+      const isBorough = feature.properties.borough;
+      
+      // Prepare data for API call
+      const analysisData = isBorough ? {
+        zip_code: feature.properties.borough + " Borough",
+        RiskScore: feature.properties.avgRiskScore || 0,
+        DIABETES_CrudePrev: feature.properties.avgDiabetes || 0,
+        OBESITY_CrudePrev: feature.properties.avgObesity || 0,
+        LPA_CrudePrev: feature.properties.avgPhysicalInactivity || 0,
+        CSMOKING_CrudePrev: feature.properties.avgCurrentSmoking || 0,
+        BPHIGH_CrudePrev: feature.properties.avgHypertension || 0,
+        FOODINSECU_CrudePrev: feature.properties.avgFoodInsecurity || 0,
+        ACCESS2_CrudePrev: feature.properties.avgHealthcareAccess || 0,
+      } : {
+        zip_code: feature.properties.ZCTA5CE10,
         RiskScore: feature.properties.RiskScore,
         DIABETES_CrudePrev: feature.properties.DIABETES_CrudePrev,
         OBESITY_CrudePrev: feature.properties.OBESITY_CrudePrev,
@@ -85,7 +182,9 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         BPHIGH_CrudePrev: feature.properties.BPHIGH_CrudePrev,
         FOODINSECU_CrudePrev: feature.properties.FOODINSECU_CrudePrev,
         ACCESS2_CrudePrev: feature.properties.ACCESS2_CrudePrev,
-      });
+      };
+      
+      const response = await axios.post(`${API_BASE_URL}/api/analyze`, analysisData);
       setAiSummary(response.data.summary);
     } catch (error) {
       console.error('Error fetching AI analysis:', error);
@@ -110,27 +209,54 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         const containerPoint = e.containerPoint;
         setClickPosition({ x: containerPoint.x, y: containerPoint.y });
         setSelectedFeature(feature);
-        setClickedZipCode(feature.properties.zip_code);
+        
+        // Set appropriate display identifier
+        const displayId = feature.properties.borough 
+          ? feature.properties.borough 
+          : feature.properties.zip_code;
+        setClickedZipCode(displayId);
+        
         setSelectedArea(feature);
         await analyzeArea(feature);
       },
       mouseover: (e) => {
         const layer = e.target;
-        layer.setStyle({ weight: 2, color: '#666', dashArray: '', fillOpacity: 0.9 });
+        const isBorough = feature.properties.borough;
+        if (isBorough) {
+          // Borough hover style - match zip code behavior
+          layer.setStyle({ 
+            weight: 3, 
+            color: '#666', 
+            dashArray: '', 
+            fillOpacity: 0.9 
+          });
+        } else {
+          // Zip code hover style (existing)
+          layer.setStyle({ 
+            weight: 2, 
+            color: '#666', 
+            dashArray: '', 
+            fillOpacity: 0.9 
+          });
+        }
         layer.bringToFront();
       },
       mouseout: (e) => {
         const layer = e.target;
+        // Reset to original style for both boroughs and zip codes
         layer.setStyle(geoJsonStyle(feature));
       },
     });
   };
 
+  const visualizationData = getVisualizationData();
+
   return (
     <>
-      {geojsonData && (
+      {visualizationData && (
         <GeoJSON
-          data={geojsonData}
+          key={`${selectedBorough}-${viewMode}`} // Force re-render when borough or view mode changes
+          data={visualizationData}
           style={geoJsonStyle}
           onEachFeature={onEachFeature}
         />
@@ -147,15 +273,31 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
 
 const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMoveEvent, sidebarOpen, setSidebarOpen, showSearchPopup, searchPopupData, setSearchPopupData }) => {
   const [geojsonData, setGeojsonData] = useState(null);
+  
+  // Get loading states from store
+  const { viewMode, isBoroughBoundariesLoading, isZipCodeDataLoading, setIsZipCodeDataLoading } = useAppStore();
 
   useEffect(() => {
+    setIsZipCodeDataLoading(true);
     fetch('https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson')
       .then(response => response.json())
       .then(data => {
         setGeojsonData(data);
       })
-      .catch(error => console.error('Error loading GeoJSON data:', error));
-  }, []);
+      .catch(error => {
+        console.error('Error loading GeoJSON data:', error);
+        // Try fallback to local file
+        return fetch('/ny_new_york_zip_codes_geo.min.json')
+          .then(response => response.json())
+          .then(fallbackData => {
+            setGeojsonData(fallbackData);
+            console.log('Loaded zip code data from local fallback');
+          });
+      })
+      .finally(() => {
+        setIsZipCodeDataLoading(false);
+      });
+  }, [setIsZipCodeDataLoading]);
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
@@ -183,6 +325,26 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMov
           setSearchPopupData={setSearchPopupData}
         />
       </MapContainer>
+      
+      {/* Borough boundaries loading overlay */}
+      {viewMode === 'borough' && isBoroughBoundariesLoading && (
+        <div className="map-loading-overlay">
+          <div className="map-loading-content">
+            <div className="loading-spinner"></div>
+            <span>Loading borough boundaries...</span>
+          </div>
+        </div>
+      )}
+      
+      {/* Zip code data loading overlay */}
+      {viewMode === 'zipcode' && isZipCodeDataLoading && (
+        <div className="map-loading-overlay">
+          <div className="map-loading-content">
+            <div className="loading-spinner"></div>
+            <span>Loading zip code data...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

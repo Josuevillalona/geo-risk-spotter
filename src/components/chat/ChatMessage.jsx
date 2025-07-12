@@ -5,16 +5,18 @@ import markdownComponents from './MarkdownComponents';
 /**
  * ChatMessage: Renders individual chat messages with role-based styling.
  * Supports user, system (including error states), and assistant messages with markdown.
+ * Enhanced mode adds context awareness and intent indicators.
  * 
  * @param {Object} message - Message object with role and content
  * @param {number} index - Message index for React key
+ * @param {boolean} enhanced - Whether to use enhanced styling and features
  */
-const ChatMessage = ({ message, index }) => {
+const ChatMessage = ({ message, index, enhanced = false }) => {
   const baseMessageStyle = {
     marginBottom: '1rem',
-    padding: '1rem',
-    borderRadius: '0.75rem',
-    maxWidth: '85%',
+    padding: enhanced ? '1.25rem' : '1rem',
+    borderRadius: enhanced ? '12px' : '0.75rem',
+    maxWidth: enhanced ? '90%' : '85%',
     fontSize: '0.875rem',
     lineHeight: '1.6'
   };
@@ -23,11 +25,22 @@ const ChatMessage = ({ message, index }) => {
     return (
       <div key={index} style={{
         ...baseMessageStyle,
-        backgroundColor: '#eff6ff',
-        border: '1px solid #bfdbfe',
+        backgroundColor: enhanced ? '#f0f9ff' : '#eff6ff',
+        border: enhanced ? '1px solid #93c5fd' : '1px solid #bfdbfe',
         marginLeft: 'auto',
-        textAlign: 'left'
+        textAlign: 'left',
+        boxShadow: enhanced ? '0 1px 3px rgba(0, 0, 0, 0.1)' : 'none'
       }}>
+        {enhanced && message.context && (
+          <div style={{
+            fontSize: '0.75rem',
+            color: '#6b7280',
+            marginBottom: '0.5rem',
+            fontWeight: '500'
+          }}>
+            {message.context.viewMode === 'borough' ? '🏢 Borough Query' : '📍 Area Query'}
+          </div>
+        )}
         <div style={{
           fontWeight: '500',
           color: '#1e40af'

@@ -2,11 +2,17 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { FaSearch, FaHeartbeat, FaSpinner } from 'react-icons/fa';
 import { MdSwapHoriz, MdAutoAwesome, MdMap } from 'react-icons/md';
+import BoroughFilter from './common/BoroughFilter';
+import { useAppStore } from '../store';
+import { getZipCodeBorough } from '../services/boroughService';
 
 const TopBar = ({ setSelectedArea, setIsLoading, setAiSummary, triggerMapMove, useInsightsFirstLayout, setUseInsightsFirstLayout, showSearchResultPopup }) => {
   const [searchInput, setSearchInput] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+  
+  // Get borough filter state
+  const { selectedBorough } = useAppStore();
 
   const handleSearch = async (zipCode) => {
     setSearchLoading(true);
@@ -58,15 +64,28 @@ const TopBar = ({ setSelectedArea, setIsLoading, setAiSummary, triggerMapMove, u
       
       if (feature) {
         console.log('🎯 Zip code found:', feature.properties);
+        
+        // Validate borough filter if active
+        const zipCodeValue = feature.properties.zip_code || 
+                            feature.properties.ZIP_CODE || 
+                            feature.properties.zipcode || 
+                            feature.properties.ZCTA5CE10;
+        
+        if (selectedBorough !== 'All') {
+          const zipCodeBorough = getZipCodeBorough(zipCodeValue);
+          if (zipCodeBorough !== selectedBorough) {
+            setErrorMessage(`Zip code ${zipCodeValue} is in ${zipCodeBorough || 'Unknown'}, but you're filtering by ${selectedBorough}. Clear the borough filter or search for a zip code in ${selectedBorough}.`);
+            setSearchLoading(false);
+            setIsLoading(false);
+            return;
+          }
+        }
+        
         setSelectedArea(feature);
         triggerMapMove();
         
         // Show search popup if function is available
         if (showSearchResultPopup) {
-          const zipCodeValue = feature.properties.zip_code || 
-                              feature.properties.ZIP_CODE || 
-                              feature.properties.zipcode || 
-                              feature.properties.ZCTA5CE10;
           showSearchResultPopup(zipCodeValue, feature);
         }
         
@@ -152,58 +171,66 @@ const TopBar = ({ setSelectedArea, setIsLoading, setAiSummary, triggerMapMove, u
   };
 
   return (
-    <div className="top-bar flex flex-col sm:flex-row sm:items-center sm:justify-between bg-green-700 text-white p-4 shadow-md">
-      <div className="flex flex-col items-start sm:flex-row sm:items-center">
-        <div className="logo flex items-center gap-2 font-bold text-xl">
-          <FaHeartbeat className="logo-icon text-2xl text-pink-200" aria-hidden="true" />
-          <span>RiskPulse: Diabetes</span>
+    <div className="top-bar bg-green-700 text-white shadow-md">
+      {/* Main header row */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4">
+        <div className="flex flex-col items-start sm:flex-row sm:items-center">
+          <div className="logo flex items-center gap-2 font-bold text-xl">
+            <FaHeartbeat className="logo-icon text-2xl text-pink-200" aria-hidden="true" />
+            <span>RiskPulse: Diabetes</span>
+          </div>
+          <span className="ml-2 text-sm text-white/90 hidden sm:inline">
+            AI-powered diabetes risk mapping for public health
+          </span>
         </div>
-        <span className="ml-2 text-sm text-white/90 hidden sm:inline">
-          AI-powered diabetes risk mapping for public health
-        </span>
+        
+        <div className="flex items-center gap-4">
+          {/* Layout Toggle Button */}
+          <button
+            onClick={() => setUseInsightsFirstLayout(!useInsightsFirstLayout)}
+            className="layout-toggle-topbar"
+            title={useInsightsFirstLayout ? "Switch to Classic Layout" : "Switch to Insights-First Layout"}
+          >
+            <MdSwapHoriz className="layout-toggle-icon" />
+            <span className="layout-toggle-text">
+              {useInsightsFirstLayout ? (
+                <>
+                  <MdMap className="inline mr-1" />
+                  Classic
+                </>
+              ) : (
+                <>
+                  <MdAutoAwesome className="inline mr-1" />
+                  Insights
+                </>
+              )}
+            </span>
+          </button>
+          
+          <form className="search-form" onSubmit={handleSubmit}>
+            <div className="search-container">
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Enter NY ZIP code (e.g., 10001) to analyze diabetes risk"
+                pattern="[0-9]{5}"
+                maxLength="5"
+                disabled={searchLoading}
+                aria-label="Search by ZIP code for comprehensive diabetes risk analysis and health insights"
+              />
+              <button type="submit" disabled={searchLoading} aria-label={searchLoading ? 'Analyzing diabetes risk data, please wait...' : 'Search ZIP code for diabetes risk analysis'}>
+                {searchLoading ? <FaSpinner className="icon-spin" /> : <FaSearch />}
+              </button>
+            </div>
+            {errorMessage && <div className="search-error">{errorMessage}</div>}
+          </form>
+        </div>
       </div>
       
-      <div className="flex items-center gap-4">
-        {/* Layout Toggle Button */}
-        <button
-          onClick={() => setUseInsightsFirstLayout(!useInsightsFirstLayout)}
-          className="layout-toggle-topbar"
-          title={useInsightsFirstLayout ? "Switch to Classic Layout" : "Switch to Insights-First Layout"}
-        >
-          <MdSwapHoriz className="layout-toggle-icon" />
-          <span className="layout-toggle-text">
-            {useInsightsFirstLayout ? (
-              <>
-                <MdMap className="inline mr-1" />
-                Classic
-              </>
-            ) : (
-              <>
-                <MdAutoAwesome className="inline mr-1" />
-                Insights
-              </>
-            )}
-          </span>
-        </button>
-        
-        <form className="search-form" onSubmit={handleSubmit}>
-          <div className="search-container">
-            <input
-              type="text"
-              value={searchInput}
-              onChange={(e) => setSearchInput(e.target.value)}
-              placeholder="Enter NY ZIP code (e.g., 10001) to analyze diabetes risk"
-              pattern="[0-9]{5}"
-              maxLength="5"
-              disabled={searchLoading}
-              aria-label="Search by ZIP code for comprehensive diabetes risk analysis and health insights"
-            />
-            <button type="submit" disabled={searchLoading} aria-label={searchLoading ? 'Analyzing diabetes risk data, please wait...' : 'Search ZIP code for diabetes risk analysis'}>
-              {searchLoading ? <FaSpinner className="icon-spin" /> : <FaSearch />}
-            </button>
-          </div>
-          {errorMessage && <div className="search-error">{errorMessage}</div>}
-        </form>
+      {/* Borough filter row */}
+      <div className="border-t border-green-600 bg-green-600 px-4 py-3">
+        <BoroughFilter className="max-w-full" />
       </div>
     </div>
   );
