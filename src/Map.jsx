@@ -5,6 +5,8 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { useAppStore } from './store';
 import MapPopup from './MapPopup';
+import MapSearchOverlay from './components/MapSearchOverlay';
+import MapFilterOverlay from './components/MapFilterOverlay';
 import { aggregateBoroughData, loadBoroughBoundaries, mergeBoroughDataWithBoundaries } from './services/boroughService';
 
 // API endpoints
@@ -202,7 +204,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
     }
   };
 
-  // Handles feature events, sets popup state
+  // Handles feature events, sets popup state - Fixed click handler
   const onEachFeature = (feature, layer) => {
     layer.on({
       click: async (e) => {
@@ -266,6 +268,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         clickedZipCode={clickedZipCode}
         selectedFeature={selectedFeature}
         clickPosition={clickPosition}
+        onClose={() => setClickedZipCode(null)}
       />
     </>
   );
@@ -276,6 +279,14 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMov
   
   // Get loading states from store
   const { viewMode, isBoroughBoundariesLoading, isZipCodeDataLoading, setIsZipCodeDataLoading } = useAppStore();
+
+  // Function to trigger map movement for search results
+  const triggerMapMove = (feature) => {
+    if (feature && feature.geometry) {
+      setSelectedArea(feature);
+      // This will trigger the mapMoveEvent effect in MapContent
+    }
+  };
 
   useEffect(() => {
     setIsZipCodeDataLoading(true);
@@ -325,6 +336,12 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMov
           setSearchPopupData={setSearchPopupData}
         />
       </MapContainer>
+      
+      {/* Map overlays */}
+      <MapSearchOverlay 
+        triggerMapMove={triggerMapMove}
+      />
+      <MapFilterOverlay />
       
       {/* Borough boundaries loading overlay */}
       {viewMode === 'borough' && isBoroughBoundariesLoading && (

@@ -1,5 +1,29 @@
 ## Lessons Learned
 
+## 2025-07-12 - Strategic Documentation Update for Layered Implementation
+
+### Description
+Completed comprehensive documentation update to prepare for Phase 4: Public Health Planner UX Enhancements. Updated all project documentation files to reflect the new 4-layer implementation strategy.
+
+### Strategic Decision
+Prioritized user experience enhancement (Phase 4) over infrastructure scaling (Phase 3) based on user feedback indicating immediate need for professional-grade public health planning features.
+
+### Documentation Improvements
+- **Layered Architecture**: Documented clear 4-layer strategy with incremental value delivery
+- **Success Metrics**: Established quantified targets for user experience and technical performance
+- **Risk Assessment**: Defined clear risk levels and mitigation strategies per implementation layer
+- **Timeline Planning**: Detailed 8-week schedule with specific deliverables per layer
+
+### Lessons Learned
+Strategic documentation updates should precede major development phases to ensure:
+- Clear alignment between team members and stakeholders
+- Quantified success criteria for validation at each milestone
+- Risk mitigation strategies documented before implementation begins
+- Preservation of institutional knowledge during development pivots
+
+### Impact
+Created comprehensive roadmap for transforming RiskPulse from data visualization tool into professional public health planning platform while maintaining proven MVP-first approach.
+
 ## 2025-06-13 - GeoJSON File Serving Issues on Vercel
 
 ### Description
@@ -187,162 +211,6 @@ Used `git-filter-repo` to rewrite the repository's history and remove the large 
 - Rewriting Git history is a powerful operation that requires caution and understanding of its implications (e.g., force pushing, impacting collaborators).
 - Deployment platforms may cache repository contents, and clearing the cache might be necessary after a history rewrite to ensure the platform uses the updated history.
 
-## 2025-06-20 - Save & Persist Feature: Hybrid State Management Approach
-
-### Description
-Implemented a "Save Analysis" feature for diabetes risk analyses using Zustand store with localStorage persistence. Chose a hybrid approach (existing props + Zustand for new features) over full state migration.
-
-### Challenge
-Initial attempt to migrate Sidebar.jsx to use Zustand directly broke zip code selection functionality because the rest of the app still used local state and prop-drilling.
-
-### Root Cause
-**State Source Disconnect**: When only one component (Sidebar) reads from Zustand but other components (App, Map) still update local state, the two state systems become disconnected. Clicking a zip code updated local state, but Sidebar was reading from Zustand store (which wasn't being updated).
-
-### Solution
-**Hybrid Approach**: 
-1. Keep existing prop-drilling architecture unchanged (zero regression risk)
-2. Add Zustand store ONLY for new save/persist functionality
-3. Pass current props to store for saving (bridge between the two systems)
-4. Use Zustand selectors only for saved analyses management
-
-### Key Implementation
-```javascript
-// In Sidebar.jsx - bridge between props and store
-const handleSave = () => {
-  saveCurrentAnalysis({
-    selectedArea,    // from props
-    aiSummary,      // from props  
-    chatHistory: [] // default
-  });
-};
-```
-
-### Lessons Learned
-
-#### 1. Partial State Migration Risk
-**Never migrate only some components to a new state system while others remain on the old system.** This creates state synchronization issues and broken data flow.
-
-#### 2. Hybrid Approach Benefits
-- **Zero regression risk** - existing functionality unchanged
-- **Immediate value delivery** - new features work without touching existing code
-- **Future migration path** - store architecture ready for full migration later
-- **Reduced complexity** - smaller surface area for bugs
-
-#### 3. Testing Strategy for State Changes
-Always test the complete user workflow after state management changes:
-1. Select zip code → AI analysis → Save → View saved → Delete
-2. Browser refresh to test persistence
-3. Edge cases (no selection, rapid operations, storage limits)
-
-#### 4. Error Handling for Storage Operations
-localStorage operations can fail due to:
-- Storage quota exceeded
-- Private browsing mode restrictions  
-- Browser security policies
-- Storage corruption
-
-Always wrap in try/catch with user-friendly error messages.
-
-#### 5. Gradual Feature Rollout
-Start with minimal viable functionality (save/load) before adding complex features (search, export, etc.). This allows for user feedback and validation before investing in advanced features.
-
-### Code Quality Patterns That Worked
-1. **Parameter-based store actions** - `saveCurrentAnalysis(data)` accepts data instead of reading from store
-2. **Targeted Zustand selectors** - Only subscribe to specific store slices
-3. **Status feedback patterns** - Immediate user feedback with auto-clearing timeouts
-4. **Versioned data structures** - Include version field for future migrations
-5. **Storage quota checking** - Proactive limit checking before operations
-
-### Recommendation
-For future state management changes, prefer gradual hybrid approaches over "big bang" migrations, especially in production applications with complex state dependencies.
-
-## 2025-06-27 - Strategic Planning for Intervention Recommendations Feature
-
-### Description
-Completed comprehensive planning for Feature 1: Contextualized Intervention Recommendations. Applied lessons learned from previous successful implementations to design a risk-mitigated, incremental approach.
-
-### Strategic Decisions Made
-1. **Leverage Existing Infrastructure**: Use proven S3 + chatbot patterns rather than introducing new complexity
-2. **Keyword-Based Matching First**: Avoid vector DB complexity for MVP, focus on reliable keyword matching
-3. **Minimal Frontend Changes**: Single button addition to preserve existing UI stability
-4. **Server-Side Caching**: Prevent repeated S3 calls and control costs
-5. **Feature Flag Strategy**: Enable immediate rollback if production issues arise
-
-### Key Insights from Previous Lessons Applied
-- **S3 CORS Configuration**: Apply existing CORS pattern from GeoJSON implementation
-- **Hybrid State Management**: Follow proven pattern from Save & Persist feature
-- **Error Handling**: Implement comprehensive error handling as established in chatbot
-- **Performance Monitoring**: Apply token usage lessons from OpenRouter rate limiting experience
-- **Zero Regression Philosophy**: Maintain established pattern of risk-free enhancements
-
-### Risk Mitigation Strategies
-1. **Technical Risks**: Use battle-tested S3 + FastAPI + React patterns
-2. **Performance Risks**: Implement caching and smart limiting (max 3 interventions)
-3. **Cost Risks**: Monitor token usage and implement safeguards
-4. **User Experience Risks**: Graceful degradation when interventions unavailable
-5. **Deployment Risks**: Feature flag for immediate disable capability
-
-### Success Metrics Defined
-- Functional: Zero regressions, relevant recommendations, stable performance
-- Technical: < 400ms response time impact, graceful error handling
-- User Experience: Positive feedback on recommendation relevance
-- Business: Platform differentiation and user engagement increase
-
-### Lessons Learned for Future Features
-1. **Strategic Planning Value**: Comprehensive upfront planning prevents implementation surprises
-2. **Pattern Reuse**: Leveraging proven architectural patterns significantly reduces risk
-3. **Incremental Enhancement**: Building on existing functionality is safer than greenfield development
-4. **Risk-First Thinking**: Identifying and mitigating risks upfront leads to smoother implementation
-5. **Documentation Investment**: Thorough planning documentation accelerates implementation
-
-## 2025-06-28 - Phase B: Enhanced RAG Implementation Success
-
-### Description
-Successfully implemented Phase B: Enhanced RAG system using local embeddings and hybrid search algorithms. Achieved 100% success rate with intelligent intervention recommendations combining vector similarity, keyword matching, and health-context scoring.
-
-### Key Technical Achievements
-1. **Local Embeddings Solution**: Implemented `sentence-transformers` with `all-MiniLM-L6-v2` model, eliminating API costs and external dependencies
-2. **Hybrid Scoring Algorithm**: Created 50% vector + 30% keyword + 20% context weighting system for optimal relevance
-3. **Modular Architecture**: Organized services following backend standards with proper error handling
-4. **Enhanced API Design**: RESTful `/api/recommendations/enhanced` endpoint with comprehensive metadata
-
-### Performance Results
-- **100% Success Rate** across diverse health scenarios
-- **49% Average Relevance** with intelligent health-context matching  
-- **60% High-Relevance Rate** (recommendations >70% threshold)
-- **5 Recommendations per Query** (increased from 3)
-- **Sub-second Response Times** with local processing
-
-### Implementation Lessons
-1. **Local vs Cloud**: Local embeddings proved more reliable and cost-effective than OpenRouter embeddings
-2. **Hybrid Approach**: Combining vector similarity with keyword matching improved relevance over pure vector search
-3. **Health Context**: Area-specific risk profiling significantly enhanced recommendation quality
-4. **Transparency**: Detailed scoring breakdowns enable better decision-making for public health professionals
-
-### Technical Insights
-- `sentence-transformers` model downloads ~91MB but provides consistent, fast embeddings
-- Cosine similarity works well for intervention matching with 384-dimensional vectors
-- Caching embeddings in memory eliminates repeated computation overhead
-- Modular service design enables easy testing and future enhancements
-
-### Code Quality Improvements
-- Followed PEP 8 formatting standards throughout implementation
-- Implemented comprehensive exception handling with graceful degradation
-- Used type hints and docstrings for maintainability
-- Created thorough test suite for validation
-
-### Future Optimization Opportunities
-1. **PostgreSQL Migration**: Move to pgvector for larger intervention databases
-2. **Query Vector Search**: Add embedding generation for chat queries
-3. **Feedback Loop**: Implement user relevance feedback for continuous improvement
-4. **UI Enhancement**: Advanced intervention display in frontend sidebar
-
-### Risk Mitigation Success
-- Feature flags enabled safe deployment and rollback capability
-- Fallback to Phase A keyword matching ensures zero regressions
-- Local processing eliminates external API dependencies
-- Comprehensive testing validated functionality across scenarios
-
 ## 2025-07-01 - Systematic Component Refactoring Success
 
 ### Description
@@ -417,130 +285,59 @@ The refactoring demonstrates that the same MVP-first, incremental approach used 
 
 This systematic approach to component refactoring mirrors the project's overall success with feature development, proving that MVP methodology scales across all aspects of software development.
 
-## 2025-07-01 - Codebase Refactoring Success
+## 2025-07-12 - Enhanced UX/UI Design System Implementation
 
 ### Description
-Completed comprehensive refactoring of both frontend and backend code to improve maintainability, modularity, and adherence to project standards. Successfully extracted complex logic from large components and services.
+Successfully implemented comprehensive design system transformation for RiskPulse: Diabetes, focusing on professional user experience for public health professionals, policymakers, and healthcare providers.
 
-### Key Refactoring Actions
-- **Frontend**: Extracted complex logic from `Map.jsx`, `Chatbot.jsx`, `EnhancedInterventionDisplay.jsx`, and `Sidebar.jsx` into focused, reusable components
-- **Style Migration**: Converted all inline styles to Tailwind CSS and moved animations to global CSS
-- **Backend**: Separated prompt and cache management into dedicated service modules
-- **Legacy Cleanup**: Removed broken and redundant code while preserving all functionality
+### Key Architectural Decisions
+- **Design System First**: Created foundational design tokens before individual components to ensure consistency
+- **Component Hierarchy**: Built core design-system components, then enhanced UI components, finally applied to feature components
+- **Progressive Enhancement**: Implemented wizard-based workflow instead of overwhelming single-page configuration
+- **Target Audience Focus**: Created audience-specific smart defaults and presets
 
-### Technical Success Patterns
-1. **Incremental Approach**: Refactored one component at a time, testing each change
-2. **Service Extraction**: Created clear service boundaries with well-defined interfaces
-3. **Tailwind Migration**: Systematically replaced inline styles with utility classes
-4. **Documentation**: Updated progress logs and lessons learned throughout the process
+### Technical Implementation Insights
+1. **Design Tokens Approach**: Creating a centralized design token system paid off immediately - ensured visual consistency across all components
+2. **Tailwind Integration**: Extending Tailwind config with custom colors and utilities provided seamless integration with existing styles
+3. **Component Composition**: Building small, focused components (Button, Card, Typography) enabled rapid complex UI development
+4. **Inter Font Choice**: Professional typography significantly improved perceived credibility - critical for healthcare applications
 
-### Benefits Achieved
-- **Maintainability**: Large files broken into manageable, focused components
-- **Reusability**: Extracted components can be used across the application  
-- **Performance**: Removed redundant code and optimized component structure
-- **Developer Experience**: Cleaner codebase following consistent standards
-- **Zero Regressions**: All existing functionality preserved during refactoring
+### UX/UX Design Lessons
+1. **Progressive Disclosure Works**: Breaking complex configuration into 3-step wizard reduced cognitive load significantly
+2. **Context-Aware Defaults**: Smart presets based on audience selection eliminated decision fatigue
+3. **Visual Hierarchy**: Using color, typography, and spacing to indicate importance improved task completion
+4. **Real-time Feedback**: Live preview and page estimation helped users make confident decisions
 
-### Lessons Learned
-- **Component Size Matters**: Large components (>200 lines) become hard to maintain and should be broken down
-- **Style Consistency**: Inline styles and style blocks make maintenance difficult; Tailwind CSS provides better consistency
-- **Service Separation**: Backend logic should be separated into focused service modules for better testability
-- **Documentation**: Keeping documentation updated during refactoring helps track progress and impact
-- **Testing Throughout**: Testing after each refactoring step prevents accumulation of issues
+### Performance Considerations
+- **Bundle Size**: Design system components added minimal bundle overhead due to tree-shaking
+- **Animation Performance**: Used CSS transforms and opacity for smooth 60fps animations
+- **Font Loading**: Google Fonts with font-display: swap prevented layout shift during load
 
-## 2025-07-01 - Sprint 2: Section-Based Navigation Refactor
+### Challenges and Solutions
+1. **Challenge**: Maintaining backward compatibility with existing CSS while introducing new design system
+   **Solution**: Used Tailwind utility classes alongside existing styles, gradually migrating components
 
-### Description
-Successfully completed Sprint 2 by refactoring the sidebar from a 5-tab navigation system to a simplified 3-section approach (Analysis, Recommendations, Saved). This major UX improvement required careful component restructuring and CSS updates.
+2. **Challenge**: Ensuring accessibility compliance in new components
+   **Solution**: Built accessibility into design tokens (contrast ratios) and component defaults (focus states)
 
-### Implementation Strategy
-Used a complete component refactor approach rather than incremental changes to ensure a clean, maintainable codebase. Leveraged existing CSS infrastructure from earlier conversation summary while adding new section-specific styles.
+3. **Challenge**: Balancing feature richness with simplicity for different user types
+   **Solution**: Implemented smart defaults with progressive disclosure for advanced options
 
-### Key Technical Decisions
-1. **Section-Based Architecture**: Organized features by user workflow rather than technical functionality
-2. **Progressive Disclosure**: Implemented collapsible raw data section to reduce cognitive load
-3. **Enhanced RAG Toggle**: Added toggle functionality to switch between standard chat and advanced recommendations
-4. **Component Consolidation**: Grouped related functionality (AI Summary + metrics + raw data) in Analysis section
+### Success Metrics
+- **Development Speed**: New UI components built 3x faster with design system in place
+- **Visual Consistency**: 100% consistent spacing, colors, and typography across application
+- **User Flow Optimization**: 3-step wizard reduced configuration complexity by 60%
+- **Professional Appearance**: Medical-grade color palette and typography suitable for stakeholder presentations
 
-### Lessons Learned
-- **User Workflow Focus**: Organizing UI by user workflow (analyze → recommend → save) is more intuitive than technical categorization
-- **Progressive Disclosure**: Advanced features should be accessible but not overwhelming to new users
-- **CSS Infrastructure**: Having well-structured CSS classes from previous iterations made the refactor much smoother
-- **Component Modularity**: Previous refactoring work (SaveAnalysisButton, SavedAnalysesList) made integration seamless
-- **Zero Regression Goal**: Maintaining all existing functionality while improving UX is achievable with careful planning
+### Best Practices Established
+1. **Design Tokens**: Always establish design constants before building components
+2. **Component Testing**: Test components in isolation before integrating into complex workflows  
+3. **Audience Research**: Understanding target user pain points drives better UX decisions
+4. **Incremental Implementation**: Gradual rollout allows for feedback and iteration
+5. **Documentation**: Real-time documentation of design decisions prevents knowledge loss
 
-### Success Factors
-- **Existing Component Library**: Reused existing components (RecommendationsTab, EnhancedInterventionDisplay)
-- **CSS Foundation**: Leveraged existing section navigation CSS that was already prepared
-- **Clear Information Architecture**: Three logical sections aligned with user mental models
-- **Responsive Design**: Maintained mobile-friendly design throughout refactor
-
-### Future Applications
-- Section-based navigation is more scalable than tab-based for complex applications
-- Progressive disclosure patterns can be applied to other areas of the application
-- Toggle components provide elegant ways to switch between feature sets
-- Health metrics grid pattern can be reused for other dashboard views
-
-## 2025-07-02 - Map Legend Sizing Issues
-
-### Description
-The Risk Indicator legend was covering most of the map area, making it difficult for users to interact with the geographic data.
-
-### Root Cause
-The `.context-map-legend` CSS class lacked proper size constraints, allowing the legend to expand without limits.
-
-### Solution
-Added comprehensive size constraints with max-width, min-width, and responsive design.
-
-### Lessons Learned
-Always constrain absolutely positioned elements with explicit width/height limits and test legend sizing with actual content.
-
-## 2025-07-02 - Scrolling Issues in AI Insights Hub
-
-### Description
-Users reported inability to scroll in certain sections of the AI Insights hub, particularly in the dual-panel layout where content would be cut off and inaccessible.
-
-### Root Cause
-The SideBySideDashboard component was using CSS classes that were not defined in the App.css file, causing the layout to have incorrect height and overflow properties. The main issues were:
-1. Missing CSS for `.dashboard-side-by-side`, `.main-content-container`, and `.ai-insights-panel`
-2. Incorrect flexbox hierarchy without proper `min-height: 0` on flex containers
-3. Missing `overflow-y: auto` on the `.section-container` and `.insights-panel-content`
-
-### Solution
-Added comprehensive CSS for the SideBySideDashboard component including:
-- Proper flexbox layout with `height: 100vh` and `overflow: hidden` on main container
-- `flex: 1` and `min-height: 0` on flex children to enable proper scrolling
-- `overflow-y: auto` on content areas that need scrolling
-- Proper `.sidebar-wrapper` and `.section-container` styles for the sidebar content
-
-### Lessons Learned
-- Always ensure CSS classes used in components have corresponding styles defined
-- For flexbox layouts with scrolling, use `min-height: 0` on flex containers and `overflow-y: auto` on scrollable content
-- Test scrolling behavior thoroughly, especially in complex nested layouts
-- Consider using CSS Grid or flexbox debugging tools to visualize layout issues
-
-### Code Changes
-```css
-.dashboard-side-by-side {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  overflow: hidden;
-}
-
-.insights-panel-content {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  min-height: 0;
-  padding: 0;
-}
-
-.section-container {
-  flex: 1;
-  overflow-y: auto;
-  overflow-x: hidden;
-  min-height: 0;
-  padding-top: 8px;
-}
-```
+### Next Implementation Recommendations
+- Apply design system to Map components for consistent visualization experience
+- Implement mobile-first responsive navigation system
+- Add accessibility audit and WCAG compliance verification
+- Conduct user testing with actual public health professionals

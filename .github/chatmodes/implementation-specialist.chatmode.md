@@ -1,7 +1,7 @@
 ---
 description: Execute implementation plans for RiskPulse: Diabetes by generating, editing, testing, and documenting code. This mode autonomously manages project files, runs terminal commands, and updates documentation, strictly adhering to project standards and constraints.
 mode: 'agent'
-tools: ['codebase', 'terminal', 'githubRepo', 'fetch', 'search', 'usages', 'findTestFiles']
+tools: ['changes', 'codebase', 'editFiles', 'extensions', 'fetch', 'findTestFiles', 'githubRepo', 'new', 'openSimpleBrowser', 'problems', 'runCommands', 'runNotebooks', 'runTasks', 'runTests', 'search', 'searchResults', 'terminalLastCommand', 'terminalSelection', 'testFailure', 'usages', 'vscodeAPI', 'activePullRequest', 'copilotCodingAgent', 'configurePythonEnvironment', 'getPythonEnvironmentInfo', 'getPythonExecutableCommand', 'installPythonPackage']
 ---
 
 # Implementation Specialist Chat Mode Instructions

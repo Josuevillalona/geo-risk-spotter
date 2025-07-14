@@ -1,65 +1,169 @@
-# Current Task: Sprint 2 - Enhanced Polish & Optimization ✅ COMPLETED
+# Current Task: Public Health Planner UX Enhancements - Layered Implementation Plan 🚀
 
-## Section-Based Navigation with Performance & UX Enhancements - COMPLETED ✅ (July 2, 2025)
+## Layered Implementation Plan for Public Health Planner UX Enhancements - STARTING (July 12, 2025)
 
-### 🎯 OBJECTIVE ACHIEVED  
-✅ Successfully completed Sprint 2 enhancements, adding advanced animations, performance optimizations, and accessibility improvements to the 3-section navigation system. Enhanced user experience with micro-interactions, skeleton loading states, and improved visual feedback.
+### 🎯 OBJECTIVE
+Implement a comprehensive 4-layer enhancement strategy to transform RiskPulse: Diabetes into a professional-grade tool for public health planners, following a proven MVP-first approach with incremental value delivery.
 
-### 📋 IMPLEMENTATION STRATEGY DELIVERED
-✅ **Approach**: Enhanced existing section-based navigation with polish and performance optimizations  
-✅ **Timeline**: Extended Sprint 2 with 1 additional day for refinements  
-✅ **Enhancement Level**: Production-ready UX with advanced interactions and accessibility
+### 📋 IMPLEMENTATION STRATEGY  
+**Approach**: Layered enhancement strategy building incrementally from UI optimization to advanced analytics  
+**Timeline**: 4 layers over 8 weeks (5-15 days per layer)  
+**Enhancement Level**: Professional public health planning tool with evidence-based decision support
 
-### 🔧 TECHNICAL IMPLEMENTATION COMPLETED
+### 🏗️ LAYERED ARCHITECTURE OVERVIEW
 
-#### Performance Optimizations ✅
-✅ **Memoized Calculations**: Added useMemo for key metrics to prevent unnecessary re-calculations
-✅ **Optimized Renders**: Reduced component re-renders with intelligent state management
-✅ **Skeleton Loading**: Implemented skeleton loading states for better perceived performance
-✅ **Smooth Transitions**: Added section transition animations with optimized timing
+#### **Layer 1: Information Hierarchy Optimization** 🎯
+*Timeline: 5-7 days | Impact: High | Risk: Low*
+- **Objective**: Restructure sidebar to match Public Health Planner workflow sequence
+- **Key Features**: Hero metrics, workflow-driven sections, context strip
+- **Technical Focus**: Sidebar.jsx restructuring, new HeroMetrics component, ContextStrip implementation
+- **Success Criteria**: Risk score prominently displayed, context immediately visible, workflow sequence clear
 
-#### Advanced Animations & Micro-Interactions ✅
-✅ **Section Transitions**: Smooth fade-in animations when switching between sections
-✅ **Hover Effects**: Enhanced hover states with shimmer effects on cards and buttons
-✅ **Loading States**: Improved loading animations with pulsing effects and spinners
-✅ **Interactive Feedback**: Added visual feedback for all clickable elements
-✅ **Collapsible Animations**: Smooth expand/collapse animations for raw data section
+#### **Layer 2: Correlation Insights Engine** 🔍  
+*Timeline: 7-10 days | Impact: Very High | Risk: Medium*
+- **Objective**: Implement instant "Why is this area high-risk?" analysis
+- **Key Features**: Root cause analysis, neighborhood comparisons, correlation engine
+- **Technical Focus**: correlationAnalysis.js service, RootCausePanel component, NeighborhoodComparison
+- **Success Criteria**: One-click analysis, automated "why statements", neighbor comparisons functional
 
-#### Accessibility Enhancements ✅
-✅ **ARIA Support**: Added proper ARIA roles, labels, and controls for screen readers
-✅ **Keyboard Navigation**: Full keyboard support with Enter and Space key handling
-✅ **Tab Management**: Proper tablist/tabpanel structure for navigation
-✅ **Focus Management**: Clear focus indicators and logical tab order
-✅ **Semantic HTML**: Proper semantic structure for assistive technologies
+#### **Layer 3: Evidence Package Builder** 📊
+*Timeline: 10-12 days | Impact: Very High | Risk: Medium*  
+- **Objective**: Create stakeholder presentation tools and evidence generation
+- **Key Features**: Presentation mode, evidence packages, export functionality
+- **Technical Focus**: PresentationMode component, EvidenceBuilder, PDF generation service
+- **Success Criteria**: Stakeholder demos functional, PDF exports working, shareable links active
 
-#### Visual Polish ✅
-✅ **Enhanced Metric Cards**: Added shimmer effects and improved hover animations
-✅ **Toggle Switch**: Professional toggle design with smooth transitions
-✅ **Section Headers**: Added animated icons with subtle pulse effects
-✅ **Loading Skeletons**: Shimmer loading states for metric cards
-✅ **Enhanced RAG Glow**: Animated border glow effect for Enhanced RAG feature
+#### **Layer 4: Advanced Analytics Integration** 🔬
+*Timeline: 12-15 days | Impact: High | Risk: Higher*
+- **Objective**: Add predictive analytics, ROI calculations, decision support
+- **Key Features**: ROI calculator, predictive modeling, cost-benefit analysis
+- **Technical Focus**: ROICalculator component, predictiveModels.js service, CostBenefitAnalysis
+- **Success Criteria**: ROI projections accurate, impact predictions generated, sensitivity analysis functional
 
-### 📊 SUCCESS CRITERIA MET
-✅ Significantly improved perceived performance with skeleton loading
-✅ Enhanced user engagement with smooth micro-interactions
-✅ Full accessibility compliance with ARIA and keyboard support
-✅ Professional-grade visual polish matching modern web standards
-✅ Zero performance regressions with optimized rendering
-✅ Consistent animations across all responsive breakpoints
+### 🔧 CURRENT IMPLEMENTATION STATUS
 
-### 🎨 UX ENHANCEMENTS DELIVERED
+#### **Preparation Phase** - COMPLETED ✅
+- [x] Strategic plan documentation review
+- [x] User avatar analysis validation  
+- [x] Technical architecture assessment
+- [x] Documentation updates comprehensive
+- [x] Coding standards review and preparation
 
-#### Advanced User Experience ✅
-- **Immediate Feedback**: Every interaction provides instant visual feedback
-- **Perceived Performance**: Skeleton loading makes the app feel faster
-- **Accessibility First**: Full screen reader and keyboard navigation support
-- **Smooth Interactions**: All transitions are carefully timed for optimal UX
-- **Progressive Enhancement**: Enhanced features don't interfere with core functionality
+#### **Layer 1: Ready to Start** 🎯 (NEXT)
+- [ ] Read and apply coding standards from `.github/instructions/`
+- [ ] Workflow-driven section restructuring (Sidebar.jsx)
+- [ ] Hero metrics implementation (HeroMetrics.jsx)
+- [ ] Context strip development (ContextStrip.jsx)
+- [ ] Visual hierarchy optimization (CSS updates)
 
-### 🚀 NEXT STEPS: SPRINT 3 PLANNING
-- **Sprint 3.1**: Production deployment optimization and monitoring
-- **Sprint 3.2**: Advanced analytics and dashboard enhancements  
-- **Sprint 3.3**: Performance testing and scaling preparation
+### � SUCCESS METRICS TARGET
+
+#### **User Experience Metrics**
+- **Time to Insight**: Target <30 seconds for basic analysis
+- **Evidence Generation**: Target <5 minutes for complete package  
+- **Question Response**: 90% stakeholder questions answerable in real-time
+
+#### **Technical Performance**
+- **Load Time**: <2 seconds for any layer functionality
+- **Export Time**: <30 seconds for evidence package generation
+- **Accuracy**: >95% correlation analysis accuracy
+
+### 🎯 STRATEGIC ALIGNMENT
+
+#### **Public Health Planner Workflow Integration**
+1. **Situation Assessment** → Hero metrics and risk indicators
+2. **Root Cause Analysis** → Correlation insights engine  
+3. **Action Planning** → Evidence-based intervention recommendations
+4. **Decision Support** → Stakeholder materials and ROI calculations
+
+#### **MVP-First Approach Maintained**
+- Each layer delivers standalone value
+- Incremental complexity increase
+- No regressions to existing functionality
+- Cost-effective development approach
+
+### 🚀 IMPLEMENTATION SEQUENCE
+
+#### **Week 1-2: Layer 1 - Information Hierarchy**
+- Days 1-3: Section restructuring and hero metrics
+- Days 4-5: Context strip implementation
+- Days 6-7: CSS styling and responsive design
+
+#### **Week 3-4: Layer 2 - Correlation Engine**
+- Days 8-10: Correlation analysis service
+- Days 11-12: Root cause analysis panel
+- Days 13-14: Neighborhood comparison features
+
+#### **Week 5-6: Layer 3 - Evidence Builder**
+- Days 15-17: Presentation mode development
+- Days 18-20: Evidence package generator
+- Days 21-22: Export and sharing functionality
+
+#### **Week 7-8: Layer 4 - Advanced Analytics**
+- Days 23-25: ROI calculator implementation
+- Days 26-27: Predictive modeling integration
+- Days 28-30: Testing and refinement
+
+### 🔧 TECHNICAL PREPARATION
+
+#### **Coding Standards Requirements**
+- **React Frontend**: Must follow `.github/instructions/react-frontend.instructions.md`
+- **Python Backend**: Must follow `.github/instructions/python-backend.instructions.md`
+- **Database Work**: Must follow `.github/instructions/postgres-database.instructions.md`
+
+#### **Key Files to Create/Modify per Layer**
+
+**Layer 1 Files:**
+- ✅ **Modify**: `src/Sidebar.jsx` - Section restructuring
+- ✅ **Create**: `src/components/sidebar/HeroMetrics.jsx`
+- ✅ **Create**: `src/components/sidebar/ContextStrip.jsx` 
+- ✅ **Create**: `src/components/sidebar/RiskTrendIndicator.jsx`
+- ✅ **Enhance**: CSS in `src/App.css` for hero metrics styling
+
+**Layer 2 Files:**
+- ✅ **Create**: `src/services/correlationAnalysis.js`
+- ✅ **Create**: `src/components/sidebar/RootCausePanel.jsx`
+- ✅ **Create**: `src/components/sidebar/NeighborhoodComparison.jsx`
+- ✅ **Create**: `src/components/sidebar/FactorCard.jsx`
+
+**Layer 3 Files:**
+- ✅ **Create**: `src/components/presentation/PresentationMode.jsx`
+- ✅ **Create**: `src/components/evidence/EvidenceBuilder.jsx`
+- ✅ **Create**: `src/services/evidenceExporter.js`
+
+**Layer 4 Files:**
+- ✅ **Create**: `src/components/analytics/ROICalculator.jsx`
+- ✅ **Create**: `src/services/predictiveModels.js`
+- ✅ **Create**: `src/components/analytics/CostBenefitAnalysis.jsx`
+
+### � IMMEDIATE NEXT STEPS
+1. **Confirm implementation plan** with user
+2. **Begin Layer 1** - Information Hierarchy Optimization
+3. **Start with Sidebar.jsx restructuring** following React coding standards
+4. **Implement hero metrics** with prominent risk score display
+5. **Create context strip** for immediate area understanding
+
+---
+
+## Previous Completed Tasks Archive
+
+### Sprint 2 - Enhanced Polish & Optimization ✅ COMPLETED (July 2, 2025)
+- Advanced animations and micro-interactions with skeleton loading
+- Accessibility enhancements with ARIA support and keyboard navigation
+- Professional visual polish with shimmer effects and smooth transitions
+- Performance optimizations with memoized calculations and optimized renders
+
+### Phase B: Enhanced RAG Implementation ✅ COMPLETED
+- Local vector embeddings with sentence-transformers (all-MiniLM-L6-v2)
+- Hybrid search algorithm (50% vector + 30% keyword + 20% context)
+- Enhanced scoring system with full transparency and detailed breakdowns
+- 100% success rate with 49% average relevance and zero ongoing costs
+
+### Sprint 2.2: Contextualized Intervention Recommendations ✅ COMPLETED
+- Evidence-based intervention knowledge base (50 interventions) hosted on S3
+- Smart keyword-based recommendation matching for health risk profiling
+- Enhanced chatbot with intervention suggestions and "🎯 Get Interventions" quick action
+- Production deployment with comprehensive error handling and 30-minute caching
 
 ---
 

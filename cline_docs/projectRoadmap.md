@@ -28,7 +28,7 @@
   - [x] Professional visual design with shimmer animations
   - [x] Complete UI/UX enhancement for Phase B features
 
-### Phase 3: The Scalable Data Platform (Target: +3-4 Weeks) 🚀 NEXT
+### Phase 3: The Scalable Data Platform (Target: +3-4 Weeks) � DEFERRED
 - [ ] **Sprint 3.1: Production Deployment Enhancement**
   - [ ] Deploy Phase B Enhanced RAG to production (Render/Vercel)
   - [ ] Performance optimization for vector embeddings
@@ -41,6 +41,47 @@
   - [ ] Enhanced data visualization components
   - [ ] Multi-metric correlation analysis
   - [ ] Comparative area analysis features
+
+### Phase 4: Public Health Planner UX Enhancements (Target: +8 Weeks) 🚀 STARTING
+
+#### **Layered Implementation Strategy**
+**Objective**: Transform RiskPulse into a professional-grade Public Health Planner tool through incremental UX enhancements
+
+- [ ] **Layer 1: Information Hierarchy Optimization (5-7 days)**
+  - [ ] Workflow-driven section restructuring 
+  - [ ] Hero metrics implementation (risk score prominence)
+  - [ ] Context strip development (area type, population, comparisons)
+  - [ ] Visual hierarchy optimization for critical data
+
+- [ ] **Layer 2: Correlation Insights Engine (7-10 days)**  
+  - [ ] Root cause analysis service ("Why is this area high-risk?")
+  - [ ] Correlation analysis automation
+  - [ ] Neighborhood comparison features
+  - [ ] Instant insight generation system
+
+- [ ] **Layer 3: Evidence Package Builder (10-12 days)**
+  - [ ] Stakeholder presentation mode
+  - [ ] Evidence package generator (PDF export)
+  - [ ] Shareable links for collaboration  
+  - [ ] Cost-benefit analysis integration
+
+- [ ] **Layer 4: Advanced Analytics Integration (12-15 days)**
+  - [ ] ROI calculator implementation
+  - [ ] Predictive modeling service
+  - [ ] Impact projections based on evidence
+  - [ ] Sensitivity analysis for parameter changes
+
+#### **Success Metrics Targets**
+- **Time to Insight**: <30 seconds for basic analysis
+- **Evidence Generation**: <5 minutes for complete package
+- **Question Response**: 90% stakeholder questions answerable in real-time
+- **Technical Performance**: <2 seconds load time, >95% accuracy
+
+#### **Strategic Benefits**
+- Professional-grade tool for public health planners
+- Evidence-based decision support automation
+- Stakeholder presentation capabilities  
+- Cost-effective intervention planning
 
 ### Recently Completed Tasks
 - [x] **Sprint 2.1A: Save & Persist Feature** ✅ *(June 20, 2025)*
@@ -100,6 +141,12 @@
 ---
 
 ### Next Major Milestones
-- **Q3 2025**: Complete Phase 2 with advanced intervention recommendations
-- **Q4 2025**: Launch Phase 3 scalable data platform
+- **Q3 2025**: Complete Phase 4 Public Health Planner UX Enhancements
+- **Q4 2025**: Launch Phase 3 scalable data platform (deferred until after UX)
 - **2026**: National-scale deployment readiness
+
+### Strategic Priority Shift (July 2025)
+**Decision**: Prioritize user experience enhancement (Phase 4) over infrastructure scaling (Phase 3) based on:
+- User feedback indicating need for professional-grade public health planning features
+- Proven MVP foundation ready for UX enhancement  
+- Cost-effective approach focusing on user value before infrastructure complexity

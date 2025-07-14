@@ -3,16 +3,52 @@ import RecommendationsTab from './components/RecommendationsTab';
 import EnhancedInterventionDisplay from './components/EnhancedInterventionDisplay';
 import SaveAnalysisButton from './components/sidebar/SaveAnalysisButton';
 import SavedAnalysesList from './components/sidebar/SavedAnalysesList';
+import HeroMetrics from './components/sidebar/HeroMetrics';
+import ContextStrip from './components/sidebar/ContextStrip';
+import RootCausePanel from './components/sidebar/RootCausePanel';
+import NeighborhoodComparison from './components/sidebar/NeighborhoodComparison';
+import EvidenceBuilder from './components/evidence/EvidenceBuilder';
+import PresentationMode from './components/presentation/PresentationMode';
 import { useAppStore } from './store';
-import { MdAnalytics, MdChat, MdBookmark, MdBarChart, MdTrendingUp } from 'react-icons/md';
+import { MdAnalytics, MdChat, MdBookmark, MdBarChart, MdTrendingUp, MdSearch, MdAssignment, MdSlideshow } from 'react-icons/md';
 
 const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
-  const [activeSection, setActiveSection] = useState('analysis');
+  const [activeSection, setActiveSection] = useState('situation');
   const [enhancedLoading, setEnhancedLoading] = useState(false);
   const [showEnhancedRAG, setShowEnhancedRAG] = useState(false);
+  const [showPresentationMode, setShowPresentationMode] = useState(false);
+  const [evidenceSubSection, setEvidenceSubSection] = useState('builder');
 
   // Get borough state from store
   const { selectedBorough, viewMode, boroughData, isBoroughDataLoading, isZipCodeDataLoading } = useAppStore();
+
+  // Define workflow-driven sections for Public Health Planners
+  const PLANNER_WORKFLOW_SECTIONS = [
+    {
+      id: 'situation',
+      label: 'Situation Assessment',
+      icon: MdAnalytics,
+      description: 'Current health status and risk profile'
+    },
+    {
+      id: 'exploration', 
+      label: 'Root Cause Analysis',
+      icon: MdSearch,
+      description: 'Understanding the drivers behind the data'
+    },
+    {
+      id: 'planning',
+      label: 'Action Planning', 
+      icon: MdChat,
+      description: 'Evidence-based intervention recommendations'
+    },
+    {
+      id: 'evidence',
+      label: 'Decision Support',
+      icon: MdAssignment,
+      description: 'Stakeholder materials and saved analysis'
+    }
+  ];
 
   const formatPercent = (value) => {
     if (value === undefined || value === null || value === '') return '0.00%';
@@ -139,21 +175,21 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
     );
   }
 
-  const renderAnalysisSection = () => (
+  const renderSituationAssessment = () => (
     <div className="section-content">
-      {/* AI Summary */}
-      <div className="analysis-summary">
-        <div className="section-header">
-          <MdTrendingUp className="section-icon" />
-          <h3>AI Analysis</h3>
+      {/* AI Summary - First and Prominent */}
+      <div className="ai-analysis-header">
+        <div className="section-header-clean">
+          <MdTrendingUp className="section-icon-clean" />
+          <h2>AI Health Analysis</h2>
         </div>
         {isLoading || 
          (viewMode === 'borough' && isBoroughDataLoading) || 
          (viewMode === 'zipcode' && isZipCodeDataLoading) ? (
-          <div className="ai-loading-state">
+          <div className="ai-loading-state-clean">
             <div className="loading-spinner"></div>
             <span>🧠 Analyzing diabetes risk patterns...</span>
-            <small style={{ display: 'block', marginTop: '4px', opacity: 0.7 }}>
+            <small style={{ display: 'block', marginTop: '8px', opacity: 0.7, color: '#6b7280' }}>
               {viewMode === 'borough' && isBoroughDataLoading ? 
                 'Loading borough data for analysis...' :
                 viewMode === 'zipcode' && isZipCodeDataLoading ?
@@ -163,19 +199,25 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
             </small>
           </div>
         ) : (
-          <div className="ai-summary-container">
-            <div className="ai-summary">
+          <div className="ai-summary-clean">
+            <div className="ai-content">
               {aiSummary}
             </div>
           </div>
         )}
       </div>
 
-      {/* Key Metrics Grid */}
+      {/* Hero Metrics - Prominent Risk Display */}
+      <HeroMetrics 
+        keyMetrics={keyMetrics}
+        displayData={displayData}
+      />
+
+      {/* Key Metrics Grid - Right after Top Concerns */}
       <div className="health-metrics-grid">
         <div className="section-header">
           <MdBarChart className="section-icon" />
-          <h3>Key Health Metrics</h3>
+          <h3>Detailed Health Metrics</h3>
           {(displayData?.type === 'borough' || displayData?.type === 'borough-summary') && (
             <small className="metrics-context">
               Borough averages across {displayData?.type === 'borough-summary' ? 
@@ -251,10 +293,69 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
           </div>
         )}
       </div>
+      
+      {/* Context Strip - Moved after metrics */}
+      <ContextStrip 
+        displayData={displayData}
+        comparisons={null} // Will be enhanced in Layer 2
+      />
     </div>
   );
 
-  const renderRecommendationsSection = () => (
+  const renderRootCauseExploration = () => {
+    // Prepare data for correlation analysis
+    const areaData = displayData?.data;
+    const comparisonData = null; // Could be city/state averages in future
+    
+    // Mock neighborhood data for demonstration (will be enhanced with real neighbor selection)
+    const mockNeighborhoodAreas = [
+      {
+        DIABETES_CrudePrev: 8.5,
+        OBESITY_CrudePrev: 28.2,
+        hypertension_avg: 32.1,
+        physical_inactivity_avg: 22.8,
+        smoking_avg: 14.3,
+        food_insecurity_avg: 12.1
+      },
+      {
+        DIABETES_CrudePrev: 9.8,
+        OBESITY_CrudePrev: 31.5,
+        hypertension_avg: 35.7,
+        physical_inactivity_avg: 26.1,
+        smoking_avg: 16.8,
+        food_insecurity_avg: 15.4
+      }
+    ];
+
+    return (
+      <div className="section-content">
+        <div className="section-header">
+          <MdSearch className="section-icon" />
+          <h3>Root Cause Analysis</h3>
+          <small className="section-description">
+            Understanding why this area shows elevated diabetes risk
+          </small>
+        </div>
+        
+        {/* Layer 2: Root Cause Analysis Panel */}
+        <RootCausePanel 
+          areaData={areaData}
+          comparisonData={comparisonData}
+          isLoading={isLoading || isBoroughDataLoading || isZipCodeDataLoading}
+        />
+        
+        {/* Layer 2: Neighborhood Comparison */}
+        <NeighborhoodComparison 
+          targetArea={areaData}
+          neighborhoodAreas={selectedArea ? mockNeighborhoodAreas : []}
+          isLoading={isLoading || isBoroughDataLoading || isZipCodeDataLoading}
+          viewMode={viewMode}
+        />
+      </div>
+    );
+  };
+
+  const renderActionPlanning = () => (
     <div className="section-content">
       {/* Enhanced RAG Toggle */}
       <div className="enhanced-rag-toggle">
@@ -304,15 +405,94 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
     </div>
   );
 
-  const renderSavedSection = () => (
-    <div className="section-content">
-      <div className="section-header">
-        <MdBookmark className="section-icon" />
-        <h3>Analysis History</h3>
+  const renderDecisionSupport = () => {
+    // Prepare area data for evidence generation
+    const areaData = displayData?.data || selectedArea?.properties;
+    
+    return (
+      <div className="section-content">
+        <div className="section-header">
+          <MdAssignment className="section-icon" />
+          <h3>Evidence & Decision Support</h3>
+          <small className="section-description">
+            Professional materials for stakeholder presentations and funding requests
+          </small>
+        </div>
+        
+        {/* Evidence Section Navigation */}
+        <div className="evidence-navigation">
+          <button 
+            className={`evidence-nav-btn ${evidenceSubSection === 'builder' ? 'active' : ''}`}
+            onClick={() => setEvidenceSubSection('builder')}
+          >
+            <MdAssignment />
+            Evidence Builder
+          </button>
+          <button 
+            className={`evidence-nav-btn ${evidenceSubSection === 'presentation' ? 'active' : ''}`}
+            onClick={() => setEvidenceSubSection('presentation')}
+          >
+            <MdSlideshow />
+            Presentation Mode
+          </button>
+          <button 
+            className={`evidence-nav-btn ${evidenceSubSection === 'history' ? 'active' : ''}`}
+            onClick={() => setEvidenceSubSection('history')}
+          >
+            <MdBookmark />
+            Analysis History
+          </button>
+        </div>
+        
+        {/* Evidence Sub-Section Content */}
+        {evidenceSubSection === 'builder' && (
+          <EvidenceBuilder 
+            areaData={areaData}
+            onPackageGenerated={(packageData) => {
+              // Package generation complete - could trigger notification or other actions
+            }}
+            className="evidence-section"
+          />
+        )}
+        
+        {evidenceSubSection === 'presentation' && (
+          <div className="presentation-section">
+            <div className="presentation-intro">
+              <h4>Stakeholder Presentation</h4>
+              <p>Create professional slide presentations for decision-makers and stakeholders.</p>              <button
+                className="launch-presentation-btn"
+                onClick={() => setShowPresentationMode(true)}
+                disabled={!areaData}
+              >
+                <MdSlideshow />
+                Launch Presentation Mode
+              </button>
+            </div>
+            
+            {areaData && (
+              <div className="presentation-preview">
+                <h5>Available Slides</h5>
+                <div className="slide-list">
+                  <div className="slide-item">� Executive Summary</div>
+                  <div className="slide-item">📍 Risk Overview</div>
+                  <div className="slide-item">🔍 Root Cause Analysis</div>
+                  <div className="slide-item">💡 Action Plan</div>
+                  <div className="slide-item">� Evidence & Data</div>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {evidenceSubSection === 'history' && (
+          <div className="evidence-section">
+            <h4>Analysis History</h4>
+            <SavedAnalysesList />
+          </div>
+        )}
       </div>
-      <SavedAnalysesList />
-    </div>
-  );
+    );
+  };
 
   return (
     <div className="sidebar-wrapper">
@@ -325,74 +505,62 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
       
       {/* Section Navigation */}
       <div className="section-navigation" role="tablist">
-        <button 
-          className={`section-nav-btn ${activeSection === 'analysis' ? 'active' : ''}`}
-          onClick={() => setActiveSection('analysis')}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setActiveSection('analysis');
-            }
-          }}
-          role="tab"
-          aria-selected={activeSection === 'analysis'}
-          aria-controls="analysis-panel"
-        >
-          <MdAnalytics className="nav-icon" />
-          <span>Analysis</span>
-        </button>
-        <button
-          className={`section-nav-btn ${activeSection === 'recommendations' ? 'active' : ''}`}
-          onClick={() => setActiveSection('recommendations')}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setActiveSection('recommendations');
-            }
-          }}
-          role="tab"
-          aria-selected={activeSection === 'recommendations'}
-          aria-controls="recommendations-panel"
-        >
-          <MdChat className="nav-icon" />
-          <span>Recommendations</span>
-        </button>
-        <button 
-          className={`section-nav-btn ${activeSection === 'saved' ? 'active' : ''}`}
-          onClick={() => setActiveSection('saved')}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              setActiveSection('saved');
-            }
-          }}
-          role="tab"
-          aria-selected={activeSection === 'saved'}
-          aria-controls="saved-panel"
-        >
-          <MdBookmark className="nav-icon" />
-          <span>Saved</span>
-        </button>
+        {PLANNER_WORKFLOW_SECTIONS.map(section => {
+          const IconComponent = section.icon;
+          return (
+            <button 
+              key={section.id}
+              className={`section-nav-btn ${activeSection === section.id ? 'active' : ''}`}
+              onClick={() => setActiveSection(section.id)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  setActiveSection(section.id);
+                }
+              }}
+              role="tab"
+              aria-selected={activeSection === section.id}
+              aria-controls={`${section.id}-panel`}
+              title={section.description}
+            >
+              <IconComponent className="nav-icon" />
+              <span>{section.label}</span>
+            </button>
+          );
+        })}
       </div>
       
       {/* Section Content */}
       <div className="section-container">
-        {activeSection === 'analysis' && (
-          <div role="tabpanel" id="analysis-panel" aria-labelledby="analysis-tab">
-            {renderAnalysisSection()}
+        {activeSection === 'situation' && (
+          <div role="tabpanel" id="situation-panel" aria-labelledby="situation-tab">
+            {renderSituationAssessment()}
           </div>
         )}
-        {activeSection === 'recommendations' && (
-          <div role="tabpanel" id="recommendations-panel" aria-labelledby="recommendations-tab">
-            {renderRecommendationsSection()}
+        {activeSection === 'exploration' && (
+          <div role="tabpanel" id="exploration-panel" aria-labelledby="exploration-tab">
+            {renderRootCauseExploration()}
           </div>
         )}
-        {activeSection === 'saved' && (
-          <div role="tabpanel" id="saved-panel" aria-labelledby="saved-tab">
-            {renderSavedSection()}
+        {activeSection === 'planning' && (
+          <div role="tabpanel" id="planning-panel" aria-labelledby="planning-tab">
+            {renderActionPlanning()}
+          </div>
+        )}
+        {activeSection === 'evidence' && (
+          <div role="tabpanel" id="evidence-panel" aria-labelledby="evidence-tab">
+            {renderDecisionSupport()}
           </div>
         )}
       </div>
+      
+      {/* Layer 3: Presentation Mode Overlay */}
+      {showPresentationMode && (
+        <PresentationMode 
+          areaData={displayData?.data || selectedArea?.properties}
+          onClose={() => setShowPresentationMode(false)}
+        />
+      )}
     </div>
   );
 };

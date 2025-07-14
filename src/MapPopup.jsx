@@ -32,9 +32,9 @@ const getMetricRisk = (value, type) => {
 
 /**
  * MapPopup: Shows metrics for a selected zip code or borough on the map.
- * Props: clickedZipCode, selectedFeature, clickPosition
+ * Props: clickedZipCode, selectedFeature, clickPosition, onClose
  */
-const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition }) => {
+const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition, onClose }) => {
   if (!clickedZipCode || !selectedFeature) return null;
   
   const isBorough = selectedFeature.properties.borough;
@@ -42,8 +42,8 @@ const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition }) => {
   
   // Get appropriate values based on whether this is a borough or zip code
   const getRiskScore = () => isBorough ? props.avgRiskScore : props.RiskScore;
-  const getDiabetesRate = () => isBorough ? props.avgDiabetesRate : props.DIABETES_CrudePrev;
-  const getObesityRate = () => isBorough ? props.avgObesityRate : props.OBESITY_CrudePrev;
+  const getDiabetesRate = () => isBorough ? props.avgDiabetes : props.DIABETES_CrudePrev;
+  const getObesityRate = () => isBorough ? props.avgObesity : props.OBESITY_CrudePrev;
   
   return (
     <div
@@ -68,6 +68,7 @@ const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition }) => {
         borderBottom: '1px solid #e5e7eb',
         backgroundColor: '#f8fafc',
         borderRadius: '8px 8px 0 0',
+        position: 'relative',
       }}>
         <div style={{
           fontSize: '16px',
@@ -76,9 +77,37 @@ const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition }) => {
           display: 'flex',
           alignItems: 'center',
           gap: '8px',
+          paddingRight: '24px', // Make room for close button
         }}>
           {isBorough ? '🏙️' : '📍'} {isBorough ? `${clickedZipCode} Borough` : `Zip Code ${clickedZipCode}`}
         </div>
+        {/* Close Button */}
+        <button
+          onClick={onClose}
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            background: 'none',
+            border: 'none',
+            fontSize: '18px',
+            color: '#6b7280',
+            cursor: 'pointer',
+            width: '20px',
+            height: '20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderRadius: '4px',
+            pointerEvents: 'auto', // Enable pointer events for the close button
+            transition: 'color 0.2s ease',
+          }}
+          onMouseEnter={(e) => e.target.style.color = '#374151'}
+          onMouseLeave={(e) => e.target.style.color = '#6b7280'}
+          title="Close popup"
+        >
+          ×
+        </button>
         {isBorough && (
           <div style={{
             fontSize: '12px',
