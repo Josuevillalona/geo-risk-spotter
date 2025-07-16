@@ -1,19 +1,14 @@
 import React, { useState } from "react";
 import Map from "../Map";
 import Sidebar from "../Sidebar";
-import { FaMapMarkerAlt, FaChevronLeft, FaChevronRight, FaExpand, FaCompress } from "react-icons/fa";
+import { FaMapMarkerAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdAutoAwesome } from "react-icons/md";
 
 const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
-  const [mapExpanded, setMapExpanded] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
   // For mobile responsiveness
   const [mobileActivePanel, setMobileActivePanel] = useState('insights'); // 'insights' or 'map'
-
-  const toggleMapExpansion = () => {
-    setMapExpanded(!mapExpanded);
-  };
 
   const toggleSidebarCollapse = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -22,7 +17,7 @@ const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
   return (
     <div className="dashboard-side-by-side">
       {/* Main Content Container */}
-      <div className={`main-content-container ${mapExpanded ? 'map-expanded' : ''} ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <div className={`main-content-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
         
         {/* AI Insights Panel - Primary */}
         <div className={`ai-insights-panel ${sidebarCollapsed ? 'collapsed' : ''}`}>
@@ -48,19 +43,12 @@ const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
         </div>
 
         {/* Map Context Panel - Secondary */}
-        <div className={`map-context-panel ${mapExpanded ? 'expanded' : ''}`}>
+        <div className="map-context-panel">
           <div className="map-panel-header">
             <div className="panel-title">
               <FaMapMarkerAlt className="panel-icon" />
               <span>Geographic Context</span>
             </div>
-            <button 
-              className="panel-expand-btn"
-              onClick={toggleMapExpansion}
-              title={mapExpanded ? "Minimize" : "Expand"}
-            >
-              {mapExpanded ? <FaCompress /> : <FaExpand />}
-            </button>
           </div>
           
           <div className="map-panel-content">

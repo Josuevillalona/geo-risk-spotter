@@ -190,10 +190,10 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
         <div className="empty-state-content">
           <MdAnalytics className="empty-state-icon" />
           <h3>Discover Diabetes Risk Insights</h3>
-          <p>Search for any New York ZIP code above or click a neighborhood on the map to unlock comprehensive diabetes risk analysis</p>
+          <p>Search for any New York ZIP code or click an area on the map to unlock comprehensive diabetes risk analysis</p>
           <div className="empty-state-features">
             <small>✨ AI-powered health analysis</small>
-            <small>📊 8 key health metrics</small>
+            <small>📊 Key health metrics</small>
             <small>🎯 Evidence-based interventions</small>
           </div>
         </div>

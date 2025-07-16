@@ -4,12 +4,21 @@ Uses sentence-transformers for local, cost-effective embedding generation.
 """
 
 import numpy as np
-from sentence_transformers import SentenceTransformer
-from sklearn.metrics.pairwise import cosine_similarity
-from typing import List, Dict, Tuple, Optional
 import logging
+from typing import List, Dict, Tuple, Optional
 
 logger = logging.getLogger(__name__)
+
+# Try to import sentence-transformers with fallback
+try:
+    from sentence_transformers import SentenceTransformer
+    from sklearn.metrics.pairwise import cosine_similarity
+    EMBEDDINGS_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"sentence-transformers not available: {e}")
+    EMBEDDINGS_AVAILABLE = False
+    SentenceTransformer = None
+    cosine_similarity = None
 
 
 class EmbeddingService:
@@ -27,10 +36,16 @@ class EmbeddingService:
         """
         self.model_name = model_name
         self.model: Optional[SentenceTransformer] = None
-        self._load_model()
+        self.available = EMBEDDINGS_AVAILABLE
+        if self.available:
+            self._load_model()
     
     def _load_model(self) -> None:
         """Load the sentence transformer model."""
+        if not EMBEDDINGS_AVAILABLE:
+            logger.warning("Embeddings not available - sentence-transformers not installed")
+            return
+            
         try:
             logger.info(f"Loading embedding model: {self.model_name}")
             self.model = SentenceTransformer(self.model_name)
@@ -53,6 +68,10 @@ class EmbeddingService:
             RuntimeError: If model is not loaded
             ValueError: If text is empty
         """
+        if not self.available:
+            logger.warning("Embeddings not available - returning empty array")
+            return np.array([])
+            
         if not self.model:
             raise RuntimeError("Embedding model not loaded")
         
@@ -76,6 +95,10 @@ class EmbeddingService:
         Returns:
             2D numpy array where each row is an embedding
         """
+        if not self.available:
+            logger.warning("Embeddings not available - returning empty array")
+            return np.array([])
+            
         if not self.model:
             raise RuntimeError("Embedding model not loaded")
         
@@ -107,6 +130,10 @@ class EmbeddingService:
         Returns:
             1D array of similarity scores
         """
+        if not self.available:
+            logger.warning("Embeddings not available - returning zero similarities")
+            return np.array([])
+            
         try:
             # Ensure query_embedding is 2D for sklearn
             if query_embedding.ndim == 1:
@@ -132,7 +159,14 @@ class EmbeddingService:
         Returns:
             List of (index, similarity_score) tuples, sorted by similarity desc
         """
+        if not self.available:
+            logger.warning("Embeddings not available - returning empty results")
+            return []
+            
         similarities = self.compute_similarity(query_embedding, doc_embeddings)
+        
+        if similarities.size == 0:
+            return []
         
         # Get top k indices
         top_indices = np.argsort(similarities)[::-1][:top_k]

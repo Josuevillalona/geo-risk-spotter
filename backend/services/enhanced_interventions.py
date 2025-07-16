@@ -60,31 +60,33 @@ class EnhancedInterventionService:
             interventions = await self._fetch_interventions_from_s3()
             
             if interventions:
-                # Generate embeddings for all interventions
+                # Try to generate embeddings for all interventions
                 intervention_texts = [
                     create_intervention_text(intervention) 
                     for intervention in interventions
                 ]
                 
-                try:
-                    embeddings = self.embedding_service.generate_embeddings_batch(intervention_texts)
-                    
-                    self.intervention_cache.update({
-                        "data": interventions,
-                        "embeddings": embeddings,
-                        "timestamp": now
-                    })
-                    
-                    logger.info(f"Cache updated with {len(interventions)} interventions and embeddings")
-                    
-                except Exception as e:
-                    logger.error(f"Failed to generate embeddings: {e}")
-                    # Fall back to data without embeddings
-                    self.intervention_cache.update({
-                        "data": interventions,
-                        "embeddings": None,
-                        "timestamp": now
-                    })
+                embeddings = None
+                if self.embedding_service.available:
+                    try:
+                        embeddings = self.embedding_service.generate_embeddings_batch(intervention_texts)
+                        logger.info(f"Generated embeddings for {len(interventions)} interventions")
+                    except Exception as e:
+                        logger.error(f"Failed to generate embeddings: {e}")
+                        embeddings = None
+                else:
+                    logger.warning("Embedding service not available - using keyword-only matching")
+                
+                self.intervention_cache.update({
+                    "data": interventions,
+                    "embeddings": embeddings,
+                    "timestamp": now
+                })
+                
+                logger.info(f"Cache updated with {len(interventions)} interventions" + 
+                           (" and embeddings" if embeddings is not None else " (no embeddings)"))
+            else:
+                logger.error("No interventions fetched - cache not updated")
     
     def _get_keyword_scores(self, interventions: List[Dict], health_data: dict, 
                            query: str = "") -> np.ndarray:
@@ -225,17 +227,20 @@ class EnhancedInterventionService:
         context_scores = self._get_health_context_scores(interventions, health_data)
         
         # Calculate vector similarity scores if embeddings available and query provided
-        if embeddings is not None and query:
+        if embeddings is not None and query and self.embedding_service.available:
             try:
                 query_embedding = self.embedding_service.generate_embedding(query)
-                similarities = self.embedding_service.compute_similarity(query_embedding, embeddings)
-                vector_scores = similarities
-                logger.info("Using vector similarity scores")
+                if query_embedding.size > 0:
+                    similarities = self.embedding_service.compute_similarity(query_embedding, embeddings)
+                    vector_scores = similarities
+                    logger.info("Using vector similarity scores")
+                else:
+                    logger.warning("Empty query embedding - using keyword-only matching")
             except Exception as e:
                 logger.warning(f"Vector similarity failed, using keyword-only: {e}")
         
         # Hybrid scoring: combine vector similarity, keyword matching, and context
-        if query and embeddings is not None:
+        if query and embeddings is not None and self.embedding_service.available and vector_scores.max() > 0:
             # With query and embeddings: weighted combination
             combined_scores = (0.5 * vector_scores + 
                              0.3 * keyword_scores + 
@@ -257,7 +262,7 @@ class EnhancedInterventionService:
         for idx in filtered_indices:
             intervention = interventions[idx].copy()
             intervention['_relevance_score'] = float(combined_scores[idx])
-            intervention['_vector_score'] = float(vector_scores[idx]) if embeddings is not None else 0.0
+            intervention['_vector_score'] = float(vector_scores[idx]) if (embeddings is not None and self.embedding_service.available) else 0.0
             intervention['_keyword_score'] = float(keyword_scores[idx])
             intervention['_context_score'] = float(context_scores[idx])
             results.append(intervention)

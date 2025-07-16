@@ -633,15 +633,7 @@ button:focus-visible {
 }
 
 /* Responsive Grid States */
-.main-content-container.map-expanded {
-  grid-template-columns: 25% 75%;
-}
-
 .main-content-container.sidebar-collapsed {
-  grid-template-columns: 60px 1fr;
-}
-
-.main-content-container.map-expanded.sidebar-collapsed {
   grid-template-columns: 60px 1fr;
 }
 
@@ -738,11 +730,6 @@ button:focus-visible {
   position: relative;
 }
 
-.map-context-panel.expanded {
-  /* Map expansion styles applied via grid changes in parent container */
-  z-index: 1;
-}
-
 .map-panel-header {
   display: flex;
   align-items: center;
@@ -751,24 +738,6 @@ button:focus-visible {
   background: #f8f9fa;
   border-bottom: 1px solid #e9ecef;
   min-height: 50px;
-}
-
-.panel-expand-btn {
-  background: none;
-  border: none;
-  color: #666;
-  cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.panel-expand-btn:hover {
-  background: #e9ecef;
-  color: #333;
 }
 
 .map-panel-content {
@@ -950,10 +919,6 @@ button:focus-visible {
   .main-content-container {
     grid-template-columns: 65% 35%;
   }
-  
-  .main-content-container.map-expanded {
-    grid-template-columns: 25% 75%;
-  }
 }
 
 /* Desktop Standard: Balanced layout */
@@ -961,20 +926,12 @@ button:focus-visible {
   .main-content-container {
     grid-template-columns: 60% 40%;
   }
-  
-  .main-content-container.map-expanded {
-    grid-template-columns: 30% 70%;
-  }
 }
 
 /* Tablet: Maintained side-by-side */
 @media (min-width: 768px) and (max-width: 1023px) {
   .main-content-container {
     grid-template-columns: 60% 40%;
-  }
-  
-  .main-content-container.map-expanded {
-    grid-template-columns: 35% 65%;
   }
   
   .layout-controls {
@@ -1071,7 +1028,6 @@ button:focus-visible {
   .layout-toggle-btn,
   .panel-control-btn,
   .panel-collapse-btn,
-  .panel-expand-btn,
   .mobile-nav-btn {
     transition: none;
   }

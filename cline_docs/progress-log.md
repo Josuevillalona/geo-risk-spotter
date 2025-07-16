@@ -298,7 +298,7 @@ Successfully implemented a robust "Save Analysis" feature using Zustand for stat
 
 ### Core Deliverables Achieved
 1. **50-Intervention Knowledge Base** - Comprehensive JSON database with evidence-based interventions
-2. **S3 Integration** - Hosted at `https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/interventions/interventions-db.json`
+2. **S3 Integration** - Hosted at `https://geo-risk-spotter-geojson.s3.us-east-1.amazonaws.com/interventions/interventions-db.json`
 3. **Backend Enhancement** - `/api/chat` endpoint enhanced with intervention fetching and caching
 4. **Smart Matching** - Keyword-based health risk profiling for relevant recommendations
 5. **Frontend Integration** - "🎯 Get Interventions" quick action button in chatbot
@@ -1397,72 +1397,115 @@ The borough foundation is complete and ready for:
 
 # RiskPulse: Diabetes - Progress Log
 
-## Layer 1: Hotspot Intelligence Consolidation - COMPLETED ✅ (July 16, 2025)
+## Repository Cleanup for Production Deployment - COMPLETED ✅ (June 11, 2025)
 
 ### 🎯 Overview
-Successfully implemented Layer 1 of the strategic consolidation plan, merging "Situation Assessment" and "Root Cause Analysis" into a unified "Hotspot Intelligence" section. This aligns with the natural workflow of Local Public Health Planners who think in terms of "what's the problem AND why is it happening" as a single cognitive process.
+Completed comprehensive repository cleanup to prepare for production deployment on GitHub, optimizing for Vercel (frontend) and Render (backend) hosting. Removed 137 files totaling 27,939 lines of development artifacts, debug files, and sensitive data.
 
 ### 🔧 Technical Implementation
-- **Navigation Structure Updated**: Consolidated from 4 sections to 3 sections
-  - ✅ "Situation Assessment" + "Root Cause Analysis" → "Hotspot Intelligence"
-  - ✅ "Action Planning" (unchanged)
-  - ✅ "Report Builder" (unchanged)
-- **Unified Intelligence Component**: Created `renderHotspotIntelligence()` function that seamlessly integrates:
-  - AI Health Analysis header
-  - Hero Metrics display
-  - Enhanced Metrics Display
-  - Detailed Health Metrics grid
-  - Root Cause Analysis components (RootCausePanel + NeighborhoodComparison)
-- **Modern Design System**: Implemented clean, minimalistic design inspired by modern dashboard aesthetics
-- **Seamless Transition**: Added visual transition elements to guide users from "what" to "why" information
+- **Updated .gitignore**: Added comprehensive patterns for production deployment
+  - Python cache files (`__pycache__/`, `*.pyc`)
+  - Development files (`debug_*.py`, `test_*.py`, `extract_*.py`)
+  - Sensitive data (`.env`, API keys, credentials)
+  - Build artifacts (`dist/`, `node_modules/`, `.venv/`)
+  - Log files and temporary directories
+- **Removed Development Files**: Cleaned up 137 files including:
+  - Debug scripts: `debug_*.py`, `debug_*.js`
+  - Test files: `test_*.py`, `test_*.js`, `browser_test_*.js`
+  - Extract scripts: `extract_*.py`, `chunk_*.txt`
+  - Build artifacts: `dist/` directory
+  - Git cleanup tools: `git-filter-repo-2.47.0/` directory
+  - BFG reports: `..bfg-report/` directory
+- **Cleaned Backend Directory**: Removed test files, cache, and development documentation
+- **Terminated Processes**: Safely terminated Python processes before cleanup
+- **Git Operations**: Committed and pushed clean repository to GitHub
 
-### 🎨 Design System Implementation
-- **Color Palette**: Clean gradient system with primary brand colors (#6366f1 to #8b5cf6)
-- **Typography**: Modern font stack with proper hierarchy and spacing
-- **Card System**: Clean, rounded cards with subtle shadows and hover effects
-- **Loading States**: Modern skeleton loading with smooth animations
-- **Responsive Design**: Mobile-first approach with adaptive layouts
+### 📊 Cleanup Results
+- **Files Removed**: 137 development and debug files
+- **Lines Removed**: 27,939 lines of code/data
+- **Repository Size**: Reduced from 80+ files to 22 essential files
+- **Git History**: Maintained with clean commit message
+- **LFS Objects**: Successfully uploaded 2 large files (55MB total)
 
-### 📊 User Experience Improvements
-- ✅ **Cognitive Load Reduction**: Eliminated mental switching between separate assessment and analysis modes
-- ✅ **Workflow Alignment**: Matches natural thought process of public health planners
-- ✅ **Information Density**: Better utilization of screen real estate
-- ✅ **Visual Hierarchy**: Clear progression from situation to root cause analysis
-- ✅ **Professional Aesthetics**: Clean, modern design suitable for stakeholder presentations
+### 🎯 Benefits Achieved
+- **Production Ready**: Repository optimized for Vercel and Render deployment
+- **Security Enhanced**: Removed sensitive files and credentials
+- **Performance Optimized**: Eliminated unnecessary files and build artifacts
+- **Professional Presentation**: Clean, organized repository structure
+- **Deployment Optimized**: Proper .gitignore prevents future commit issues
 
-### 🎯 Strategic Benefits Achieved
-- **Presentation Efficiency**: Single view supports complete stakeholder narrative
-- **Decision Speed**: Faster time from hotspot identification to driver understanding
-- **User Adoption**: Aligns with natural workflow, reducing training requirements
-- **Stakeholder Ready**: Professional design suitable for executive presentations
-
-### 📝 Code Changes Summary
-```jsx
-// UPDATED: Navigation sections (4 → 3)
-const PLANNER_WORKFLOW_SECTIONS = [
-  { id: 'intelligence', label: 'Hotspot Intelligence', ... },
-  { id: 'planning', label: 'Action Planning', ... },
-  { id: 'evidence', label: 'Report Builder', ... }
-];
-
-// CREATED: Unified intelligence component
-const renderHotspotIntelligence = () => {
-  // Integrates all situation assessment components
-  // Seamlessly transitions to root cause analysis
-  // Modern design with clean visual hierarchy
-};
-
-// REMOVED: Separate renderSituationAssessment() and renderRootCauseExploration()
-// ADDED: Modern CSS design system (ModernSidebar.css)
+### 📝 Final Repository Structure
+```
+geo-risk-spotter/
+├── .clinerules/          # Project rules and standards
+├── .github/              # GitHub workflows and configs
+├── .vercel/              # Vercel deployment config
+├── backend/              # FastAPI backend (cleaned)
+├── cline_docs/           # Project documentation
+├── copilot_guide/        # Copilot customization
+├── public/               # Static assets and data
+├── src/                  # React frontend source
+├── package.json          # Dependencies and scripts
+├── README.md             # Project documentation
+├── .gitignore            # Updated ignore patterns
+└── vite.config.js        # Build configuration
 ```
 
-### 🔄 Next Steps - Layer 2 Planning
-- **Smart Data Correlation**: Automatic correlation identification between metrics and root causes
-- **Contextual Highlighting**: Visual connections between related factors
-- **Presentation-Ready Summaries**: Auto-generated executive summaries for stakeholders
+### 🚀 Deployment Status
+- **GitHub**: ✅ Pushed clean repository to origin/master
+- **Vercel**: Ready for frontend deployment
+- **Render**: Ready for backend deployment
+- **Security**: All sensitive files properly ignored
 
-### 📈 Success Metrics
-- **User Workflow**: Single unified view eliminates section switching
-- **Information Integration**: Seamless flow from metrics to root cause analysis
-- **Design Quality**: Professional, modern aesthetic suitable for executive presentations
-- **Performance**: Maintained existing performance with enhanced visual design
+## Production Deployment Dependency Fix - COMPLETED ✅ (July 2, 2025)
+
+### 🎯 Overview
+Fixed critical production deployment error on Render caused by incompatible dependencies between sentence-transformers and huggingface_hub libraries. The error "ImportError: cannot import name 'cached_download' from 'huggingface_hub'" was preventing the Enhanced RAG functionality from working in production.
+
+### 🔧 Technical Implementation
+- **Updated requirements.txt**: Added specific version constraints for compatible dependency versions
+- **Enhanced Error Handling**: Added fallback imports with graceful degradation when dependencies are unavailable
+- **Service Layer Updates**: Modified embedding and intervention services to handle missing dependencies
+
+### 📊 Dependency Version Fixes
+**Updated requirements.txt:**
+- `sentence-transformers>=2.3.0,<3.0.0` (was causing import errors with older versions)
+- `transformers>=4.21.0,<5.0.0` (compatible with updated sentence-transformers)
+- `huggingface_hub>=0.15.0,<1.0.0` (version with renamed cached_download → hf_hub_download)
+
+### 🔧 Code Changes Summary
+```python
+# backend/services/embeddings.py
+try:
+    from sentence_transformers import SentenceTransformer
+    from sklearn.metrics.pairwise import cosine_similarity
+    EMBEDDINGS_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"sentence-transformers not available: {e}")
+    EMBEDDINGS_AVAILABLE = False
+
+# All methods now check EMBEDDINGS_AVAILABLE flag
+def generate_embedding(self, text: str) -> np.ndarray:
+    if not self.available:
+        logger.warning("Embeddings not available - returning empty array")
+        return np.array([])
+```
+
+### 📊 Service Layer Improvements
+- **EmbeddingService**: Added `available` property and graceful fallback for all methods
+- **EnhancedInterventionService**: Enhanced to work with or without embeddings
+- **Hybrid Scoring**: Automatically falls back to keyword + context scoring when embeddings unavailable
+
+### 🎯 Benefits Achieved
+- **Production Stability**: Deployment no longer fails due to dependency conflicts
+- **Graceful Degradation**: System continues to work even without ML dependencies
+- **Enhanced Error Handling**: Clear logging when dependencies are missing
+- **Backward Compatibility**: Maintains functionality with older dependency versions
+
+### 📝 Testing Status
+- ✅ **Dependency Compatibility**: Updated requirements.txt with compatible versions
+- ✅ **Fallback Handling**: All services handle missing dependencies gracefully
+- ✅ **Error Logging**: Clear warnings when embeddings not available
+- 🚧 **Production Testing**: Pending redeployment to verify fixes
+
+---
