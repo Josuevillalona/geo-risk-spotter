@@ -23,7 +23,45 @@ dist-ssr
 *.sln
 *.sw?
 
+# Deployment
 .vercel
 
+# Environment variables (sensitive)
+.env
 /backend/.env
+backend/.env
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Development/Debug files
+chunk_*.txt
+*_raw.txt
+extracted_text.txt
+debug_*.py
+debug_*.js
+test_*.py
+test_*.js
+extract_*.py
+convert_shapefile.py
+show_complete_social_determinants.py
+zcta_script.py
+browser_test_pdf.js
+upload-to-s3.ps1
+
+# Old/temporary data files
+all_extracted_interventions.json
+interventions-db-comprehensive.json
+interventions-db-updated.json
+requirements_shapefile.txt
+
+# Git cleanup artifacts
+.bfg-report/
+git-filter-repo-2.47.0/
+
+# Large data files that should be hosted on S3
 public/ny_new_york_zip_codes_geo.min.json
