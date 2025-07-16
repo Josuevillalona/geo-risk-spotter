@@ -104,10 +104,19 @@ const calculateAverage = (areas, metric) => {
 export const aggregateBoroughData = (zipCodeFeatures) => {
   const boroughData = {};
   
+  console.log('Aggregating borough data from', zipCodeFeatures.length, 'zip code features');
+  
   Object.entries(NYC_BOROUGHS).forEach(([borough, config]) => {
-    const boroughZipCodes = zipCodeFeatures.filter(area => 
-      config.zipCodes.includes(area.properties.ZCTA5CE10)
-    );
+    const boroughZipCodes = zipCodeFeatures.filter(area => {
+      // Check multiple possible zip code property names
+      const zipCode = area.properties.ZCTA5CE10 || 
+                     area.properties.zip_code || 
+                     area.properties.ZCTA5 || 
+                     area.properties.zipcode;
+      return config.zipCodes.includes(zipCode);
+    });
+    
+    console.log(`Borough ${borough}: found ${boroughZipCodes.length} zip codes`);
     
     if (boroughZipCodes.length > 0) {
       boroughData[borough] = {
@@ -124,9 +133,16 @@ export const aggregateBoroughData = (zipCodeFeatures) => {
         bounds: config.bounds,
         zipCodes: boroughZipCodes
       };
+      
+      console.log(`Borough ${borough} data:`, {
+        zipCodeCount: boroughData[borough].zipCodeCount,
+        diabetes_avg: boroughData[borough].diabetes_avg,
+        risk_score_avg: boroughData[borough].risk_score_avg
+      });
     }
   });
   
+  console.log('Final borough data:', Object.keys(boroughData));
   return boroughData;
 };
 
@@ -383,8 +399,19 @@ export const preloadCriticalData = async () => {
     // Start both operations in parallel
     const [boundariesResult, healthDataResult] = await Promise.allSettled([
       loadBoroughBoundaries(),
+      // Try S3 first, fallback to local file if CORS fails
       fetch('https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson')
         .then(response => response.json())
+        .catch(error => {
+          console.warn('S3 fetch failed, trying local fallback:', error.message);
+          return fetch('/ny_new_york_zip_codes_health.geojson')
+            .then(response => response.json())
+            .catch(fallbackError => {
+              console.warn('Local fallback failed, trying minimal fallback:', fallbackError.message);
+              return fetch('/ny_new_york_zip_codes_geo.min.json')
+                .then(response => response.json());
+            });
+        })
     ]);
 
     // Handle boundaries result

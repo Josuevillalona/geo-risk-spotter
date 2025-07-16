@@ -1,5 +1,6 @@
 import React from 'react';
-import { MdLocationOn, MdPeople, MdCompareArrows } from 'react-icons/md';
+import { MdLocationOn, MdPeople, MdCompareArrows, MdTrendingUp, MdError } from 'react-icons/md';
+import { useAppStore } from '../../store';
 
 const LocationContext = ({ data }) => {
   if (!data) return null;
@@ -8,21 +9,24 @@ const LocationContext = ({ data }) => {
     switch (data.type) {
       case 'borough':
         return {
-          icon: <MdLocationOn className="context-icon" />,
+          icon: <MdLocationOn className="context-icon text-blue-500" />,
           primary: data.name,
-          secondary: 'Borough'
+          secondary: 'Borough View',
+          badge: 'OVERVIEW'
         };
       case 'zipcode':
         return {
-          icon: <MdLocationOn className="context-icon" />,
+          icon: <MdLocationOn className="context-icon text-green-500" />,
           primary: `ZIP ${data.name}`,
-          secondary: 'New York'
+          secondary: data.data?.borough || 'New York',
+          badge: 'DETAILED'
         };
       case 'borough-summary':
         return {
-          icon: <MdLocationOn className="context-icon" />,
+          icon: <MdLocationOn className="context-icon text-purple-500" />,
           primary: data.name,
-          secondary: 'Borough Summary'
+          secondary: 'Borough Filter Active',
+          badge: 'FILTERED'
         };
       default:
         return null;
@@ -34,7 +38,10 @@ const LocationContext = ({ data }) => {
   
   return (
     <div className="context-item location-context">
-      {locationInfo.icon}
+      <div className="context-icon-wrapper">
+        {locationInfo.icon}
+        <span className="context-badge">{locationInfo.badge}</span>
+      </div>
       <div className="context-text">
         <span className="context-primary">{locationInfo.primary}</span>
         <span className="context-secondary">{locationInfo.secondary}</span>
@@ -44,92 +51,156 @@ const LocationContext = ({ data }) => {
 };
 
 const PopulationContext = ({ data }) => {
+  const { selectedBorough, boroughData } = useAppStore();
+  
   if (!data?.data) return null;
   
-  // Extract population data if available
-  const population = data.data.population || data.data.zipCodeCount;
-  
-  if (!population) return null;
-  
-  const formatPopulation = (pop) => {
-    if (pop >= 1000000) return `${(pop / 1000000).toFixed(1)}M`;
-    if (pop >= 1000) return `${(pop / 1000).toFixed(1)}K`;
-    return pop.toString();
-  };
-  
-  const getPopulationLabel = () => {
+  const getPopulationInfo = () => {
     if (data.type === 'borough' || data.type === 'borough-summary') {
-      return 'ZIP Codes';
+      // Get zip count for borough from boroughData object
+      const boroughInfo = boroughData?.[data.name];
+      const zipCount = boroughInfo?.zipCodeCount || boroughInfo?.zipCodes?.length || 0;
+      
+      return {
+        value: zipCount,
+        label: zipCount === 1 ? 'ZIP Code' : 'ZIP Codes',
+        icon: 'zip',
+        color: 'text-blue-500'
+      };
+    } else {
+      // Individual zip code population (if available)
+      const population = data.data.population;
+      if (population) {
+        return {
+          value: formatNumber(population),
+          label: 'Population',
+          icon: 'people',
+          color: 'text-green-500'
+        };
+      }
+      // Fallback to basic zip info
+      return {
+        value: '1',
+        label: 'ZIP Code',
+        icon: 'zip',
+        color: 'text-green-500'
+      };
     }
-    return 'Population';
   };
+
+  const formatNumber = (num) => {
+    if (num >= 1000000) return `${(num / 1000000).toFixed(1)}M`;
+    if (num >= 1000) return `${(num / 1000).toFixed(1)}K`;
+    return num.toString();
+  };
+  
+  const popInfo = getPopulationInfo();
   
   return (
     <div className="context-item population-context">
-      <MdPeople className="context-icon" />
+      <div className="context-icon-wrapper">
+        {popInfo.icon === 'people' ? (
+          <MdPeople className={`context-icon ${popInfo.color}`} />
+        ) : (
+          <MdLocationOn className={`context-icon ${popInfo.color}`} />
+        )}
+      </div>
       <div className="context-text">
-        <span className="context-primary">{formatPopulation(population)}</span>
-        <span className="context-secondary">{getPopulationLabel()}</span>
+        <span className="context-primary">{popInfo.value}</span>
+        <span className="context-secondary">{popInfo.label}</span>
       </div>
     </div>
   );
 };
 
-const ComparisonIndicator = ({ value, baseline, label }) => {
-  if (!value || !baseline || value === 'N/A') return null;
+const RiskContext = ({ data }) => {
+  if (!data?.data) return null;
   
-  const numValue = parseFloat(value);
-  const numBaseline = parseFloat(baseline);
+  const riskScore = data.data.risk_score || data.data.riskScore;
+  if (!riskScore || riskScore === 'N/A') return null;
   
-  if (isNaN(numValue) || isNaN(numBaseline)) return null;
-  
-  const ratio = numValue / numBaseline;
-  const percentDiff = ((ratio - 1) * 100);
-  
-  const getComparisonClass = () => {
-    if (ratio > 1.2) return 'comparison-high';
-    if (ratio > 1.1) return 'comparison-moderate';
-    if (ratio < 0.8) return 'comparison-low';
-    return 'comparison-neutral';
+  const getRiskLevel = (score) => {
+    const numScore = parseFloat(score);
+    if (numScore >= 70) return { level: 'High', color: 'text-red-500', bg: 'bg-red-50' };
+    if (numScore >= 50) return { level: 'Moderate', color: 'text-yellow-600', bg: 'bg-yellow-50' };
+    return { level: 'Low', color: 'text-green-600', bg: 'bg-green-50' };
   };
   
-  const getComparisonText = () => {
-    if (Math.abs(percentDiff) < 5) return 'Similar';
-    const direction = percentDiff > 0 ? 'higher' : 'lower';
-    return `${Math.abs(percentDiff).toFixed(0)}% ${direction}`;
-  };
+  const riskInfo = getRiskLevel(riskScore);
   
   return (
-    <div className={`comparison-indicator ${getComparisonClass()}`}>
-      <span className="comparison-value">{getComparisonText()}</span>
-      <span className="comparison-label">{label}</span>
+    <div className="context-item risk-context">
+      <div className="context-icon-wrapper">
+        <MdTrendingUp className={`context-icon ${riskInfo.color}`} />
+      </div>
+      <div className="context-text">
+        <span className="context-primary">{parseFloat(riskScore).toFixed(1)}</span>
+        <span className="context-secondary">Risk Score</span>
+      </div>
+      <div className={`risk-level-badge ${riskInfo.bg} ${riskInfo.color}`}>
+        {riskInfo.level}
+      </div>
     </div>
   );
 };
 
 const ComparisonContext = ({ data }) => {
+  const { selectedBorough, boroughData } = useAppStore();
+  
   if (!data?.data) return null;
   
-  // For now, we'll show a placeholder since we don't have comparison data yet
-  // This will be enhanced in Layer 2 with actual comparison calculations
+  // Enhanced context for different view modes
+  const getComparisonInfo = () => {
+    if (data.type === 'borough-summary' && selectedBorough !== 'All') {
+      return {
+        icon: <MdCompareArrows className="context-icon text-purple-500" />,
+        primary: 'Borough Filter',
+        secondary: `${selectedBorough} only`,
+        badge: 'ACTIVE'
+      };
+    } else if (data.type === 'zipcode' && data.data?.borough) {
+      return {
+        icon: <MdCompareArrows className="context-icon text-blue-500" />,
+        primary: 'vs. Borough',
+        secondary: `Compare to ${data.data.borough}`,
+        badge: 'AVAILABLE'
+      };
+    } else {
+      return {
+        icon: <MdCompareArrows className="context-icon text-gray-400" />,
+        primary: 'Comparison',
+        secondary: 'Select area to compare',
+        badge: 'PENDING'
+      };
+    }
+  };
+  
+  const compInfo = getComparisonInfo();
   
   return (
     <div className="context-item comparison-context">
-      <MdCompareArrows className="context-icon" />
+      <div className="context-icon-wrapper">
+        {compInfo.icon}
+        <span className="context-badge">{compInfo.badge}</span>
+      </div>
       <div className="context-text">
-        <span className="context-primary">vs. County</span>
-        <span className="context-secondary">Comparison available in analysis</span>
+        <span className="context-primary">{compInfo.primary}</span>
+        <span className="context-secondary">{compInfo.secondary}</span>
       </div>
     </div>
   );
 };
 
 const ContextStrip = ({ displayData, comparisons }) => {
+  const { selectedBorough, viewMode } = useAppStore();
+  
   if (!displayData) {
     return (
       <div className="context-strip">
-        <div className="context-item">
-          <MdLocationOn className="context-icon" />
+        <div className="context-item context-empty">
+          <div className="context-icon-wrapper">
+            <MdError className="context-icon text-gray-400" />
+          </div>
           <div className="context-text">
             <span className="context-primary">Select an area</span>
             <span className="context-secondary">to view health data</span>
@@ -141,11 +212,17 @@ const ContextStrip = ({ displayData, comparisons }) => {
   
   return (
     <div className="context-strip">
-      {/* Only show location context for borough types, skip for zipcode since it's shown in HeroMetrics */}
-      {(displayData.type === 'borough' || displayData.type === 'borough-summary') && (
-        <LocationContext data={displayData} />
-      )}
+      {/* Always show location context */}
+      <LocationContext data={displayData} />
+      
+      {/* Show population/zip count info */}
       <PopulationContext data={displayData} />
+      
+      {/* Show risk score if available */}
+      <RiskContext data={displayData} />
+      
+      {/* Show comparison/filter status */}
+      <ComparisonContext data={displayData} />
     </div>
   );
 };

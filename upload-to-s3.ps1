@@ -53,17 +53,17 @@ function Upload-FileToS3 {
     return $true
 }
 
-# Upload zip code health data
-$success1 = Upload-FileToS3 -LocalFile "public/ny_new_york_zip_codes_geo.min.json" -S3Key "ny_new_york_zip_codes_health.geojson" -Description "Zip Code Health Data"
+# Upload enhanced zip code health data with additional metrics
+$success1 = Upload-FileToS3 -LocalFile "public/ny_new_york_zip_codes_health.geojson" -S3Key "ny_new_york_zip_codes_health.geojson" -Description "Enhanced Zip Code Health Data"
 
 # Upload borough boundaries
 $success2 = Upload-FileToS3 -LocalFile "public/nyc_borough_boundaries.geojson" -S3Key "nyc_borough_boundaries.geojson" -Description "Borough Boundaries"
 
 Write-Host "`n📊 Upload Summary:" -ForegroundColor Yellow
 if ($success1) {
-    Write-Host "✅ Zip Code Health Data uploaded successfully" -ForegroundColor Green
+    Write-Host "✅ Enhanced Zip Code Health Data uploaded successfully" -ForegroundColor Green
 } else {
-    Write-Host "❌ Zip Code Health Data upload failed" -ForegroundColor Red
+    Write-Host "❌ Enhanced Zip Code Health Data upload failed" -ForegroundColor Red
 }
 
 if ($success2) {

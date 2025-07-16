@@ -19,6 +19,10 @@ export const useAppStore = create(
       isBoroughDataLoading: false,
       isBoroughBoundariesLoading: false,
       isZipCodeDataLoading: false,
+      
+      // Enhanced Borough Visualization State
+      showBoroughBoundaries: true, // Always show boundaries for context
+      boundaryVisualMode: 'contextual', // 'contextual', 'prominent', 'subtle'
 
       // Existing Actions
       setAndAnalyzeArea: (area) => set({ selectedArea: area, isLoading: true, aiSummary: null, chatHistory: [] }),
@@ -33,6 +37,8 @@ export const useAppStore = create(
       setIsBoroughDataLoading: (loading) => set({ isBoroughDataLoading: loading }),
       setIsBoroughBoundariesLoading: (loading) => set({ isBoroughBoundariesLoading: loading }),
       setIsZipCodeDataLoading: (loading) => set({ isZipCodeDataLoading: loading }),
+      setShowBoroughBoundaries: (show) => set({ showBoroughBoundaries: show }),
+      setBoundaryVisualMode: (mode) => set({ boundaryVisualMode: mode }),
 
       // Get filtered data based on current borough selection
       getFilteredZipCodes: () => {
@@ -40,7 +46,14 @@ export const useAppStore = create(
         if (selectedBorough === 'All' || !boroughData) {
           return null; // Return all data
         }
-        return boroughData[selectedBorough]?.zipCodes || [];
+        
+        // Extract the actual zip code values from the borough features
+        const boroughFeatures = boroughData[selectedBorough]?.zipCodes || [];
+        const zipCodeValues = boroughFeatures.map(feature => 
+          feature.properties?.ZCTA5CE10 || feature.properties?.zip_code
+        ).filter(Boolean);
+        
+        return zipCodeValues;
       },
       
       saveCurrentAnalysis: (analysisData = null) => {

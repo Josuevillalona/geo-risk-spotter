@@ -138,7 +138,9 @@ function App() {
             mapMoveEvent,
             showSearchPopup,
             searchPopupData,
-            setSearchPopupData
+            setSearchPopupData,
+            setShowSearchPopup,
+            triggerMapMove
           }}
           sidebarProps={{
             selectedArea,

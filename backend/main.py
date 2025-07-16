@@ -50,8 +50,11 @@ app.add_middleware(
 
 # Define a Pydantic model for the incoming request data
 class HealthData(BaseModel):
+    # Core identifiers (required for backward compatibility)
     zip_code: str
     RiskScore: float
+    
+    # Original core health metrics (required for backward compatibility)
     DIABETES_CrudePrev: float
     OBESITY_CrudePrev: float
     LPA_CrudePrev: float
@@ -59,7 +62,25 @@ class HealthData(BaseModel):
     BPHIGH_CrudePrev: float
     FOODINSECU_CrudePrev: float
     ACCESS2_CrudePrev: float
-    # Add other raw data properties here as needed
+    
+    # Population demographics (new - optional for backward compatibility)
+    TotalPopulation: Optional[float] = None
+    TotalPop18plus: Optional[float] = None
+    
+    # Social determinants of health (new - optional for backward compatibility)
+    DEPRESSION_CrudePrev: Optional[float] = None
+    ISOLATION_CrudePrev: Optional[float] = None
+    HOUSINSECU_CrudePrev: Optional[float] = None
+    LACKTRPT_CrudePrev: Optional[float] = None
+    FOODSTAMP_CrudePrev: Optional[float] = None
+    
+    # Additional health outcomes (new - optional for backward compatibility)
+    GHLTH_CrudePrev: Optional[float] = None
+    MHLTH_CrudePrev: Optional[float] = None
+    PHLTH_CrudePrev: Optional[float] = None
+    CHECKUP_CrudePrev: Optional[float] = None
+    DENTAL_CrudePrev: Optional[float] = None
+    SLEEP_CrudePrev: Optional[float] = None
 
 class RecommendationRequest(BaseModel):
     question_type: QuestionType

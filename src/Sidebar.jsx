@@ -4,13 +4,14 @@ import EnhancedInterventionDisplay from './components/EnhancedInterventionDispla
 import SaveAnalysisButton from './components/sidebar/SaveAnalysisButton';
 import SavedAnalysesList from './components/sidebar/SavedAnalysesList';
 import HeroMetrics from './components/sidebar/HeroMetrics';
-import ContextStrip from './components/sidebar/ContextStrip';
+import EnhancedMetricsDisplay from './components/sidebar/EnhancedMetricsDisplay';
 import RootCausePanel from './components/sidebar/RootCausePanel';
 import NeighborhoodComparison from './components/sidebar/NeighborhoodComparison';
 import EvidenceBuilder from './components/evidence/EvidenceBuilder';
 import PresentationMode from './components/presentation/PresentationMode';
 import { useAppStore } from './store';
 import { MdAnalytics, MdChat, MdBookmark, MdBarChart, MdTrendingUp, MdSearch, MdAssignment, MdSlideshow } from 'react-icons/md';
+import './components/sidebar/EnhancedMetricsDisplay.css';
 
 const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
   const [activeSection, setActiveSection] = useState('situation');
@@ -50,10 +51,17 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
     }
   ];
 
-  const formatPercent = (value) => {
-    if (value === undefined || value === null || value === '') return '0.00%';
+  const formatPercent = (value, fieldName = '') => {
+    if (value === undefined || value === null || value === '') return 'N/A';
     const num = Number(value);
-    if (isNaN(num)) return '0.00%';
+    if (isNaN(num)) return 'N/A';
+    
+    // For social determinants that commonly have missing data, show "No Data" instead of 0.00%
+    const socialDeterminantFields = ['ISOLATION_CrudePrev', 'HOUSINSECU_CrudePrev', 'LACKTRPT_CrudePrev', 'FOODSTAMP_CrudePrev', 'FOODINSECU_CrudePrev'];
+    if (num === 0 && socialDeterminantFields.some(field => fieldName.includes(field))) {
+      return 'No Data';
+    }
+    
     return `${num.toFixed(2)}%`;
   };
 
@@ -120,17 +128,37 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
         healthcareAccess: formatPercent(boroughStats?.healthcare_access_avg)
       };
     } else if (selectedArea?.properties) {
-      // Regular zip code view
+      // Regular zip code view with enhanced metrics
       const { properties } = selectedArea;
       return {
+        // Core risk metrics (original - maintain backward compatibility)
         riskScore: properties.RiskScore?.toFixed(2) || 'N/A',
         diabetes: formatPercent(properties.DIABETES_CrudePrev),
         obesity: formatPercent(properties.OBESITY_CrudePrev),
         hypertension: formatPercent(properties.BPHIGH_CrudePrev),
         physicalActivity: formatPercent(properties.LPA_CrudePrev),
         smoking: formatPercent(properties.CSMOKING_CrudePrev),
-        foodInsecurity: formatPercent(properties.FOODINSECU_CrudePrev),
-        healthcareAccess: formatPercent(properties.ACCESS2_CrudePrev)
+        foodInsecurity: formatPercent(properties.FOODINSECU_CrudePrev, 'FOODINSECU_CrudePrev'),
+        healthcareAccess: formatPercent(properties.ACCESS2_CrudePrev),
+        
+        // Population demographics (new)
+        totalPopulation: properties.TotalPopulation ? Math.round(properties.TotalPopulation).toLocaleString() : 'N/A',
+        adultPopulation: properties.TotalPop18plus ? Math.round(properties.TotalPop18plus).toLocaleString() : 'N/A',
+        
+        // Social determinants of health (new)
+        depression: formatPercent(properties.DEPRESSION_CrudePrev, 'DEPRESSION_CrudePrev'),
+        socialIsolation: formatPercent(properties.ISOLATION_CrudePrev, 'ISOLATION_CrudePrev'),
+        housingInsecurity: formatPercent(properties.HOUSINSECU_CrudePrev, 'HOUSINSECU_CrudePrev'),
+        transportationBarriers: formatPercent(properties.LACKTRPT_CrudePrev, 'LACKTRPT_CrudePrev'),
+        foodStampUsage: formatPercent(properties.FOODSTAMP_CrudePrev, 'FOODSTAMP_CrudePrev'),
+        
+        // Additional health outcomes (new)
+        generalHealth: formatPercent(properties.GHLTH_CrudePrev),
+        mentalHealth: formatPercent(properties.MHLTH_CrudePrev),
+        physicalHealth: formatPercent(properties.PHLTH_CrudePrev),
+        routineCheckup: formatPercent(properties.CHECKUP_CrudePrev),
+        dentalVisit: formatPercent(properties.DENTAL_CrudePrev),
+        sleepDuration: formatPercent(properties.SLEEP_CrudePrev)
       };
     }
     
@@ -213,6 +241,9 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
         displayData={displayData}
       />
 
+      {/* Enhanced Metrics Display - New comprehensive view */}
+      <EnhancedMetricsDisplay keyMetrics={keyMetrics} />
+
       {/* Key Metrics Grid - Right after Top Concerns */}
       <div className="health-metrics-grid">
         <div className="section-header">
@@ -293,12 +324,6 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
           </div>
         )}
       </div>
-      
-      {/* Context Strip - Moved after metrics */}
-      <ContextStrip 
-        displayData={displayData}
-        comparisons={null} // Will be enhanced in Layer 2
-      />
     </div>
   );
 

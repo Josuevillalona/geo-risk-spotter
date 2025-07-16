@@ -1,45 +1,5 @@
 # RiskPulse: Diabetes - Progress Log
 
-## Layered Implementation Plan Documentation - COMPLETED ✅ (July 12, 2025)
-
-### 🎯 Overview
-Updated all project documentation to reflect the comprehensive 4-layer enhancement strategy for transforming RiskPulse: Diabetes into a professional-grade Public Health Planner tool. Prepared documentation infrastructure for the upcoming 8-week implementation sprint.
-
-### 🔧 Documentation Updates
-- **Updated currentTask.md**: Documented new layered implementation plan with detailed objectives and timelines
-- **Enhanced projectRoadmap.md**: Added Phase 4 - Public Health Planner UX Enhancements with 4-layer structure  
-- **Refreshed codebaseSummary.md**: Updated current state and prepared for UX enhancement integration
-- **Maintained lessons-learned.md**: Preserved existing insights for reference during implementation
-
-### 📊 Strategic Planning Improvements
-- ✅ **Layered Architecture**: 4 distinct layers with incremental value delivery
-- ✅ **Timeline Planning**: Detailed 8-week schedule with 5-15 days per layer
-- ✅ **Success Metrics**: Quantified targets for user experience and technical performance  
-- ✅ **Risk Assessment**: Clear risk levels and mitigation strategies per layer
-- ✅ **MVP Alignment**: Maintained proven MVP-first approach with no regression risk
-
-### 🎯 Implementation Readiness
-- **Layer 1 Prepared**: Information Hierarchy Optimization ready to start
-- **Technical Foundation**: Existing codebase assessment completed
-- **User Workflow**: Public Health Planner workflow sequence documented
-- **Success Criteria**: Clear validation metrics established for each layer
-
-### 📝 Documentation Structure Enhanced
-```
-cline_docs/
-├── currentTask.md         # ✅ Updated with layered plan
-├── progress-log.md        # ✅ New entry added  
-├── projectRoadmap.md      # ✅ Phase 4 added
-├── codebaseSummary.md     # ✅ Current state updated
-├── lessons-learned.md     # ✅ Maintained for reference
-└── [other files unchanged]
-```
-
-### 🚀 Next Steps
-- Begin Layer 1: Information Hierarchy Optimization
-- Implement hero metrics and workflow-driven sections
-- Follow incremental enhancement strategy with continuous validation
-
 ## UI Simplification: Detailed Data Section Removal - COMPLETED ✅ (July 2, 2025)
 
 ### 🎯 Overview
@@ -1181,7 +1141,8 @@ Added map popup functionality to zip code search results, providing immediate vi
 - ✅ **Immediate Visual Feedback**: Users see popup with key metrics right after searching
 - ✅ **Consistent Interface**: Same popup design for both search and map click interactions
 - ✅ **Automatic Cleanup**: Popup disappears automatically without user intervention
-- ✅ **Key Information Display**: Shows Risk Score, Diabetes %, and Obesity % prominently
+- ✅ **Key Information Display**: Shows Risk Score, Diabetes %,
+ and Obesity % prominently
 - ✅ **Visual Risk Indicators**: Color-coded metrics and emoji indicators for quick assessment
 
 ### 🎨 Popup Features
@@ -1192,7 +1153,7 @@ Added map popup functionality to zip code search results, providing immediate vi
 - **Responsive**: Adapts to different screen sizes and map positions
 
 ### 📝 Code Changes Summary
-```jsx
+```javascript
 // NEW: Search popup state management in App.jsx
 const [showSearchPopup, setShowSearchPopup] = useState(false);
 const [searchPopupData, setSearchPopupData] = useState(null);
@@ -1289,4 +1250,43 @@ The borough foundation is complete and ready for:
 - ✅ `src/store.js` - ENHANCED: Added borough state management
 - ✅ `src/components/common/BoroughFilter.jsx` - NEW: Borough filter component  
 - ✅ `src/components/TopBar.jsx` - ENHANCED: Integrated borough filter with validation
-- ✅ `src/App.jsx` - ENHANCED: Borough data initialization on app load
+
+## Borough Dropdown and Filtering Fix - COMPLETED ✅ (July 15, 2025)
+
+### 🎯 Overview
+Fixed critical issue with borough dropdown not showing options and filtering functionality not working due to CORS/S3 access issues.
+
+### 🔧 Technical Implementation
+- **Root Cause**: S3 bucket CORS configuration was blocking browser requests from localhost:5173
+- **Solution**: Enhanced fallback logic to handle CORS issues gracefully
+- **Updated Files**: 
+  - `src/services/boroughService.js` - Enhanced preloadCriticalData with cascading fallback
+  - `src/Map.jsx` - Improved GeoJSON loading with multiple fallback options
+
+### 📊 Fallback Strategy Implemented
+1. **Primary**: Try S3 URL (https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson)
+2. **Fallback 1**: Local health data (/ny_new_york_zip_codes_health.geojson)
+3. **Fallback 2**: Minimal local data (/ny_new_york_zip_codes_geo.min.json)
+
+### 🎯 Benefits Achieved
+- ✅ **Borough Dropdown**: Now populates with all 5 NYC boroughs (Manhattan, Brooklyn, Queens, Bronx, Staten Island)
+- ✅ **Filtering Functionality**: Borough selection properly filters and highlights zip codes
+- ✅ **Graceful Degradation**: App continues to work even with S3 access issues
+- ✅ **Better Error Handling**: Clear console logging for debugging data loading issues
+
+### 📝 Code Changes Summary
+```javascript
+// Enhanced fallback logic in boroughService.js
+fetch('https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson')
+  .then(response => response.json())
+  .catch(error => {
+    console.warn('S3 fetch failed, trying local fallback:', error.message);
+    return fetch('/ny_new_york_zip_codes_health.geojson')
+      .then(response => response.json())
+      .catch(fallbackError => {
+        console.warn('Local fallback failed, trying minimal fallback:', fallbackError.message);
+        return fetch('/ny_new_york_zip_codes_geo.min.json')
+          .then(response => response.json());
+      });
+  })
+```

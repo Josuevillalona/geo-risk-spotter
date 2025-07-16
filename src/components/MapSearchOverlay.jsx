@@ -27,7 +27,8 @@ const MapSearchOverlay = ({ triggerMapMove }) => {
       // Search for ZIP code in the data
       const feature = data.features.find(f => 
         f.properties.ZCTA5CE10 === searchQuery.trim() ||
-        f.properties.zipcode === searchQuery.trim()
+        f.properties.zipcode === searchQuery.trim() ||
+        f.properties.zip_code === searchQuery.trim()
       );
 
       if (feature) {
