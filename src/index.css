@@ -698,17 +698,25 @@ button:focus-visible {
   border: none;
   color: #666;
   cursor: pointer;
-  padding: 4px;
-  border-radius: 4px;
+  padding: 8px;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+  font-size: 14px;
+  min-width: 32px;
+  min-height: 32px;
 }
 
 .panel-collapse-btn:hover {
   background: #e9ecef;
   color: #333;
+  transform: scale(1.05);
+}
+
+.panel-collapse-btn:active {
+  transform: scale(0.95);
 }
 
 .insights-panel-content {
@@ -778,42 +786,53 @@ button:focus-visible {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
   border-radius: 6px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  max-width: 90%;
+  max-width: 95%;
+  min-width: fit-content;
 }
 
 .context-map-legend .legend-title {
   display: block;
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #333;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   text-align: center;
 }
 
 .context-map-legend .legend-items {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  flex-wrap: nowrap;
+  gap: 3px;
   justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.context-map-legend .legend-items::-webkit-scrollbar {
+  display: none;
 }
 
 .context-map-legend .legend-item {
   display: flex;
   align-items: center;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   color: #666;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .context-map-legend .legend-color {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 1px;
-  margin-right: 3px;
+  margin-right: 2px;
   border: 1px solid rgba(0,0,0,0.1);
+  flex-shrink: 0;
 }
 
 /* Mobile Layout Styles */
@@ -874,39 +893,49 @@ button:focus-visible {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
   border-radius: 6px;
-  padding: 8px 12px;
+  padding: 6px 10px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  max-width: 90%;
+  max-width: 95%;
+  min-width: fit-content;
 }
 
 .mobile-map-legend .legend-title {
   display: block;
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   color: #333;
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   text-align: center;
 }
 
 .legend-items-mobile {
   display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
+  flex-wrap: nowrap;
+  gap: 3px;
   justify-content: center;
+  align-items: center;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.legend-items-mobile::-webkit-scrollbar {
+  display: none;
 }
 
 .legend-item-mobile {
   display: flex;
   align-items: center;
-  font-size: 0.65rem;
+  font-size: 0.6rem;
   color: #666;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .legend-color-mobile {
-  width: 8px;
-  height: 8px;
+  width: 7px;
+  height: 7px;
   border-radius: 1px;
   margin-right: 3px;
   border: 1px solid rgba(0,0,0,0.1);

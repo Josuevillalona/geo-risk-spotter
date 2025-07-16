@@ -70,7 +70,7 @@ const CriticalFactors = ({ metrics }) => {
         {concerningFactors.map((factor, index) => (
           <div key={factor.key} className={`factor-tag priority-${index + 1}`}>
             <span className="factor-name">{factor.label}</span>
-            <span className="factor-value">{factor.value}%</span>
+            <span className="factor-value">{factor.value}</span>
           </div>
         ))}
       </div>
@@ -91,36 +91,6 @@ const HeroMetrics = ({ keyMetrics, displayData }) => {
   };
   
   const riskCategory = getRiskCategory(riskLevel);
-  
-  // Format area name for better display
-  const getAreaDisplayName = () => {
-    if (!displayData?.name) return 'Select an area to analyze';
-    
-    if (displayData.type === 'borough' || displayData.type === 'borough-summary') {
-      return `${displayData.name} Borough`;
-    }
-    
-    if (displayData.type === 'zipcode') {
-      return `ZIP Code ${displayData.name}`;
-    }
-    
-    return displayData.name;
-  };
-  
-  const getAreaDisplayType = () => {
-    if (!displayData?.type) return '';
-    
-    switch (displayData.type) {
-      case 'borough':
-        return 'Borough Overview';
-      case 'borough-summary':
-        return 'Borough Analysis';
-      case 'zipcode':
-        return displayData.data?.borough ? `${displayData.data.borough} ZIP Code` : 'ZIP Code Analysis';
-      default:
-        return 'Health Analysis';
-    }
-  };
   
   return (
     <div className="hero-metrics">
@@ -149,25 +119,6 @@ const HeroMetrics = ({ keyMetrics, displayData }) => {
             </div>
           </div>
         </div>
-      </div>
-      
-      {/* Enhanced Area Context */}
-      <div className="area-context-card">
-        <div className="context-header">
-          <MdLocationOn className="location-icon" />
-          <div className="area-info">
-            <h4 className="area-name">{getAreaDisplayName()}</h4>
-            <span className="area-type">{getAreaDisplayType()}</span>
-          </div>
-        </div>
-        
-        {displayData?.type === 'borough-summary' && displayData?.data?.zipCodeCount && (
-          <div className="coverage-indicator">
-            <span className="coverage-text">
-              Analysis covers {displayData.data.zipCodeCount} ZIP codes
-            </span>
-          </div>
-        )}
       </div>
       
       {/* Enhanced Critical Factors */}

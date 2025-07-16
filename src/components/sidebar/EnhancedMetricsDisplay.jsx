@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MdExpandMore, MdExpandLess, MdPeople, MdLocationCity, MdLocalHospital, MdPsychology, MdHome, MdDirectionsCar, MdRestaurant } from 'react-icons/md';
+import { MdExpandMore, MdExpandLess, MdPeople, MdLocationCity, MdLocalHospital, MdPsychology } from 'react-icons/md';
 
 const MetricSection = ({ title, icon: Icon, metrics, defaultExpanded = false, priority = 'normal' }) => {
   const [isExpanded, setIsExpanded] = useState(defaultExpanded);
@@ -81,36 +81,29 @@ const getMetricLabel = (key) => {
 const EnhancedMetricsDisplay = ({ keyMetrics }) => {
   if (!keyMetrics) return null;
   
-  // Organize metrics by category
+  // Organize metrics by category - REMOVED core health metrics to prevent redundancy
   const demographics = {
     totalPopulation: keyMetrics.totalPopulation,
     adultPopulation: keyMetrics.adultPopulation
   };
   
-  const coreHealthMetrics = {
-    diabetes: keyMetrics.diabetes,
-    obesity: keyMetrics.obesity,
-    hypertension: keyMetrics.hypertension,
-    physicalActivity: keyMetrics.physicalActivity,
-    smoking: keyMetrics.smoking
-  };
+  // REMOVED: coreHealthMetrics - now displayed in main Key Health Indicators section
   
   const socialDeterminants = {
-    depression: keyMetrics.depression,
-    socialIsolation: keyMetrics.socialIsolation,
-    housingInsecurity: keyMetrics.housingInsecurity,
-    transportationBarriers: keyMetrics.transportationBarriers,
-    foodInsecurity: keyMetrics.foodInsecurity,
-    foodStampUsage: keyMetrics.foodStampUsage
+    depression: keyMetrics.depression
+    // REMOVED: socialIsolation, housingInsecurity, transportationBarriers, foodInsecurity, foodStampUsage
+    // These metrics consistently show "No Data" and don't provide value to public health planners
   };
   
   const healthcareAccess = {
-    healthcareAccess: keyMetrics.healthcareAccess,
+    // REMOVED: healthcareAccess - now in main section
     routineCheckup: keyMetrics.routineCheckup,
     dentalVisit: keyMetrics.dentalVisit
   };
   
-  const healthOutcomes = {
+  const additionalHealthMetrics = {
+    // ADDED: Include smoking here as additional context (removed from core)
+    smoking: keyMetrics.smoking,
     generalHealth: keyMetrics.generalHealth,
     mentalHealth: keyMetrics.mentalHealth,
     physicalHealth: keyMetrics.physicalHealth,
@@ -120,8 +113,8 @@ const EnhancedMetricsDisplay = ({ keyMetrics }) => {
   return (
     <div className="enhanced-metrics-display">
       <div className="metrics-header">
-        <h3>Detailed Health Profile</h3>
-        <p className="metrics-subtitle">Comprehensive health and social determinants data</p>
+        <h3>Additional Health Context</h3>
+        <p className="metrics-subtitle">Supporting data for comprehensive analysis</p>
       </div>
       
       <div className="metrics-sections">
@@ -129,16 +122,8 @@ const EnhancedMetricsDisplay = ({ keyMetrics }) => {
           title="Population Demographics" 
           icon={MdPeople} 
           metrics={demographics}
-          defaultExpanded={true}
-          priority="high"
-        />
-        
-        <MetricSection 
-          title="Core Health Indicators" 
-          icon={MdLocalHospital} 
-          metrics={coreHealthMetrics}
-          defaultExpanded={true}
-          priority="high"
+          defaultExpanded={false}
+          priority="medium"
         />
         
         <MetricSection 
@@ -150,7 +135,7 @@ const EnhancedMetricsDisplay = ({ keyMetrics }) => {
         />
         
         <MetricSection 
-          title="Healthcare Access" 
+          title="Healthcare Access & Behaviors" 
           icon={MdLocalHospital} 
           metrics={healthcareAccess}
           defaultExpanded={false}
@@ -158,18 +143,12 @@ const EnhancedMetricsDisplay = ({ keyMetrics }) => {
         />
         
         <MetricSection 
-          title="Health Outcomes" 
+          title="Additional Health Outcomes" 
           icon={MdPsychology} 
-          metrics={healthOutcomes}
+          metrics={additionalHealthMetrics}
           defaultExpanded={false}
-          priority="normal"
+          priority="low"
         />
-      </div>
-      
-      <div className="metrics-footer">
-        <p className="data-note">
-          Data from CDC PLACES 2024. Percentages represent age-adjusted prevalence rates.
-        </p>
       </div>
     </div>
   );

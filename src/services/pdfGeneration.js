@@ -11,7 +11,8 @@ import html2canvas from 'html2canvas';
  * PDF Generation Service Class
  */
 class PDFGenerationService {
-  constructor() {
+  constructor(debug = false) {
+    this.debug = debug;
     this.doc = null;
     this.currentPage = 1;
     this.pageHeight = 297; // A4 height in mm
@@ -49,39 +50,81 @@ class PDFGenerationService {
   }
 
   /**
+   * Debug logging helper
+   */
+  log(message, data = null) {
+    if (this.debug) {
+      console.log(`[PDF Debug] ${message}`, data);
+    }
+  }
+
+  /**
    * Generate complete evidence package PDF
    */
   async generateEvidencePackage(packageData) {
     try {
+      this.log('Starting PDF generation', packageData);
+      
+      // Validate input data
+      if (!packageData) {
+        throw new Error('Package data is required');
+      }
+      
+      if (!packageData.areaName) {
+        throw new Error('Area name is required in package data');
+      }
+      
+      this.log('Package data validation passed');
+      
       this.doc = new jsPDF('p', 'mm', 'a4');
       this.currentPage = 1;
       this.currentY = this.margins.top;
 
+      this.log('PDF instance created successfully');
+
       // Generate cover page
+      this.log('Generating cover page...');
       await this.generateCoverPage(packageData);
+      this.log('Cover page completed');
       
       // Generate table of contents
+      this.log('Generating table of contents...');
       this.addNewPage();
       await this.generateTableOfContents(packageData);
+      this.log('Table of contents completed');
       
       // Generate each section
-      for (const [sectionId, sectionContent] of Object.entries(packageData.sections)) {
-        this.addNewPage();
-        await this.generateSection(sectionId, sectionContent, packageData);
+      this.log('Generating sections...', Object.keys(packageData.sections || {}));
+      for (const [sectionId, sectionContent] of Object.entries(packageData.sections || {})) {
+        if (sectionContent) {
+          this.log(`Generating section: ${sectionId}`);
+          this.addNewPage();
+          await this.generateSection(sectionId, sectionContent, packageData);
+          this.log(`Section ${sectionId} completed`);
+        }
       }
       
       // Generate custom sections
-      for (const customSection of packageData.customSections || []) {
-        this.addNewPage();
-        await this.generateCustomSection(customSection, packageData);
+      if (packageData.customSections && packageData.customSections.length > 0) {
+        this.log('Generating custom sections...', packageData.customSections);
+        for (const customSection of packageData.customSections) {
+          this.log(`Generating custom section: ${customSection.title}`);
+          this.addNewPage();
+          await this.generateCustomSection(customSection, packageData);
+          this.log(`Custom section ${customSection.title} completed`);
+        }
       }
       
       // Add footer to all pages
+      this.log('Adding footers to all pages...');
       this.addFootersToAllPages(packageData);
+      this.log('Footers added');
       
+      this.log('PDF generation completed successfully');
       return this.doc;
       
     } catch (error) {
+      this.log('PDF generation failed', error);
       console.error('PDF generation failed:', error);
       throw new Error('Failed to generate PDF: ' + error.message);
     }
@@ -91,32 +134,49 @@ class PDFGenerationService {
    * Generate cover page
    */
   async generateCoverPage(packageData) {
-    const { title, areaName, metadata } = packageData;
-    
-    // Header with logo space
-    this.addLogo();
-    
-    // Title section
-    this.currentY = 60;
-    this.addTitle(title);
-    
-    // Subtitle
-    this.currentY += 15;
-    this.addSubtitle(`Diabetes Risk Analysis for ${areaName}`);
-    
-    // Key metrics box
-    this.currentY += 30;
-    await this.addKeyMetricsBox(packageData);
-    
-    // Metadata section
-    this.currentY += 50;
-    this.addMetadataSection(metadata);
-    
-    // Confidentiality notice
-    this.addConfidentialityNotice(metadata.confidentialityLevel);
-    
-    // Footer
-    this.addPageFooter();
+    try {
+      this.log('Generating cover page with data:', packageData);
+      
+      const { title, areaName, metadata } = packageData;
+      
+      // Header with logo space
+      this.log('Adding logo...');
+      this.addLogo();
+      
+      // Title section
+      this.currentY = 60;
+      this.log('Adding title...');
+      this.addTitle(title);
+      
+      // Subtitle
+      this.currentY += 15;
+      this.log('Adding subtitle...');
+      this.addSubtitle(`Diabetes Risk Analysis for ${areaName}`);
+      
+      // Key metrics box
+      this.currentY += 30;
+      this.log('Adding key metrics box...');
+      await this.addKeyMetricsBox(packageData);
+      
+      // Metadata section
+      this.currentY += 50;
+      this.log('Adding metadata section...');
+      this.addMetadataSection(metadata);
+      
+      // Confidentiality notice
+      this.log('Adding confidentiality notice...');
+      this.addConfidentialityNotice(metadata?.confidentialityLevel || 'public');
+      
+      // Footer
+      this.log('Adding page footer...');
+      this.addPageFooter();
+      
+      this.log('Cover page generation completed');
+      
+    } catch (error) {
+      this.log('Cover page generation failed', error);
+      throw error;
+    }
   }
 
   /**
@@ -188,14 +248,26 @@ class PDFGenerationService {
    * Generate Executive Summary section
    */
   async generateExecutiveSummarySection(packageData) {
-    const { areaName, analysis } = packageData;
+    const { areaName, analysis, summary } = packageData;
     
-    // Overview paragraph
+    // Debug log for AI summary usage
+    this.log('Executive Summary - AI Summary available:', summary ? 'Yes' : 'No');
+    if (summary) {
+      this.log('AI Summary content:', summary.substring(0, 100) + '...');
+    }
+    
+    // Overview paragraph - use AI summary if available
     this.addSubheading('Overview');
-    this.addBodyText(
-      `This evidence package presents a comprehensive analysis of diabetes risk factors in ${areaName}. ` +
-      `Our analysis reveals significant patterns and correlations that inform targeted intervention strategies.`
-    );
+    if (summary && summary.trim() !== 'Health risk analysis for the selected area') {
+      this.log('Using AI summary in Executive Summary');
+      this.addBodyText(summary);
+    } else {
+      this.log('Using default overview text');
+      this.addBodyText(
+        `This evidence package presents a comprehensive analysis of diabetes risk factors in ${areaName}. ` +
+        `Our analysis reveals significant patterns and correlations that inform targeted intervention strategies.`
+      );
+    }
     
     this.currentY += 5;
     
@@ -341,23 +413,42 @@ class PDFGenerationService {
     
     this.currentY += 10;
     
-    // AI insights with actual metrics-based insights
+    // AI insights from the insights hub
     this.addSubheading('AI-Generated Insights');
-    const insights = this.generateAIInsights(packageData);
-    this.addCalloutBox(
-      insights.title,
-      insights.content,
-      this.colors.accent
-    );
     
-    // Additional insight if space allows
-    if (insights.secondary) {
-      this.currentY += 5;
+    // Debug log for AI summary usage
+    this.log('AI Insights - AI Summary available:', packageData.summary ? 'Yes' : 'No');
+    if (packageData.summary) {
+      this.log('AI Summary content:', packageData.summary.substring(0, 100) + '...');
+    }
+    
+    // Use actual AI summary from insights hub if available
+    if (packageData.summary && packageData.summary.trim() !== 'Health risk analysis for the selected area') {
+      this.log('Using AI summary in AI Insights section');
       this.addCalloutBox(
-        insights.secondary.title,
-        insights.secondary.content,
-        this.colors.primary
+        'AI Analysis Summary',
+        packageData.summary,
+        this.colors.accent
       );
+    } else {
+      this.log('Using fallback generated insights');
+      // Fallback to generated insights if no AI summary available
+      const insights = this.generateAIInsights(packageData);
+      this.addCalloutBox(
+        insights.title,
+        insights.content,
+        this.colors.accent
+      );
+      
+      // Additional insight if space allows
+      if (insights.secondary) {
+        this.currentY += 5;
+        this.addCalloutBox(
+          insights.secondary.title,
+          insights.secondary.content,
+          this.colors.primary
+        );
+      }
     }
   }
 
@@ -950,6 +1041,21 @@ class PDFGenerationService {
     this.doc.text(`Generated: ${date}`, this.margins.left, footerY);
   }
 
+  addPageFooter() {
+    // Simple footer implementation
+    const footerY = this.pageHeight - this.margins.bottom + 5;
+    
+    // Footer line
+    this.doc.setDrawColor(this.colors.border);
+    this.doc.line(this.margins.left, footerY - 5, this.pageWidth - this.margins.right, footerY - 5);
+    
+    // Footer text
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setFontSize(8);
+    this.doc.setTextColor(this.colors.lightText);
+    this.doc.text('Generated by RiskPulse: Diabetes Risk Analysis Platform', this.margins.left, footerY);
+  }
+
   addFootersToAllPages(packageData) {
     const totalPages = this.doc.internal.getNumberOfPages();
     
@@ -1005,6 +1111,40 @@ class PDFGenerationService {
       
       this.currentY += 6;
     });
+  }
+
+  addMetadataSection(metadata) {
+    if (!metadata) return;
+    
+    this.checkPageBreak(40);
+    
+    // Metadata box
+    const boxHeight = 35;
+    const boxY = this.currentY;
+    
+    this.doc.setFillColor(248, 250, 252);
+    this.doc.rect(this.margins.left, boxY, this.pageWidth - this.margins.left - this.margins.right, boxHeight, 'F');
+    
+    this.doc.setDrawColor(this.colors.border);
+    this.doc.rect(this.margins.left, boxY, this.pageWidth - this.margins.left - this.margins.right, boxHeight);
+    
+    // Metadata content
+    this.doc.setFont('helvetica', 'normal');
+    this.doc.setFontSize(9);
+    this.doc.setTextColor(this.colors.text);
+    
+    const metadataItems = [
+      `Generated: ${new Date(metadata.generatedAt).toLocaleDateString()}`,
+      `Data Source: ${metadata.dataSource || 'NYC Health Department'}`,
+      `Confidence Level: ${metadata.analysisConfidence || 'High'}`,
+      `Estimated Pages: ${metadata.estimatedPages || 'N/A'}`
+    ];
+    
+    metadataItems.forEach((item, index) => {
+      this.doc.text(item, this.margins.left + 5, boxY + 8 + (index * 5));
+    });
+    
+    this.currentY += boxHeight + 10;
   }
 
   addConfidentialityNotice(confidentialityLevel) {

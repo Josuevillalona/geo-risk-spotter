@@ -29,16 +29,6 @@ const TopBar = ({ useInsightsFirstLayout, setUseInsightsFirstLayout }) => {
             RiskPulse
           </span>
         </div>
-        
-        {/* Right: Saved Reports Button */}
-        <button
-          className="flex items-center gap-2 px-6 py-2 bg-white border border-gray-300 hover:border-gray-400 hover:shadow-md rounded-lg transition-all duration-200 font-medium text-sm"
-          style={{ color: '#1d4241', marginRight: '1rem' }}
-          title="View saved reports"
-        >
-          <FaBookmark className="text-sm" />
-          <span>Saved Reports</span>
-        </button>
       </div>
       
       {/* Green ribbon with tagline */}

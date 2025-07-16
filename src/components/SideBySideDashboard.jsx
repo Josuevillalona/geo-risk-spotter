@@ -34,9 +34,9 @@ const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
             <button 
               className="panel-collapse-btn"
               onClick={toggleSidebarCollapse}
-              title={sidebarCollapsed ? "Expand" : "Collapse"}
+              title={sidebarCollapsed ? "Expand AI Insights" : "Collapse AI Insights"}
             >
-              {sidebarCollapsed ? <FaChevronLeft /> : <FaChevronRight />}
+              {sidebarCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
             </button>
           </div>
           

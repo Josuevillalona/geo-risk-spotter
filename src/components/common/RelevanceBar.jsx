@@ -16,7 +16,7 @@ const RelevanceBar = ({ score, label, color = 'bg-blue-500', maxWidth = 'w-full'
         {label}
       </span>
       <span className="text-xs font-semibold text-gray-800">
-        {(score * 100).toFixed(1)}%
+        {` ${(score * 100).toFixed(1)}%`}
       </span>
     </div>
     <div className={`${maxWidth} h-2 bg-gray-200 rounded overflow-hidden relative`}>

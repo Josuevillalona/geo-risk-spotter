@@ -51,16 +51,6 @@ const SmartQuerySuggestions = ({ onQuerySelect, isLoading }) => {
 
   return (
     <div className="smart-suggestions">
-      <div className="suggestions-header">
-        <div className="suggestions-title">
-          <MdPsychology className="suggestions-icon" />
-          <span>Smart Suggestions</span>
-        </div>
-        <div className="suggestions-context">
-          <small>Based on: {contextDescription}</small>
-        </div>
-      </div>
-      
       <div className="suggestions-grid">
         {suggestions.map((suggestion) => {
           const IconComponent = suggestion.icon;

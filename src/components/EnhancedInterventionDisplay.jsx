@@ -40,7 +40,7 @@ const EnhancedInterventionDisplay = ({ selectedArea, isLoading, setIsLoading }) 
       setShowDetails(true);
     } catch (error) {
       console.error('Enhanced recommendations error:', error);
-      setError('Failed to fetch enhanced recommendations. Please try again.');
+      setError('Failed to load intervention recommendations. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -173,33 +173,33 @@ const EnhancedInterventionDisplay = ({ selectedArea, isLoading, setIsLoading }) 
         {scoring && Object.keys(scoring).length > 0 && (
           <div className="enhanced-scoring">
             <div className="scoring-header">
-              🎯 Phase B Enhanced RAG Scoring
+              🎯 Program Matching Analysis
               <span style={{
-                backgroundColor: '#3b82f6',
+                backgroundColor: '#10b981',
                 color: 'white',
                 padding: '2px 6px',
                 borderRadius: '4px',
                 fontSize: '10px',
                 fontWeight: '500'
               }}>
-                BETA
+                EVIDENCE-BASED
               </span>
             </div>
             
             <div className="scoring-bars">
               <RelevanceBar 
                 score={scoring.vector_score || 0} 
-                label="🔍 Vector Similarity" 
+                label="🔍 Health Context Match" 
                 color="bg-purple-500" 
               />
               <RelevanceBar 
                 score={scoring.keyword_score || 0} 
-                label="🔑 Health Keywords" 
+                label="🔑 Health Condition Focus" 
                 color="bg-cyan-500" 
               />
               <RelevanceBar 
                 score={scoring.context_score || 0} 
-                label="🎯 Implementation Context" 
+                label="🎯 Implementation Feasibility" 
                 color="bg-emerald-500" 
               />
             </div>
@@ -224,7 +224,7 @@ const EnhancedInterventionDisplay = ({ selectedArea, isLoading, setIsLoading }) 
                   fontWeight: '600',
                   color: '#1f2937'
                 }}>
-                  Overall Relevance Score
+                  Community Match Score
                 </span>
                 <span style={{
                   fontSize: '1.25rem',
@@ -240,7 +240,7 @@ const EnhancedInterventionDisplay = ({ selectedArea, isLoading, setIsLoading }) 
                 color: '#6b7280',
                 fontStyle: 'italic'
               }}>
-                Calculated using hybrid vector + keyword + context analysis
+                Based on health profile, condition focus, and implementation feasibility
               </div>
             </div>
           </div>
@@ -294,8 +294,8 @@ const EnhancedInterventionDisplay = ({ selectedArea, isLoading, setIsLoading }) 
             )}
             
             <div style={{ fontSize: '0.75rem', color: '#6b7280', fontStyle: 'italic' }}>
-              💡 This intervention was selected using Phase B Enhanced RAG with vector similarity, 
-              keyword matching, and health context analysis.
+              💡 This intervention was selected using advanced health data analysis and evidence-based 
+              matching to identify programs with proven success in similar communities.
             </div>
           </div>
         )}
@@ -337,11 +337,11 @@ const EnhancedInterventionDisplay = ({ selectedArea, isLoading, setIsLoading }) 
                 borderRadius: '50%',
                 animation: 'spin 1s linear infinite'
               }} />
-              Analyzing with Enhanced RAG...
+              Finding Evidence-Based Programs...
             </>
           ) : (
             <>
-              🚀 Get Phase B Enhanced Recommendations
+              🎯 Find Proven Interventions
             </>
           )}
         </button>
@@ -365,40 +365,6 @@ const EnhancedInterventionDisplay = ({ selectedArea, isLoading, setIsLoading }) 
       {/* Results display */}
       {showDetails && recommendations.length > 0 && (
         <div>
-          <div style={{
-            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-            border: '2px solid #bbf7d0',
-            color: '#166534',
-            padding: '1rem',
-            borderRadius: '0.75rem',
-            marginBottom: '1rem',
-            fontSize: '0.875rem',
-            fontWeight: '500',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              marginBottom: '0.5rem'
-            }}>
-              <span style={{ fontSize: '1.25rem' }}>🎯</span>
-              <span style={{ fontWeight: '700' }}>
-                Phase B Enhanced RAG Analysis Complete!
-              </span>
-            </div>
-            <div style={{ fontSize: '0.8rem', color: '#15803d', lineHeight: '1.4' }}>
-              Found <strong>{recommendations.length} highly relevant recommendations</strong> using:
-              <br />
-              • 🔍 <strong>Vector similarity</strong> - semantic understanding of health contexts
-              <br />
-              • 🔑 <strong>Keyword matching</strong> - targeted health condition analysis  
-              <br />
-              • 🎯 <strong>Implementation scoring</strong> - feasibility and evidence-based ranking
-            </div>
-          </div>
-
           {recommendations.map((intervention, index) => (
             <InterventionCard 
               key={intervention.title || index} 
@@ -418,7 +384,7 @@ const EnhancedInterventionDisplay = ({ selectedArea, isLoading, setIsLoading }) 
           borderRadius: '0.5rem',
           fontSize: '0.875rem'
         }}>
-          ℹ️ No enhanced recommendations found for this area.
+          ℹ️ No evidence-based interventions found for this area's health profile.
         </div>
       )}
     </div>

@@ -10,22 +10,34 @@ import {
   MdSettings,
   MdFolder,
   MdInsertDriveFile,
-  MdCheck
+  MdCheck,
+  MdSlideshow,
+  MdPictureAsPdf,
+  MdLocationOn,
+  MdTimer,
+  MdLibraryBooks,
+  MdTrendingUp,
+  MdArrowForward,
+  MdArrowBack,
+  MdCheckCircle,
+  MdRadioButtonUnchecked
 } from 'react-icons/md';
 import { useAppStore } from '../../store';
 import { generateEvidencePackagePDF } from '../../services/pdfGeneration';
 import { analyzeRootCauses } from '../../services/correlationAnalysis';
 
 /**
- * Evidence Builder Component
- * Professional evidence package generation for stakeholder engagement
- * Part of Layer 3: Evidence Package Builder
+ * Report Builder Component
+ * Professional report generation for stakeholder engagement
+ * Part of Layer 3: Report Package Builder
  */
 const EvidenceBuilder = ({ 
   areaData,
   onPackageGenerated,
   className = ''
 }) => {
+  const [activeStep, setActiveStep] = useState(1);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [selectedSections, setSelectedSections] = useState({
     executiveSummary: true,
     riskAssessment: true,
@@ -41,16 +53,146 @@ const EvidenceBuilder = ({
     title: '',
     audience: 'stakeholders',
     format: 'comprehensive',
+    outputFormat: 'pdf-report',
     includeCharts: true,
     includeRawData: false,
-    confidentialityLevel: 'public'
+    confidentialityLevel: 'public',
+    branding: 'standard'
   });
 
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedPackage, setGeneratedPackage] = useState(null);
+  const [generationProgress, setGenerationProgress] = useState(0);
 
   // Get data from store
   const { selectedArea, aiSummary } = useAppStore();
+
+  // CHNA Template Definitions
+  const chnaTemplates = useMemo(() => [
+    {
+      id: 'chna-executive',
+      title: 'CHNA Executive Summary',
+      audience: 'City Council / Board of Health',
+      description: 'High-level overview for decision makers',
+      sections: {
+        executiveSummary: true,
+        riskAssessment: true,
+        rootCauseAnalysis: false,
+        recommendedActions: true,
+        supportingData: false,
+        methodology: false,
+        appendices: false
+      },
+      estimatedPages: 8,
+      timeToGenerate: '3-5 minutes',
+      icon: MdTrendingUp,
+      color: '#3b82f6'
+    },
+    {
+      id: 'chna-detailed',
+      title: 'Comprehensive CHNA Report',
+      audience: 'State Health Department / Grant Applications',
+      description: 'Full analysis with methodology and appendices',
+      sections: {
+        executiveSummary: true,
+        riskAssessment: true,
+        rootCauseAnalysis: true,
+        recommendedActions: true,
+        supportingData: true,
+        methodology: true,
+        appendices: true
+      },
+      estimatedPages: 25,
+      timeToGenerate: '8-12 minutes',
+      icon: MdDescription,
+      color: '#10b981'
+    },
+    {
+      id: 'stakeholder-presentation',
+      title: 'Stakeholder Presentation Package',
+      audience: 'Community Leaders / Funders',
+      description: 'Visual presentation with key findings',
+      sections: {
+        executiveSummary: true,
+        riskAssessment: true,
+        rootCauseAnalysis: true,
+        recommendedActions: true,
+        supportingData: true,
+        methodology: false,
+        appendices: false
+      },
+      estimatedPages: 15,
+      timeToGenerate: '5-7 minutes',
+      icon: MdSlideshow,
+      color: '#f59e0b'
+    }
+  ], []);
+
+  // Builder Steps Configuration
+  const builderSteps = useMemo(() => [
+    {
+      id: 1,
+      title: 'Choose Template',
+      icon: MdLibraryBooks,
+      description: 'Select your presentation format',
+      component: 'CHNATemplateSelector'
+    },
+    {
+      id: 2,
+      title: 'Customize Story',
+      icon: MdEdit,
+      description: 'Review and adjust your narrative',
+      component: 'DataStoryBuilder'
+    },
+    {
+      id: 3,
+      title: 'Configure Details',
+      icon: MdSettings,
+      description: 'Set formatting and output options',
+      component: 'PackageSettings'
+    },
+    {
+      id: 4,
+      title: 'Generate Package',
+      icon: MdDownload,
+      description: 'Create your evidence package',
+      component: 'GenerationInterface'
+    }
+  ], []);
+
+  // Output Format Options
+  const outputFormats = useMemo(() => [
+    {
+      id: 'pdf-report',
+      title: 'PDF Report',
+      icon: MdPictureAsPdf,
+      description: 'Professional report for grants and formal presentations',
+      features: ['Executive summary', 'Charts and graphs', 'Appendices', 'References'],
+      audience: 'Funders, State Health Dept',
+      bestFor: 'Grant applications, formal reports',
+      color: '#dc2626'
+    },
+    {
+      id: 'powerpoint',
+      title: 'PowerPoint Deck',
+      icon: MdSlideshow,
+      description: 'Presentation slides for stakeholder meetings',
+      features: ['Visual slides', 'Speaker notes', 'Editable charts', 'Key findings'],
+      audience: 'City Council, Board of Health',
+      bestFor: 'Live presentations, meetings',
+      color: '#ea580c'
+    },
+    {
+      id: 'executive-brief',
+      title: 'Executive Brief',
+      icon: MdDescription,
+      description: 'Concise summary for busy decision makers',
+      features: ['2-page summary', 'Key metrics', 'Action items', 'Budget overview'],
+      audience: 'Executives, Mayors',
+      bestFor: 'Quick reviews, approvals',
+      color: '#059669'
+    }
+  ], []);
 
   // Generate evidence package data
   const evidenceData = useMemo(() => {
@@ -249,29 +391,60 @@ const EvidenceBuilder = ({
     setIsGenerating(true);
     
     try {
+      console.log('🔄 Generating evidence package with data:', evidenceData);
+      
       // Simulate package generation
       await new Promise(resolve => setTimeout(resolve, 3000));
       
+      // Ensure proper data structure for PDF generation
       const packageData = {
         id: generatePackageId(),
         title: packageSettings.title || `Diabetes Risk Evidence Package - ${evidenceData.areaName}`,
         areaName: evidenceData.areaName,
         audience: packageSettings.audience,
         format: packageSettings.format,
-        analysis: evidenceData.analysis, // Include the analysis data with health metrics
-        metrics: evidenceData.metrics, // Include detailed metrics
-        summary: evidenceData.summary, // Include AI summary
-        sections: generateSectionContents(),
+        
+        // Fix: Ensure metrics are properly structured with fallbacks
+        metrics: {
+          riskScore: evidenceData.metrics?.riskScore || evidenceData.metrics?.RiskScore || 0,
+          diabetes: evidenceData.metrics?.diabetes || evidenceData.metrics?.DIABETES_CrudePrev || 0,
+          obesity: evidenceData.metrics?.obesity || evidenceData.metrics?.OBESITY_CrudePrev || 0,
+          hypertension: evidenceData.metrics?.hypertension || evidenceData.metrics?.BPHIGH_CrudePrev || 0,
+          physicalActivity: evidenceData.metrics?.physicalActivity || evidenceData.metrics?.LPA_CrudePrev || 0,
+          smoking: evidenceData.metrics?.smoking || evidenceData.metrics?.CSMOKING_CrudePrev || 0,
+          foodInsecurity: evidenceData.metrics?.foodInsecurity || evidenceData.metrics?.FOODINSECU_CrudePrev || 0,
+          healthcareAccess: evidenceData.metrics?.healthcareAccess || evidenceData.metrics?.ACCESS2_CrudePrev || 0,
+          population: evidenceData.metrics?.population || evidenceData.metrics?.TotalPopulation || 0
+        },
+        
+        // Fix: Ensure analysis data structure exists
+        analysis: evidenceData.analysis || {
+          topFactors: [
+            { 
+              factor: "Data Analysis", 
+              correlation: 0.5, 
+              description: "Analysis based on available health data for this area" 
+            }
+          ]
+        },
+        
+        summary: evidenceData.summary || 'Health risk analysis for the selected area',
+        sections: selectedSections,
         customSections: customSections.filter(s => !s.isEditing),
         metadata: {
           generatedAt: new Date().toISOString(),
-          estimatedPages,
+          estimatedPages: selectedTemplate?.estimatedPages || estimatedPages,
           confidentialityLevel: packageSettings.confidentialityLevel,
           dataSource: 'NYC Department of Health and Mental Hygiene',
-          analysisConfidence: evidenceData.confidence
+          analysisConfidence: evidenceData.confidence || 'moderate'
         },
         downloadUrl: null // Would be set after actual generation
       };
+      
+      // Add sections content
+      packageData.sections = generateSectionContents();
+      
+      console.log('✅ Package data prepared:', packageData);
       
       setGeneratedPackage(packageData);
       
@@ -280,7 +453,8 @@ const EvidenceBuilder = ({
       }
       
     } catch (error) {
-      console.error('Evidence package generation failed:', error);
+      console.error('❌ Evidence package generation failed:', error);
+      alert(`Failed to generate evidence package: ${error.message}`);
     } finally {
       setIsGenerating(false);
     }
@@ -321,6 +495,34 @@ const EvidenceBuilder = ({
     return contents;
   };
 
+  // Template Selection Handler
+  const selectTemplate = (template) => {
+    setSelectedTemplate(template);
+    setSelectedSections(template.sections);
+    setPackageSettings(prev => ({
+      ...prev,
+      title: prev.title || `${template.title} - ${evidenceData?.areaName || 'Selected Area'}`,
+      audience: template.audience.split(' / ')[0].toLowerCase(),
+      format: template.id.includes('detailed') ? 'comprehensive' : 'executive'
+    }));
+    setActiveStep(2);
+  };
+
+  // Calculate comparison percentage
+  const calculateComparison = (value, baseline = 12.5) => {
+    const diff = ((value - baseline) / baseline) * 100;
+    return diff > 0 ? `+${diff.toFixed(1)}%` : `${diff.toFixed(1)}%`;
+  };
+
+  // Step Navigation
+  const nextStep = () => {
+    setActiveStep(prev => Math.min(builderSteps.length, prev + 1));
+  };
+
+  const prevStep = () => {
+    setActiveStep(prev => Math.max(1, prev - 1));
+  };
+
   if (!evidenceData) {
     return (
       <div className={`evidence-builder empty ${className}`}>
@@ -334,216 +536,198 @@ const EvidenceBuilder = ({
   }
 
   return (
-    <div className={`evidence-builder ${className}`}>
-      {/* Header */}
-      <div className="evidence-header">
-        <div className="header-content">
-          <MdDescription className="header-icon" />
-          <div className="header-text">
-            <h3 className="header-title">Evidence Package Builder</h3>
-            <p className="header-subtitle">
-              Generate professional documentation for {evidenceData.areaName}
-            </p>
+    <div className={`evidence-builder-enhanced ${className}`}>
+      {/* Progress Steps - Clean Horizontal Design */}
+      <div className="builder-progress-horizontal">
+        {builderSteps.map((step, idx) => (
+          <div key={step.id} className="progress-step-container">
+            <div className="progress-step-wrapper">
+              <div 
+                className={`progress-step-circle ${
+                  activeStep === step.id ? 'active' : 
+                  activeStep > step.id ? 'completed' : 'pending'
+                }`}
+              >
+                {activeStep > step.id ? (
+                  <MdCheckCircle className="step-check-icon" />
+                ) : (
+                  <span className="step-number">{step.id}</span>
+                )}
+              </div>
+              <div className="progress-step-labels">
+                <h4 className="step-title">{step.title}</h4>
+                <p className="step-description">{step.description}</p>
+              </div>
+            </div>
+            {/* Connection Line */}
+            {idx < builderSteps.length - 1 && (
+              <div className={`progress-connector ${activeStep > step.id ? 'completed' : 'pending'}`} />
+            )}
           </div>
+        ))}
+      </div>
+
+      {/* Builder Content */}
+      <div className="builder-content">
+        <div className="step-panel">
+          {activeStep === 1 && (
+            <CHNATemplateSelector 
+              templates={chnaTemplates}
+              selectedTemplate={selectedTemplate}
+              onSelectTemplate={selectTemplate}
+              evidenceData={evidenceData}
+            />
+          )}
+          
+          {activeStep === 2 && (
+            <DataStoryBuilder 
+              evidenceData={evidenceData}
+              selectedTemplate={selectedTemplate}
+              onUpdateStory={(story) => console.log('Story updated:', story)}
+            />
+          )}
+          
+          {activeStep === 3 && (
+            <PackageConfigurationPanel 
+              packageSettings={packageSettings}
+              onUpdateSettings={setPackageSettings}
+              outputFormats={outputFormats}
+              evidenceData={evidenceData}
+            />
+          )}
+          
+          {activeStep === 4 && (
+            <GenerationInterface 
+              packageSettings={packageSettings}
+              selectedSections={selectedSections}
+              evidenceData={evidenceData}
+              isGenerating={isGenerating}
+              generationProgress={generationProgress}
+              onGenerate={generateEvidencePackage}
+              generatedPackage={generatedPackage}
+            />
+          )}
         </div>
         
-        <div className="package-stats">
-          <div className="stat">
-            <span className="stat-value">{estimatedPages}</span>
-            <span className="stat-label">pages</span>
-          </div>
-          <div className="stat">
-            <span className="stat-value">
-              {Object.values(selectedSections).filter(Boolean).length + customSections.length}
-            </span>
-            <span className="stat-label">sections</span>
-          </div>
+        {/* Live Preview Panel */}
+        <div className="preview-panel">
+          <PackagePreview 
+            evidenceData={evidenceData}
+            currentStep={activeStep}
+            selectedTemplate={selectedTemplate}
+            packageSettings={packageSettings}
+            selectedSections={selectedSections}
+            estimatedPages={estimatedPages}
+          />
         </div>
       </div>
 
-      {/* Package Settings */}
-      <div className="package-settings">
-        <h4 className="settings-title">Package Configuration</h4>
+      {/* Navigation */}
+      <div className="builder-navigation">
+        <button 
+          className="nav-button secondary"
+          onClick={prevStep}
+          disabled={activeStep === 1}
+        >
+          <MdArrowBack />
+          Previous
+        </button>
         
-        <div className="settings-grid">
-          <div className="setting-group">
-            <label htmlFor="package-title">Package Title</label>
-            <input
-              id="package-title"
-              type="text"
-              value={packageSettings.title}
-              onChange={(e) => setPackageSettings(prev => ({ ...prev, title: e.target.value }))}
-              placeholder={`Diabetes Risk Evidence Package - ${evidenceData.areaName}`}
-              className="setting-input"
-            />
-          </div>
-          
-          <div className="setting-group">
-            <label htmlFor="target-audience">Target Audience</label>
-            <select
-              id="target-audience"
-              value={packageSettings.audience}
-              onChange={(e) => setPackageSettings(prev => ({ ...prev, audience: e.target.value }))}
-              className="setting-select"
-            >
-              <option value="stakeholders">Stakeholders & Decision Makers</option>
-              <option value="technical">Technical/Medical Professionals</option>
-              <option value="community">Community Leaders</option>
-              <option value="funding">Funding Organizations</option>
-            </select>
-          </div>
-          
-          <div className="setting-group">
-            <label htmlFor="package-format">Format Style</label>
-            <select
-              id="package-format"
-              value={packageSettings.format}
-              onChange={(e) => setPackageSettings(prev => ({ ...prev, format: e.target.value }))}
-              className="setting-select"
-            >
-              <option value="comprehensive">Comprehensive Report</option>
-              <option value="executive">Executive Brief</option>
-              <option value="technical">Technical Analysis</option>
-              <option value="presentation">Presentation Ready</option>
-            </select>
-          </div>
-          
-          <div className="setting-group">
-            <label htmlFor="confidentiality">Confidentiality Level</label>
-            <select
-              id="confidentiality"
-              value={packageSettings.confidentialityLevel}
-              onChange={(e) => setPackageSettings(prev => ({ ...prev, confidentialityLevel: e.target.value }))}
-              className="setting-select"
-            >
-              <option value="public">Public</option>
-              <option value="internal">Internal Use</option>
-              <option value="restricted">Restricted</option>
-              <option value="confidential">Confidential</option>
-            </select>
-          </div>
-        </div>
-        
-        <div className="settings-toggles">
-          <label className="toggle-setting">
-            <input
-              type="checkbox"
-              checked={packageSettings.includeCharts}
-              onChange={(e) => setPackageSettings(prev => ({ ...prev, includeCharts: e.target.checked }))}
-            />
-            <span className="toggle-label">Include Charts & Visualizations</span>
-          </label>
-          
-          <label className="toggle-setting">
-            <input
-              type="checkbox"
-              checked={packageSettings.includeRawData}
-              onChange={(e) => setPackageSettings(prev => ({ ...prev, includeRawData: e.target.checked }))}
-            />
-            <span className="toggle-label">Include Raw Data Tables</span>
-          </label>
-        </div>
-      </div>
-
-      {/* Section Selection */}
-      <div className="section-selection">
-        <h4 className="selection-title">Evidence Sections</h4>
-        
-        <div className="sections-grid">
-          {availableSections.map(section => (
+        <div className="nav-info">
+          <span className="step-indicator">Step {activeStep} of {builderSteps.length}</span>
+          <div className="progress-bar">
             <div 
-              key={section.id} 
-              className={`section-card ${selectedSections[section.id] ? 'selected' : ''} ${section.essential ? 'essential' : ''}`}
+              className="progress-fill"
+              style={{ width: `${(activeStep / builderSteps.length) * 100}%` }}
+            />
+          </div>
+        </div>
+        
+        <button 
+          className="nav-button primary"
+          onClick={activeStep === builderSteps.length ? generateEvidencePackage : nextStep}
+          disabled={activeStep === 1 && !selectedTemplate}
+        >
+          {activeStep === builderSteps.length ? (
+            <>
+              <MdDownload />
+              Generate Package
+            </>
+          ) : (
+            <>
+              Next
+              <MdArrowForward />
+            </>
+          )}
+        </button>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * CHNA Template Selector Component
+ */
+const CHNATemplateSelector = ({ templates, selectedTemplate, onSelectTemplate, evidenceData }) => {
+  return (
+    <div className="chna-template-selector">
+      <div className="template-header">
+        <h3>Choose Your Evidence Package Type</h3>
+        <p className="template-subtitle">
+          Select the format that best fits your stakeholder presentation needs for {evidenceData.areaName}
+        </p>
+      </div>
+      
+      <div className="template-grid">
+        {templates.map(template => {
+          const IconComponent = template.icon;
+          return (
+            <div 
+              key={template.id} 
+              className={`template-card ${selectedTemplate?.id === template.id ? 'selected' : ''}`}
+              onClick={() => onSelectTemplate(template)}
             >
-              <div className="section-header">
-                <label className="section-checkbox">
-                  <input
-                    type="checkbox"
-                    checked={selectedSections[section.id]}
-                    onChange={() => toggleSection(section.id)}
-                    disabled={section.essential}
-                  />
-                  <span className="checkbox-label">{section.title}</span>
-                  {section.essential && <span className="essential-badge">Essential</span>}
-                </label>
-                
-                <span className="section-pages">{section.estimatedPages} pages</span>
+              <div className="template-card-header">
+                <div className="template-icon-wrapper" style={{ backgroundColor: template.color }}>
+                  <IconComponent className="template-icon" />
+                </div>
+                <div className="template-meta">
+                  <h4 className="template-title">{template.title}</h4>
+                  <span className="audience-badge">{template.audience}</span>
+                </div>
               </div>
               
-              <p className="section-description">{section.description}</p>
+              <p className="template-description">{template.description}</p>
+              
+              <div className="template-specs">
+                <div className="spec-item">
+                  <MdDescription className="spec-icon" />
+                  <span>{template.estimatedPages} pages</span>
+                </div>
+                <div className="spec-item">
+                  <MdTimer className="spec-icon" />
+                  <span>{template.timeToGenerate}</span>
+                </div>
+              </div>
+              
+              <div className="template-sections">
+                <h5>Includes:</h5>
+                <div className="section-badges">
+                  {Object.entries(template.sections).filter(([_, included]) => included).map(([sectionId, _]) => (
+                    <span key={sectionId} className="section-badge">
+                      {sectionId.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              
+              <button className="template-select-btn">
+                {selectedTemplate?.id === template.id ? 'Selected' : 'Select Template'}
+              </button>
             </div>
-          ))}
-        </div>
+          );
+        })}
       </div>
-
-      {/* Custom Sections */}
-      <div className="custom-sections">
-        <div className="custom-header">
-          <h4 className="custom-title">Custom Sections</h4>
-          <button onClick={addCustomSection} className="add-section-button">
-            <MdAdd /> Add Custom Section
-          </button>
-        </div>
-        
-        {customSections.length > 0 && (
-          <div className="custom-sections-list">
-            {customSections.map(section => (
-              <CustomSectionEditor
-                key={section.id}
-                section={section}
-                onUpdate={(updates) => updateCustomSection(section.id, updates)}
-                onDelete={() => deleteCustomSection(section.id)}
-              />
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* Generation Controls */}
-      <div className="generation-controls">
-        <div className="controls-info">
-          <div className="package-preview">
-            <MdFolder className="preview-icon" />
-            <div className="preview-details">
-              <span className="preview-title">
-                {packageSettings.title || `Evidence Package - ${evidenceData.areaName}`}
-              </span>
-              <span className="preview-meta">
-                {estimatedPages} pages • {packageSettings.audience} • {packageSettings.confidentialityLevel}
-              </span>
-            </div>
-          </div>
-        </div>
-        
-        <div className="controls-actions">
-          <button 
-            onClick={generateEvidencePackage}
-            disabled={isGenerating || estimatedPages === 0}
-            className="generate-button primary"
-          >
-            {isGenerating ? (
-              <>
-                <div className="loading-spinner small"></div>
-                Generating Package...
-              </>
-            ) : (
-              <>
-                <MdInsertDriveFile />
-                Generate Evidence Package
-              </>
-            )}
-          </button>
-        </div>
-      </div>
-
-      {/* Generated Package Display */}
-      {generatedPackage && (
-        <GeneratedPackageDisplay 
-          package={generatedPackage}
-          onDownload={() => downloadPackage(generatedPackage)}
-          onShare={() => sharePackage(generatedPackage)}
-        />
-      )}
     </div>
   );
 };
@@ -632,11 +816,10 @@ const CustomSectionEditor = ({ section, onUpdate, onDelete }) => {
 /**
  * Generated Package Display Component
  */
-const GeneratedPackageDisplay = ({ package: packageData, onDownload, onShare }) => {
+const GeneratedPackageDisplay = ({ package: packageData, onDownload }) => {
   return (
     <div className="generated-package">
       <div className="package-header">
-        <MdCheck className="success-icon" />
         <div className="package-info">
           <h4 className="package-title">Evidence Package Generated</h4>
           <p className="package-details">
@@ -649,33 +832,363 @@ const GeneratedPackageDisplay = ({ package: packageData, onDownload, onShare }) 
         <button onClick={onDownload} className="download-button">
           <MdDownload /> Download PDF
         </button>
-        <button onClick={onShare} className="share-button">
-          <MdShare /> Share Link
-        </button>
-        <button className="preview-button">
-          <MdVisibility /> Preview
-        </button>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Data Story Builder Component
+ */
+const DataStoryBuilder = ({ evidenceData, selectedTemplate, onUpdateStory }) => {
+  const [storyStructure, setStoryStructure] = useState({
+    problem: {
+      title: `Diabetes Hotspot Identified in ${evidenceData.areaName}`,
+      keyMetric: evidenceData.metrics.diabetes,
+      comparison: 'City Average',
+      severity: 'High Priority'
+    },
+    context: {
+      rootCauses: evidenceData.analysis.topFactors || [],
+      socialDeterminants: evidenceData.analysis.socialFactors || [],
+      riskFactors: evidenceData.analysis.riskFactors || []
+    },
+    solution: {
+      interventions: evidenceData.analysis.recommendedInterventions || [],
+      evidence: 'CDC-approved programs',
+      timeline: '12-month implementation'
+    }
+  });
+
+  const calculateComparison = (value, baseline = 12.5) => {
+    const diff = ((value - baseline) / baseline) * 100;
+    return diff > 0 ? `+${diff.toFixed(1)}%` : `${diff.toFixed(1)}%`;
+  };
+
+  return (
+    <div className="data-story-builder">
+      <div className="story-header">
+        <h3>Your Data Story</h3>
+        <p className="story-subtitle">AI-generated narrative structure for your {selectedTemplate?.title}</p>
       </div>
       
-      <div className="package-metadata">
-        <div className="metadata-grid">
-          <div className="metadata-item">
-            <span className="metadata-label">Generated:</span>
-            <span className="metadata-value">
-              {new Date(packageData.metadata.generatedAt).toLocaleString()}
-            </span>
+      <div className="story-flow">
+        {/* Problem Statement */}
+        <div className="story-section problem-section">
+          <div className="section-header">
+            <div className="section-number">1</div>
+            <h4>The Problem</h4>
+            <span className="section-subtitle">"Here is the health disparity"</span>
           </div>
-          <div className="metadata-item">
-            <span className="metadata-label">Confidence:</span>
-            <span className={`metadata-value confidence-${packageData.metadata.analysisConfidence}`}>
-              {packageData.metadata.analysisConfidence.toUpperCase()}
-            </span>
-          </div>
-          <div className="metadata-item">
-            <span className="metadata-label">Audience:</span>
-            <span className="metadata-value">{packageData.audience}</span>
+          
+          <div className="story-content">
+            <div className="key-finding">
+              <span className="metric-value">{storyStructure.problem.keyMetric}%</span>
+              <span className="metric-label">diabetes prevalence</span>
+              <span className="comparison-badge">
+                {calculateComparison(storyStructure.problem.keyMetric)} vs city average
+              </span>
+            </div>
+            
+            <div className="geographic-context">
+              <MdLocationOn className="context-icon" />
+              <span>{evidenceData.areaName} requires immediate attention</span>
+            </div>
           </div>
         </div>
+
+        {/* Context/Why */}
+        <div className="story-section context-section">
+          <div className="section-header">
+            <div className="section-number">2</div>
+            <h4>The Context</h4>
+            <span className="section-subtitle">"Here's why this disparity exists"</span>
+          </div>
+          
+          <div className="story-content">
+            <div className="root-causes">
+              {storyStructure.context.rootCauses.slice(0, 3).map((cause, idx) => (
+                <div key={idx} className="cause-item">
+                  <div className="cause-strength">{cause.strength}%</div>
+                  <div className="cause-label">{cause.factor}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Solution */}
+        <div className="story-section solution-section">
+          <div className="section-header">
+            <div className="section-number">3</div>
+            <h4>The Solution</h4>
+            <span className="section-subtitle">"Here's our evidence-based action plan"</span>
+          </div>
+          
+          <div className="story-content">
+            <div className="intervention-preview">
+              <div className="intervention-type">
+                {storyStructure.solution.interventions[0]?.type || 'Evidence-based intervention'}
+              </div>
+              <div className="evidence-badge">
+                {storyStructure.solution.evidence}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Package Configuration Panel
+ */
+const PackageConfigurationPanel = ({ packageSettings, onUpdateSettings, outputFormats, evidenceData }) => {
+  return (
+    <div className="package-configuration">
+      <div className="config-header">
+        <h3>Configure Your Evidence Package</h3>
+        <p className="config-subtitle">Customize the details and format for your presentation</p>
+      </div>
+      
+      <div className="config-sections">
+        {/* Basic Settings */}
+        <div className="config-section">
+          <h4>Package Details</h4>
+          <div className="settings-grid">
+            <div className="setting-group">
+              <label htmlFor="package-title">Package Title</label>
+              <input
+                id="package-title"
+                type="text"
+                value={packageSettings.title}
+                onChange={(e) => onUpdateSettings(prev => ({ ...prev, title: e.target.value }))
+                }
+                placeholder={`Diabetes Risk Evidence Package - ${evidenceData.areaName}`}
+                className="setting-input"
+              />
+            </div>
+            
+            <div className="setting-group">
+              <label htmlFor="target-audience">Target Audience</label>
+              <select
+                id="target-audience"
+                value={packageSettings.audience}
+                onChange={(e) => onUpdateSettings(prev => ({ ...prev, audience: e.target.value }))
+                }
+                className="setting-select"
+              >
+                <option value="stakeholders">Stakeholders & Decision Makers</option>
+                <option value="technical">Technical/Medical Professionals</option>
+                <option value="community">Community Leaders</option>
+                <option value="funding">Funding Organizations</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Output Format Selection */}
+        <div className="config-section">
+          <h4>Output Format</h4>
+          <div className="format-options">
+            {outputFormats.map(format => {
+              const IconComponent = format.icon;
+              return (
+                <div 
+                  key={format.id} 
+                  className={`format-option ${packageSettings.outputFormat === format.id ? 'selected' : ''}`}
+                  onClick={() => onUpdateSettings(prev => ({ ...prev, outputFormat: format.id }))
+                  }
+                >
+                  <div className="format-icon-wrapper" style={{ backgroundColor: format.color }}>
+                    <IconComponent className="format-icon" />
+                  </div>
+                  <div className="format-details">
+                    <h5>{format.title}</h5>
+                    <p>{format.description}</p>
+                    <span className="format-best-for">Best for: {format.bestFor}</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Advanced Options */}
+        <div className="config-section">
+          <h4>Advanced Options</h4>
+          <div className="settings-toggles">
+            <label className="toggle-setting">
+              <input
+                type="checkbox"
+                checked={packageSettings.includeCharts}
+                onChange={(e) => onUpdateSettings(prev => ({ ...prev, includeCharts: e.target.checked }))
+                }
+              />
+              <span className="toggle-label">Include Charts & Visualizations</span>
+            </label>
+            
+            <label className="toggle-setting">
+              <input
+                type="checkbox"
+                checked={packageSettings.includeRawData}
+                onChange={(e) => onUpdateSettings(prev => ({ ...prev, includeRawData: e.target.checked }))
+                }
+              />
+              <span className="toggle-label">Include Raw Data Tables</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Generation Interface Component
+ */
+const GenerationInterface = ({ 
+  packageSettings, 
+  selectedSections, 
+  evidenceData, 
+  isGenerating, 
+  generationProgress, 
+  onGenerate, 
+  generatedPackage 
+}) => {
+  const estimatedPages = Object.values(selectedSections).filter(Boolean).length * 3;
+  
+  return (
+    <div className="generation-interface">
+      <div className="generation-header">
+        <h3>Generate Your Evidence Package</h3>
+        <p className="generation-subtitle">Review your selections and create your professional document</p>
+      </div>
+      
+      <div className="generation-content">
+        {!generatedPackage ? (
+          <div className="pre-generation">
+            <div className="package-summary">
+              <h4>Package Summary</h4>
+              <div className="summary-grid">
+                <div className="summary-item">
+                  <span className="summary-label">Title:</span>
+                  <span className="summary-value">{packageSettings.title || 'Evidence Package'}</span>
+                </div>
+                <div className="summary-item">
+                  <span className="summary-label">Format:</span>
+                  <span className="summary-value">{packageSettings.outputFormat}</span>
+                </div>
+                <div className="summary-item">
+                  <span className="summary-label">Pages:</span>
+                  <span className="summary-value">~{estimatedPages} pages</span>
+                </div>
+                <div className="summary-item">
+                  <span className="summary-label">Audience:</span>
+                  <span className="summary-value">{packageSettings.audience}</span>
+                </div>
+              </div>
+            </div>
+            
+            <div className="generation-controls">
+              <button 
+                onClick={onGenerate}
+                disabled={isGenerating}
+                className="generate-button primary"
+              >
+                {isGenerating ? (
+                  <>
+                    <div className="loading-spinner small"></div>
+                    Generating Package...
+                  </>
+                ) : (
+                  <>
+                    <MdInsertDriveFile />
+                    Generate Evidence Package
+                  </>
+                )}
+              </button>
+            </div>
+            
+            {isGenerating && (
+              <div className="generation-progress">
+                <div className="progress-bar">
+                  <div 
+                    className="progress-fill"
+                    style={{ width: `${generationProgress}%` }}
+                  />
+                </div>
+                <p className="progress-text">
+                  {generationProgress < 40 ? 'Analyzing data patterns...' :
+                   generationProgress < 60 ? 'Generating narrative structure...' :
+                   generationProgress < 80 ? 'Creating visualizations...' :
+                   generationProgress < 100 ? 'Compiling evidence package...' :
+                   'Package ready for download!'}
+                </p>
+              </div>
+            )}
+          </div>
+        ) : (
+          <GeneratedPackageDisplay 
+            package={generatedPackage}
+            onDownload={() => downloadPackage(generatedPackage)}
+          />
+        )}
+      </div>
+    </div>
+  );
+};
+
+/**
+ * Package Preview Component
+ */
+const PackagePreview = ({ 
+  evidenceData, 
+  currentStep, 
+  selectedTemplate, 
+  packageSettings, 
+  selectedSections, 
+  estimatedPages 
+}) => {
+  return (
+    <div className="package-preview">
+      <h4 className="preview-title">Package Preview</h4>
+      
+      <div className="preview-content">
+        <div className="preview-header">
+          <div className="preview-icon">
+            <MdFolder />
+          </div>
+          <div className="preview-details">
+            <h5>{packageSettings.title || `Evidence Package - ${evidenceData?.areaName || 'Selected Area'}`}</h5>
+            <p className="preview-meta">
+              {estimatedPages || 0} pages • {packageSettings.audience || 'stakeholders'}
+            </p>
+          </div>
+        </div>
+        
+        <div className="preview-sections">
+          <h6>Included Sections:</h6>
+          <div className="section-list">
+            {selectedSections && Object.entries(selectedSections).filter(([_, included]) => included).map(([sectionId, _]) => (
+              <div key={sectionId} className="section-item">
+                <MdCheck className="section-check" />
+                <span>{sectionId.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {selectedTemplate && (
+          <div className="preview-template">
+            <h6>Template:</h6>
+            <div className="template-info">
+              <span className="template-name">{selectedTemplate.title}</span>
+              <span className="template-audience">{selectedTemplate.audience}</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -739,6 +1252,8 @@ const generatePackageId = () => {
 
 const downloadPackage = async (packageData) => {
   try {
+    console.log('🔄 Starting PDF generation with data:', packageData);
+    
     // Show loading state
     const downloadButton = document.querySelector('.download-button');
     if (downloadButton) {
@@ -746,15 +1261,31 @@ const downloadPackage = async (packageData) => {
       downloadButton.disabled = true;
     }
     
+    // Validate package data
+    if (!packageData || !packageData.areaName) {
+      throw new Error('Invalid package data: Missing required fields');
+    }
+    
+    if (!packageData.metrics) {
+      throw new Error('Invalid package data: Missing metrics');
+    }
+    
+    console.log('✅ Package data validation passed');
+    
     // Generate PDF using the PDF service
+    console.log('🔄 Calling PDF generation service...');
     const pdfDoc = await generateEvidencePackagePDF(packageData);
+    console.log('✅ PDF generated successfully:', pdfDoc);
     
     // Create filename with timestamp
     const timestamp = new Date().toISOString().split('T')[0];
-    const filename = `Evidence_Package_${packageData.areaName}_${timestamp}.pdf`;
+    const areaName = packageData.areaName.replace(/[^a-zA-Z0-9]/g, '_');
+    const filename = `Evidence_Package_${areaName}_${timestamp}.pdf`;
     
     // Trigger download
+    console.log('💾 Triggering download:', filename);
     pdfDoc.save(filename);
+    console.log('🎉 PDF download completed successfully!');
     
     // Reset button state
     if (downloadButton) {
@@ -763,8 +1294,21 @@ const downloadPackage = async (packageData) => {
     }
     
   } catch (error) {
-    console.error('PDF download failed:', error);
-    alert('Failed to generate PDF. Please try again.');
+    console.error('❌ PDF download failed:', error);
+    console.error('📋 Error details:', {
+      message: error.message,
+      stack: error.stack,
+      packageData: packageData
+    });
+    
+    // Show user-friendly error message
+    const errorMessage = error.message.includes('jsPDF') 
+      ? 'PDF generation library error. Please refresh the page and try again.'
+      : error.message.includes('Invalid package data')
+      ? 'Invalid data for PDF generation. Please select an area and try again.'
+      : `Failed to generate PDF: ${error.message}`;
+    
+    alert(errorMessage);
     
     // Reset button state
     const downloadButton = document.querySelector('.download-button');
@@ -773,11 +1317,6 @@ const downloadPackage = async (packageData) => {
       downloadButton.disabled = false;
     }
   }
-};
-
-const sharePackage = (packageData) => {
-  // This would generate shareable link
-  console.log('Sharing package:', packageData.id);
 };
 
 export default EvidenceBuilder;

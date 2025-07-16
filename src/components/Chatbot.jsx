@@ -11,22 +11,12 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 
 // Zustand store for chat state
 const useChatStore = create((set) => ({
-  messages: [
-    {
-      role: 'system',
-      content: 'Ask me anything about this area\'s health data!'
-    }
-  ],
+  messages: [],
   addMessage: (message) => set((state) => ({
     messages: [...state.messages, message]
   })),
   clearMessages: () => set({ 
-    messages: [
-      {
-        role: 'system',
-        content: 'Let\'s explore this area\'s health data!'
-      }
-    ] 
+    messages: []
   }),
 }));
 

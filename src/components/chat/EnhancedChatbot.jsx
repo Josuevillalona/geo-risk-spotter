@@ -213,7 +213,7 @@ const EnhancedChatbot = ({ selectedArea, messages, onAddMessage, onClearMessages
             disabled={isLoading || !input.trim()}
             title="Send message"
           >
-            <MdSend />
+            <span className="send-icon">→</span>
           </button>
         </div>
         

@@ -386,10 +386,14 @@ async def get_enhanced_recommendations_endpoint(request: RecommendationRequest):
         raise HTTPException(status_code=501, detail="Enhanced RAG is disabled. Use /api/recommendations instead.")
     
     try:
+        # Generate smart query from health data for vector similarity
+        health_data = request.health_data.dict()
+        smart_query = _generate_smart_query_from_health_data(health_data)
+        
         # Use enhanced intervention service
         recommendations = await get_enhanced_relevant_interventions(
-            request.health_data.dict(),
-            query="",  # No specific query for this endpoint
+            health_data,
+            query=smart_query,
             max_results=5
         )
         
@@ -429,6 +433,50 @@ async def get_enhanced_recommendations_endpoint(request: RecommendationRequest):
     except Exception as e:
         print(f"❌ Enhanced recommendations error: {e}")
         raise HTTPException(status_code=500, detail=f"Error generating enhanced recommendations: {str(e)}")
+
+def _generate_smart_query_from_health_data(health_data: dict) -> str:
+    """
+    Generate an intelligent query from health data for vector similarity matching.
+    This enables meaningful "Health Context Match" scores when no explicit query is provided.
+    """
+    query_terms = []
+    
+    # Analyze health data and build contextual query
+    diabetes_rate = health_data.get('DIABETES_CrudePrev', 0)
+    obesity_rate = health_data.get('OBESITY_CrudePrev', 0)
+    inactivity_rate = health_data.get('LPA_CrudePrev', 0)
+    smoking_rate = health_data.get('CSMOKING_CrudePrev', 0)
+    hypertension_rate = health_data.get('BPHIGH_CrudePrev', 0)
+    food_insecurity_rate = health_data.get('FOODINSECU_CrudePrev', 0)
+    healthcare_access_rate = health_data.get('ACCESS2_CrudePrev', 0)
+    
+    # Priority health issues based on rates
+    if diabetes_rate > 15:
+        query_terms.append("diabetes prevention blood sugar glucose management")
+    if obesity_rate > 25:
+        query_terms.append("obesity weight management BMI reduction")
+    if inactivity_rate > 20:
+        query_terms.append("physical activity exercise fitness walking")
+    if smoking_rate > 15:
+        query_terms.append("smoking cessation tobacco quit")
+    if hypertension_rate > 30:
+        query_terms.append("blood pressure hypertension cardiovascular")
+    if food_insecurity_rate > 10:
+        query_terms.append("food security nutrition access healthy eating")
+    if healthcare_access_rate > 15:
+        query_terms.append("healthcare access mobile health services")
+    
+    # Add general health promotion terms
+    query_terms.append("community health chronic disease prevention")
+    
+    # Create coherent query
+    smart_query = " ".join(query_terms)
+    
+    # If no specific health issues, use general diabetes prevention query
+    if not query_terms or smart_query.strip() == "community health chronic disease prevention":
+        smart_query = "diabetes prevention community health chronic disease management"
+    
+    return smart_query
 
 if __name__ == "__main__":
     import uvicorn

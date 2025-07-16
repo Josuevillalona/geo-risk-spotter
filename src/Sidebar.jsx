@@ -1,53 +1,51 @@
 import React, { useState, useMemo } from 'react';
 import RecommendationsTab from './components/RecommendationsTab';
 import EnhancedInterventionDisplay from './components/EnhancedInterventionDisplay';
-import SaveAnalysisButton from './components/sidebar/SaveAnalysisButton';
 import SavedAnalysesList from './components/sidebar/SavedAnalysesList';
 import HeroMetrics from './components/sidebar/HeroMetrics';
 import EnhancedMetricsDisplay from './components/sidebar/EnhancedMetricsDisplay';
 import RootCausePanel from './components/sidebar/RootCausePanel';
 import NeighborhoodComparison from './components/sidebar/NeighborhoodComparison';
 import EvidenceBuilder from './components/evidence/EvidenceBuilder';
-import PresentationMode from './components/presentation/PresentationMode';
 import { useAppStore } from './store';
-import { MdAnalytics, MdChat, MdBookmark, MdBarChart, MdTrendingUp, MdSearch, MdAssignment, MdSlideshow } from 'react-icons/md';
+import { MdAnalytics, MdChat, MdBookmark, MdBarChart, MdTrendingUp, MdSearch, MdAssignment } from 'react-icons/md';
 import './components/sidebar/EnhancedMetricsDisplay.css';
+import './components/sidebar/ModernSidebar.css';
 
 const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
-  const [activeSection, setActiveSection] = useState('situation');
+  const [activeSection, setActiveSection] = useState('intelligence');
   const [enhancedLoading, setEnhancedLoading] = useState(false);
   const [showEnhancedRAG, setShowEnhancedRAG] = useState(false);
   const [showPresentationMode, setShowPresentationMode] = useState(false);
-  const [evidenceSubSection, setEvidenceSubSection] = useState('builder');
 
   // Get borough state from store
   const { selectedBorough, viewMode, boroughData, isBoroughDataLoading, isZipCodeDataLoading } = useAppStore();
 
-  // Define workflow-driven sections for Public Health Planners
+  // Define workflow-driven sections for Public Health Planners - CONSOLIDATED
   const PLANNER_WORKFLOW_SECTIONS = [
     {
-      id: 'situation',
-      label: 'Situation Assessment',
+      id: 'intelligence',
+      label: 'Hotspot Intelligence',
       icon: MdAnalytics,
-      description: 'Current health status and risk profile'
+      description: 'Comprehensive risk assessment and driver analysis'
     },
     {
-      id: 'exploration', 
-      label: 'Root Cause Analysis',
-      icon: MdSearch,
-      description: 'Understanding the drivers behind the data'
+      id: 'interventions',
+      label: 'Proven Interventions',
+      icon: MdTrendingUp,
+      description: 'Evidence-based programs matched to your community profile'
     },
     {
       id: 'planning',
       label: 'Action Planning', 
       icon: MdChat,
-      description: 'Evidence-based intervention recommendations'
+      description: 'AI-powered consultation for intervention strategy'
     },
     {
       id: 'evidence',
-      label: 'Decision Support',
+      label: 'Report Builder',
       icon: MdAssignment,
-      description: 'Stakeholder materials and saved analysis'
+      description: 'Professional report generation for stakeholders'
     }
   ];
 
@@ -203,230 +201,301 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
     );
   }
 
-  const renderSituationAssessment = () => (
-    <div className="section-content">
-      {/* AI Summary - First and Prominent */}
-      <div className="ai-analysis-header">
-        <div className="section-header-clean">
-          <MdTrendingUp className="section-icon-clean" />
-          <h2>AI Health Analysis</h2>
-        </div>
-        {isLoading || 
-         (viewMode === 'borough' && isBoroughDataLoading) || 
-         (viewMode === 'zipcode' && isZipCodeDataLoading) ? (
-          <div className="ai-loading-state-clean">
-            <div className="loading-spinner"></div>
-            <span>🧠 Analyzing diabetes risk patterns...</span>
-            <small style={{ display: 'block', marginTop: '8px', opacity: 0.7, color: '#6b7280' }}>
-              {viewMode === 'borough' && isBoroughDataLoading ? 
-                'Loading borough data for analysis...' :
-                viewMode === 'zipcode' && isZipCodeDataLoading ?
-                'Loading zip code data for analysis...' :
-                'Processing 8 health indicators with AI insights'
-              }
-            </small>
-          </div>
-        ) : (
-          <div className="ai-summary-clean">
-            <div className="ai-content">
-              {aiSummary}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Hero Metrics - Prominent Risk Display */}
-      <HeroMetrics 
-        keyMetrics={keyMetrics}
-        displayData={displayData}
-      />
-
-      {/* Enhanced Metrics Display - New comprehensive view */}
-      <EnhancedMetricsDisplay keyMetrics={keyMetrics} />
-
-      {/* Key Metrics Grid - Right after Top Concerns */}
-      <div className="health-metrics-grid">
-        <div className="section-header">
-          <MdBarChart className="section-icon" />
-          <h3>Detailed Health Metrics</h3>
-          {(displayData?.type === 'borough' || displayData?.type === 'borough-summary') && (
-            <small className="metrics-context">
-              Borough averages across {displayData?.type === 'borough-summary' ? 
-                boroughData?.[selectedBorough]?.zipCodeCount || 0 : 
-                selectedArea?.properties?.zipCodeCount || 0
-              } zip codes
-            </small>
-          )}
-        </div>
-        {isLoading || 
-         (viewMode === 'borough' && isBoroughDataLoading) || 
-         (viewMode === 'zipcode' && isZipCodeDataLoading) ? (
-          <div className="metrics-loading">
-            <div className="metric-skeleton"></div>
-            <div className="metric-skeleton"></div>
-            <div className="metric-skeleton"></div>
-            <div className="metric-skeleton"></div>
-            <div className="metric-skeleton"></div>
-            <div className="metric-skeleton"></div>
-            <div className="metric-skeleton"></div>
-            <div className="metric-skeleton"></div>
-          </div>
-        ) : (
-          <div className="metrics-quick-view">
-            <div className="metric-card primary" title="Overall diabetes risk score (0-10 scale) - Higher scores indicate greater risk">
-              <span className="metric-label">Risk Score</span>
-              <span className="metric-value">
-                {keyMetrics?.riskScore || 'N/A'}
-              </span>
-            </div>
-            <div className="metric-card" title="Percentage of adults aged 20+ diagnosed with diabetes">
-              <span className="metric-label">Diabetes</span>
-              <span className="metric-value">
-                {keyMetrics?.diabetes || 'N/A'}
-              </span>
-            </div>
-            <div className="metric-card" title="Percentage of adults with Body Mass Index (BMI) ≥30">
-              <span className="metric-label">Obesity</span>
-              <span className="metric-value">
-                {keyMetrics?.obesity || 'N/A'}
-              </span>
-            </div>
-            <div className="metric-card" title="Percentage of adults with high blood pressure or hypertension">
-              <span className="metric-label">Hypertension</span>
-              <span className="metric-value">
-                {keyMetrics?.hypertension || 'N/A'}
-              </span>
-            </div>
-            <div className="metric-card" title="Percentage of adults with no leisure-time physical activity">
-              <span className="metric-label">Physical Inactivity</span>
-              <span className="metric-value">
-                {keyMetrics?.physicalActivity || 'N/A'}
-              </span>
-            </div>
-            <div className="metric-card" title="Percentage of adults who currently smoke cigarettes">
-              <span className="metric-label">Current Smoking</span>
-              <span className="metric-value">
-                {keyMetrics?.smoking || 'N/A'}
-              </span>
-            </div>
-            <div className="metric-card" title="Percentage of households experiencing limited access to adequate food">
-              <span className="metric-label">Food Insecurity</span>
-              <span className="metric-value">
-                {keyMetrics?.foodInsecurity || 'N/A'}
-              </span>
-            </div>
-            <div className="metric-card" title="Percentage of adults with limited access to healthcare services">
-              <span className="metric-label">Healthcare Access</span>
-              <span className="metric-value">
-                {keyMetrics?.healthcareAccess || 'N/A'}
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
-  const renderRootCauseExploration = () => {
-    // Prepare data for correlation analysis
-    const areaData = displayData?.data;
-    const comparisonData = null; // Could be city/state averages in future
-    
-    // Mock neighborhood data for demonstration (will be enhanced with real neighbor selection)
-    const mockNeighborhoodAreas = [
-      {
-        DIABETES_CrudePrev: 8.5,
-        OBESITY_CrudePrev: 28.2,
-        hypertension_avg: 32.1,
-        physical_inactivity_avg: 22.8,
-        smoking_avg: 14.3,
-        food_insecurity_avg: 12.1
-      },
-      {
-        DIABETES_CrudePrev: 9.8,
-        OBESITY_CrudePrev: 31.5,
-        hypertension_avg: 35.7,
-        physical_inactivity_avg: 26.1,
-        smoking_avg: 16.8,
-        food_insecurity_avg: 15.4
+  const renderHotspotIntelligence = () => {
+    // Get area name for display
+    const getAreaDisplayText = () => {
+      if (displayData?.type === 'borough' || displayData?.type === 'borough-summary') {
+        return `${displayData.name} Borough`;
+      } else if (displayData?.type === 'zipcode') {
+        return `ZIP Code ${displayData.name}`;
+      } else if (selectedArea?.properties?.zip_code) {
+        return `ZIP Code ${selectedArea.properties.zip_code}`;
+      } else if (selectedArea?.properties?.borough) {
+        return `${selectedArea.properties.borough} Borough`;
       }
-    ];
+      return 'Selected Area';
+    };
+
+    // Get risk category for integrated display
+    const getRiskCategory = (score) => {
+      const riskValue = parseFloat(score);
+      if (isNaN(riskValue)) return { label: 'Assessment Pending', class: 'risk-unknown' };
+      if (riskValue >= 20) return { label: 'High Risk', class: 'risk-high' };
+      if (riskValue >= 15) return { label: 'Moderate Risk', class: 'risk-moderate' };
+      if (riskValue >= 10) return { label: 'Elevated Risk', class: 'risk-elevated' };
+      return { label: 'Lower Risk', class: 'risk-low' };
+    };
+
+    const riskCategory = getRiskCategory(keyMetrics?.riskScore);
 
     return (
       <div className="section-content">
-        <div className="section-header">
-          <MdSearch className="section-icon" />
-          <h3>Root Cause Analysis</h3>
-          <small className="section-description">
-            Understanding why this area shows elevated diabetes risk
-          </small>
+        {/* UNIFIED: AI Analysis + Primary Risk Display */}
+        <div className="intelligence-header">
+          <div className="section-header-modern">
+            <div className="header-icon-wrapper">
+              <MdAnalytics className="section-icon-modern" />
+            </div>
+            <div className="header-text">
+              <h2 className="section-title-modern">Hotspot Intelligence</h2>
+              <p className="section-subtitle-modern">{getAreaDisplayText()}</p>
+            </div>
+          </div>
+          
+          {isLoading || 
+           (viewMode === 'borough' && isBoroughDataLoading) || 
+           (viewMode === 'zipcode' && isZipCodeDataLoading) ? (
+            <div className="ai-loading-modern">
+              <div className="loading-spinner-modern"></div>
+              <div className="loading-text">
+                <span className="loading-primary">Analyzing diabetes risk patterns</span>
+                <small className="loading-secondary">
+                  {viewMode === 'borough' && isBoroughDataLoading ? 
+                    'Loading borough data for analysis...' :
+                    viewMode === 'zipcode' && isZipCodeDataLoading ?
+                    'Loading zip code data for analysis...' :
+                    'Processing health indicators with AI insights'
+                  }
+                </small>
+              </div>
+            </div>
+          ) : (
+            <div className="ai-summary-modern">
+              <div className="ai-content-modern">
+                {aiSummary}
+              </div>
+              
+              {/* INTEGRATED: Primary Risk Score with AI Summary */}
+              <div className="primary-risk-integrated">
+                <div className="risk-assessment-card">
+                  <div className="risk-header">
+                    <span className="risk-label">Overall Risk Assessment</span>
+                    <span className={`risk-badge ${riskCategory.class}`}>
+                      {riskCategory.label}
+                    </span>
+                  </div>
+                  <div className="risk-score-display">
+                    <span className="risk-score-value">
+                      {keyMetrics?.riskScore || 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        
-        {/* Layer 2: Root Cause Analysis Panel */}
-        <RootCausePanel 
-          areaData={areaData}
-          comparisonData={comparisonData}
-          isLoading={isLoading || isBoroughDataLoading || isZipCodeDataLoading}
-        />
-        
-        {/* Layer 2: Neighborhood Comparison */}
-        <NeighborhoodComparison 
-          targetArea={areaData}
-          neighborhoodAreas={selectedArea ? mockNeighborhoodAreas : []}
-          isLoading={isLoading || isBoroughDataLoading || isZipCodeDataLoading}
-          viewMode={viewMode}
-        />
+
+        {/* OPTIMIZED: Single Comprehensive Metrics Display */}
+        <div className="key-indicators-modern">
+          <div className="section-header-modern">
+            <div className="header-icon-wrapper">
+              <MdBarChart className="section-icon-modern" />
+            </div>
+            <div className="header-text">
+              <h3 className="section-title-modern">Key Health Indicators</h3>
+              <p className="section-subtitle-modern">
+                Essential metrics for intervention planning
+                {(displayData?.type === 'borough' || displayData?.type === 'borough-summary') && (
+                  <span className="context-note">
+                    {' '}• Borough averages across {displayData?.type === 'borough-summary' ? 
+                      boroughData?.[selectedBorough]?.zipCodeCount || 0 : 
+                      selectedArea?.properties?.zipCodeCount || 0
+                    } zip codes
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+          
+          {isLoading || 
+           (viewMode === 'borough' && isBoroughDataLoading) || 
+           (viewMode === 'zipcode' && isZipCodeDataLoading) ? (
+            <div className="metrics-loading-modern">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="metric-skeleton-modern"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="metrics-grid-optimized">
+              {/* Primary Metric: Diabetes Prevalence */}
+              <div className="metric-card-modern primary" title="Percentage of adults aged 20+ diagnosed with diabetes">
+                <div className="metric-header">
+                  <span className="metric-label">Diabetes Prevalence</span>
+                  <span className="metric-badge primary">Primary</span>
+                </div>
+                <span className="metric-value-modern primary">
+                  {keyMetrics?.diabetes || 'N/A'}
+                </span>
+              </div>
+              
+              {/* Core Risk Factors */}
+              <div className="metric-card-modern" title="Percentage of adults with BMI ≥30">
+                <div className="metric-header">
+                  <span className="metric-label">Obesity Rate</span>
+                </div>
+                <span className="metric-value-modern">
+                  {keyMetrics?.obesity || 'N/A'}
+                </span>
+              </div>
+              
+              <div className="metric-card-modern" title="Percentage of adults with high blood pressure">
+                <div className="metric-header">
+                  <span className="metric-label">Hypertension</span>
+                </div>
+                <span className="metric-value-modern">
+                  {keyMetrics?.hypertension || 'N/A'}
+                </span>
+              </div>
+              
+              <div className="metric-card-modern" title="Percentage of adults with no leisure-time physical activity">
+                <div className="metric-header">
+                  <span className="metric-label">Physical Inactivity</span>
+                </div>
+                <span className="metric-value-modern">
+                  {keyMetrics?.physicalActivity || 'N/A'}
+                </span>
+              </div>
+              
+              <div className="metric-card-modern" title="Percentage of households with limited food access">
+                <div className="metric-header">
+                  <span className="metric-label">Food Insecurity</span>
+                </div>
+                <span className="metric-value-modern">
+                  {keyMetrics?.foodInsecurity || 'N/A'}
+                </span>
+              </div>
+              
+              <div className="metric-card-modern" title="Percentage of adults with limited healthcare access">
+                <div className="metric-header">
+                  <span className="metric-label">Healthcare Access</span>
+                </div>
+                <span className="metric-value-modern">
+                  {keyMetrics?.healthcareAccess || 'N/A'}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ENHANCED: Additional Context (Collapsible) */}
+        <div className="additional-context-modern">
+          <EnhancedMetricsDisplay keyMetrics={keyMetrics} />
+        </div>
+
+        {/* INTEGRATED: Root Cause Analysis - Seamless Transition */}
+        <div className="root-cause-integration-modern">
+          <div className="section-transition-modern">
+            <div className="transition-line"></div>
+            <div className="transition-content">
+              <div className="section-header-modern">
+                <div className="header-icon-wrapper">
+                  <MdSearch className="section-icon-modern" />
+                </div>
+                <div className="header-text">
+                  <h3 className="section-title-modern">Understanding the Drivers</h3>
+                  <p className="section-subtitle-modern">
+                    Why does this area show elevated diabetes risk?
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div className="root-cause-components-modern">
+            <RootCausePanel 
+              areaData={displayData?.data}
+              comparisonData={null}
+              isLoading={isLoading || isBoroughDataLoading || isZipCodeDataLoading}
+            />
+            
+            <NeighborhoodComparison 
+              targetArea={displayData?.data}
+              neighborhoodAreas={selectedArea ? [
+                {
+                  DIABETES_CrudePrev: 8.5,
+                  OBESITY_CrudePrev: 28.2,
+                  hypertension_avg: 32.1,
+                  physical_inactivity_avg: 22.8,
+                  smoking_avg: 14.3,
+                  food_insecurity_avg: 12.1
+                },
+                {
+                  DIABETES_CrudePrev: 9.8,
+                  OBESITY_CrudePrev: 31.5,
+                  hypertension_avg: 35.7,
+                  physical_inactivity_avg: 26.1,
+                  smoking_avg: 16.8,
+                  food_insecurity_avg: 15.4
+                }
+              ] : []}
+              isLoading={isLoading || isBoroughDataLoading || isZipCodeDataLoading}
+              viewMode={viewMode}
+            />
+          </div>
+        </div>
       </div>
     );
   };
 
-  const renderActionPlanning = () => (
+  const renderProvenInterventions = () => (
     <div className="section-content">
-      {/* Enhanced RAG Toggle */}
-      <div className="enhanced-rag-toggle">
-        <div className="toggle-header">
-          <span className="toggle-label">Enhanced RAG Analysis</span>
-          <button 
-            className={`toggle-btn ${showEnhancedRAG ? 'active' : ''}`}
-            onClick={() => setShowEnhancedRAG(!showEnhancedRAG)}
-          >
-            <span className="toggle-slider"></span>
-          </button>
+      <div className="section-header-modern">
+        <div className="header-icon-wrapper">
+          <MdTrendingUp className="section-icon-modern" />
         </div>
-        <p className="toggle-description">
-          Get advanced AI-powered recommendations with detailed scoring
-        </p>
+        <div className="header-text">
+          <h2 className="section-title-modern">Proven Interventions</h2>
+          <p className="section-subtitle-modern">
+            Evidence-based programs matched to your community's health profile
+          </p>
+        </div>
+      </div>
+      
+      <div className="intervention-matching-info">
+        <div className="info-card-modern">
+          <div className="info-icon">🎯</div>
+          <div className="info-content">
+            <h3>Smart Matching</h3>
+            <p>Programs proven successful in similar communities</p>
+          </div>
+        </div>
+        
+        <div className="info-card-modern">
+          <div className="info-icon">📊</div>
+          <div className="info-content">
+            <h3>Evidence-Based</h3>
+            <p>Implementation details and success metrics included</p>
+          </div>
+        </div>
       </div>
 
-      {/* Enhanced RAG or Regular Chat */}
-      {showEnhancedRAG ? (
-        <div className="enhanced-rag-container">
-          <div className="enhanced-rag-info">
-            <div className="info-header">
-              <span className="rocket-icon">🚀</span>
-              <span className="info-title">Phase B: Enhanced RAG Intelligence</span>
-            </div>
-            <p className="info-description">
-              Advanced AI-powered recommendations using vector similarity, health keyword analysis, 
-              and implementation context scoring. Get transparent, evidence-based intervention 
-              suggestions with detailed scoring breakdowns.
-            </p>
-          </div>
-          <EnhancedInterventionDisplay 
-            selectedArea={selectedArea} 
-            isLoading={enhancedLoading}
-            setIsLoading={setEnhancedLoading}
-          />
+      <div className="enhanced-intervention-container">
+        <EnhancedInterventionDisplay 
+          selectedArea={selectedArea} 
+          isLoading={enhancedLoading}
+          setIsLoading={setEnhancedLoading}
+        />
+      </div>
+    </div>
+  );
+
+  const renderActionPlanning = () => (
+    <div className="section-content">
+      <div className="section-header-modern">
+        <div className="header-icon-wrapper">
+          <MdChat className="section-icon-modern" />
         </div>
-      ) : (
-        <div className="chatbot-container">
-          <div className="section-header">
-            <MdChat className="section-icon" />
-            <h3>AI Assistant</h3>
-          </div>
-          <RecommendationsTab selectedArea={selectedArea} />
+        <div className="header-text">
+          <h2 className="section-title-modern">Action Planning</h2>
+          <p className="section-subtitle-modern">
+            AI-powered consultation for intervention strategy and implementation
+          </p>
         </div>
-      )}
+      </div>
+
+      <div className="chatbot-container-modern">
+        <RecommendationsTab selectedArea={selectedArea} />
+      </div>
     </div>
   );
 
@@ -436,98 +505,20 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
     
     return (
       <div className="section-content">
-        <div className="section-header">
-          <MdAssignment className="section-icon" />
-          <h3>Evidence & Decision Support</h3>
-          <small className="section-description">
-            Professional materials for stakeholder presentations and funding requests
-          </small>
-        </div>
-        
-        {/* Evidence Section Navigation */}
-        <div className="evidence-navigation">
-          <button 
-            className={`evidence-nav-btn ${evidenceSubSection === 'builder' ? 'active' : ''}`}
-            onClick={() => setEvidenceSubSection('builder')}
-          >
-            <MdAssignment />
-            Evidence Builder
-          </button>
-          <button 
-            className={`evidence-nav-btn ${evidenceSubSection === 'presentation' ? 'active' : ''}`}
-            onClick={() => setEvidenceSubSection('presentation')}
-          >
-            <MdSlideshow />
-            Presentation Mode
-          </button>
-          <button 
-            className={`evidence-nav-btn ${evidenceSubSection === 'history' ? 'active' : ''}`}
-            onClick={() => setEvidenceSubSection('history')}
-          >
-            <MdBookmark />
-            Analysis History
-          </button>
-        </div>
-        
-        {/* Evidence Sub-Section Content */}
-        {evidenceSubSection === 'builder' && (
-          <EvidenceBuilder 
-            areaData={areaData}
-            onPackageGenerated={(packageData) => {
-              // Package generation complete - could trigger notification or other actions
-            }}
-            className="evidence-section"
-          />
-        )}
-        
-        {evidenceSubSection === 'presentation' && (
-          <div className="presentation-section">
-            <div className="presentation-intro">
-              <h4>Stakeholder Presentation</h4>
-              <p>Create professional slide presentations for decision-makers and stakeholders.</p>              <button
-                className="launch-presentation-btn"
-                onClick={() => setShowPresentationMode(true)}
-                disabled={!areaData}
-              >
-                <MdSlideshow />
-                Launch Presentation Mode
-              </button>
-            </div>
-            
-            {areaData && (
-              <div className="presentation-preview">
-                <h5>Available Slides</h5>
-                <div className="slide-list">
-                  <div className="slide-item">� Executive Summary</div>
-                  <div className="slide-item">📍 Risk Overview</div>
-                  <div className="slide-item">🔍 Root Cause Analysis</div>
-                  <div className="slide-item">💡 Action Plan</div>
-                  <div className="slide-item">� Evidence & Data</div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-        
-        {evidenceSubSection === 'history' && (
-          <div className="evidence-section">
-            <h4>Analysis History</h4>
-            <SavedAnalysesList />
-          </div>
-        )}
+        {/* Report Builder Content */}
+        <EvidenceBuilder 
+          areaData={areaData}
+          onPackageGenerated={(packageData) => {
+            // Package generation complete - could trigger notification or other actions
+          }}
+          className="report-builder-section"
+        />
       </div>
     );
   };
 
   return (
     <div className="sidebar-wrapper">
-      {/* Save Analysis Button */}
-      <SaveAnalysisButton 
-        selectedArea={selectedArea}
-        aiSummary={aiSummary}
-        isLoading={isLoading}
-      />
-      
       {/* Section Navigation */}
       <div className="section-navigation" role="tablist">
         {PLANNER_WORKFLOW_SECTIONS.map(section => {
@@ -557,14 +548,14 @@ const Sidebar = ({ selectedArea, isLoading, aiSummary }) => {
       
       {/* Section Content */}
       <div className="section-container">
-        {activeSection === 'situation' && (
-          <div role="tabpanel" id="situation-panel" aria-labelledby="situation-tab">
-            {renderSituationAssessment()}
+        {activeSection === 'intelligence' && (
+          <div role="tabpanel" id="intelligence-panel" aria-labelledby="intelligence-tab">
+            {renderHotspotIntelligence()}
           </div>
         )}
-        {activeSection === 'exploration' && (
-          <div role="tabpanel" id="exploration-panel" aria-labelledby="exploration-tab">
-            {renderRootCauseExploration()}
+        {activeSection === 'interventions' && (
+          <div role="tabpanel" id="interventions-panel" aria-labelledby="interventions-tab">
+            {renderProvenInterventions()}
           </div>
         )}
         {activeSection === 'planning' && (
