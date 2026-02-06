@@ -20,11 +20,13 @@ import {
   MdArrowForward,
   MdArrowBack,
   MdCheckCircle,
-  MdRadioButtonUnchecked
+  MdRadioButtonUnchecked,
+  MdAutoAwesome
 } from 'react-icons/md';
 import { useAppStore } from '../../store';
 import { generateEvidencePackagePDF } from '../../services/pdfGeneration';
 import { analyzeRootCauses } from '../../services/correlationAnalysis';
+import { getApiEndpoint } from '../../services/chatService';
 
 /**
  * Report Builder Component
@@ -393,12 +395,62 @@ const EvidenceBuilder = ({
     try {
       console.log('🔄 Generating evidence package with data:', evidenceData);
       
-      // Simulate package generation
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      let finalSummary = evidenceData.summary;
+
+      // 1. Generate AI Summary if missing
+      if (!finalSummary || finalSummary.trim() === 'Health risk analysis for the selected area') {
+        setGenerationProgress(20);
+        console.log('📝 AI Summary missing, generating on-the-fly...');
+        
+        try {
+          // Construct a prompt for the summary
+          const prompt = `Analyze the diabetes risk profile for ${evidenceData.areaName}. ` +
+            `Key stats: Diabetes Rate ${evidenceData.metrics.diabetes}%, Obesity ${evidenceData.metrics.obesity}%, ` +
+            `Risk Score ${evidenceData.metrics.riskScore}. ` +
+            `Provide a professional 2-paragraph executive summary for a public health report.`;
+
+          // Prepare request to backend
+          const enhancedQuery = {
+             context: { viewMode: 'zipcode' }, // Simplified context
+             intent: 'analysis',
+             boroughContext: null
+          };
+          
+          const endpoint = getApiEndpoint(enhancedQuery);
+          
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              message: prompt,
+              messages: [],
+              selected_area: evidenceData.rawProperties || {}, // Pass properties if available
+              context: {
+                viewMode: 'zipcode',
+                selectedBorough: 'All'
+              }
+            })
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            finalSummary = data.response;
+            console.log('✅ AI Summary generated successfully');
+          } else {
+            console.warn('⚠️ Failed to generate AI summary:', response.status);
+            finalSummary = "Summary could not be generated at this time. Please rely on the data metrics provided below.";
+          }
+        } catch (err) {
+          console.error('❌ Error generating AI summary:', err);
+          finalSummary = "Summary generation unavailable.";
+        }
+      }
+
+      setGenerationProgress(50);
       
       // Ensure proper data structure for PDF generation
       const packageData = {
-        id: generatePackageId(),
+        id: `pkg-${Date.now().toString(36)}`,
         title: packageSettings.title || `Diabetes Risk Evidence Package - ${evidenceData.areaName}`,
         areaName: evidenceData.areaName,
         audience: packageSettings.audience,
@@ -428,7 +480,7 @@ const EvidenceBuilder = ({
           ]
         },
         
-        summary: evidenceData.summary || 'Health risk analysis for the selected area',
+        summary: finalSummary, // Use the fetched or existing summary
         sections: selectedSections,
         customSections: customSections.filter(s => !s.isEditing),
         metadata: {
@@ -438,13 +490,26 @@ const EvidenceBuilder = ({
           dataSource: 'NYC Department of Health and Mental Hygiene',
           analysisConfidence: evidenceData.confidence || 'moderate'
         },
-        downloadUrl: null // Would be set after actual generation
+        downloadUrl: null 
       };
       
       // Add sections content
       packageData.sections = generateSectionContents();
       
-      console.log('✅ Package data prepared:', packageData);
+      setGenerationProgress(80);
+      console.log('📄 Generating PDF document...');
+
+      // 2. Generate PDF using the service
+      const pdfResult = await generateEvidencePackagePDF(packageData);
+      
+      setGenerationProgress(100);
+      console.log('✅ PDF Generated successfully');
+
+      // 3. Trigger Download
+      const filename = `RiskPulse_Report_${evidenceData.areaName.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.pdf`;
+      pdfResult.save(filename);
+      
+      console.log('✅ Package data prepared and downloaded:', packageData);
       
       setGeneratedPackage(packageData);
       

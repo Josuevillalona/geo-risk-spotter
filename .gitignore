@@ -65,3 +65,5 @@ git-filter-repo-2.47.0/
 
 # Large data files that should be hosted on S3
 public/ny_new_york_zip_codes_geo.min.json
+public/ny_new_york_zip_codes_health.geojson
+public/PLACES__ZCTA_Data__GIS_Friendly_Format_*.csv

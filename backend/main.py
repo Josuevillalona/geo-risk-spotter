@@ -165,7 +165,7 @@ async def analyze_health_data(data: HealthData):
                     "X-Title": "YOUR_SITE_NAME" # Optional. Site title for rankings on openrouter.ai.
                 },
                 json={
-                    "model": "mistralai/mistral-7b-instruct:free",
+                    "model": "arcee-ai/trinity-large-preview:free",
                     "messages": [{"role": "user", "content": prompt}]
                 },
                 timeout=60.0 # Add a timeout for the API call
@@ -216,7 +216,7 @@ async def get_recommendations(request: RecommendationRequest):
                     "X-Title": "YOUR_SITE_NAME"
                 },
                 json={
-                    "model": "mistralai/mistral-7b-instruct:free",
+                    "model": "arcee-ai/trinity-large-preview:free",
                     "messages": [{"role": "user", "content": prompt}]
                 },
                 timeout=60.0
@@ -332,14 +332,19 @@ async def chat(request: ChatRequest):
                     "Content-Type": "application/json"
                 },
                 json={
-                    "model": "mistralai/mistral-7b-instruct:free",  # Free model available on OpenRouter
+                    "model": "arcee-ai/trinity-large-preview:free",  # Free model available on OpenRouter
                     "messages": messages
                 }
             )
             
             if response.status_code != 200:
-                print(f"OpenRouter API error: {response.status_code} - {response.text}")
-                raise HTTPException(status_code=response.status_code, detail="Error from OpenRouter API")
+                print(f"OpenRouter API error: {response.status_code} - {response.text}", flush=True)
+                # Fallback response instead of 500 error
+                fallback_msg = "I'm currently experiencing high traffic with my AI provider (Rate Limit). Please try again in a few minutes."
+                if response.status_code == 404:
+                    fallback_msg = "The selected AI model is currently unavailable. Please check the backend configuration."
+                
+                return {"response": f"⚠️ {fallback_msg} (Debug: {response.status_code})"}
             
             data = response.json()
             return {"response": data["choices"][0]["message"]["content"]}
