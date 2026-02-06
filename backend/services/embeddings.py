@@ -38,6 +38,15 @@ class EmbeddingService:
         self.model: Optional[SentenceTransformer] = None
         self.available = EMBEDDINGS_AVAILABLE
         if self.available:
+            # Lazy load: Do not load model in init
+            logger.info("Embedding service initialized (lazy loading enabled)")
+    
+    def _ensure_model_loaded(self) -> None:
+        """Ensure the sentence transformer model is loaded."""
+        if not EMBEDDINGS_AVAILABLE:
+            return
+
+        if self.model is None:
             self._load_model()
     
     def _load_model(self) -> None:
@@ -72,6 +81,8 @@ class EmbeddingService:
             logger.warning("Embeddings not available - returning empty array")
             return np.array([])
             
+        self._ensure_model_loaded()
+        
         if not self.model:
             raise RuntimeError("Embedding model not loaded")
         
@@ -99,6 +110,8 @@ class EmbeddingService:
             logger.warning("Embeddings not available - returning empty array")
             return np.array([])
             
+        self._ensure_model_loaded()
+        
         if not self.model:
             raise RuntimeError("Embedding model not loaded")
         
