@@ -11,19 +11,27 @@ import BoroughBoundaryLayer from './components/BoroughBoundaryLayer';
 import { aggregateBoroughData, loadBoroughBoundaries, mergeBoroughDataWithBoundaries } from './services/boroughService';
 
 // API endpoints
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'https://geo-risk-spotter.onrender.com' 
+const API_BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'https://geo-risk-spotter.onrender.com'
   : 'http://localhost:8000';
 
 // --- Refactored MapContent: delegates popup to MapPopup, helpers extracted ---
-const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, geojsonData, setGeojsonData, mapMoveEvent, sidebarOpen, setSidebarOpen, showSearchPopup, searchPopupData, setSearchPopupData, setShowSearchPopup }) => {
+const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, geojsonData, setGeojsonData, mapMoveEvent, sidebarOpen, setSidebarOpen, showSearchPopup, searchPopupData, setSearchPopupData, setShowSearchPopup, sidebarCollapsed }) => {
   const map = useMap();
   const [clickedZipCode, setClickedZipCode] = useState(null);
   const [clickPosition, setClickPosition] = useState({ x: 0, y: 0 });
   const [selectedFeature, setSelectedFeature] = useState(null);
-  
+
   // Borough state from store
   const { selectedBorough, viewMode, boroughData, getFilteredZipCodes, isBoroughBoundariesLoading } = useAppStore();
+
+  // Invalidate map size when sidebar collapses/expands
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      map.invalidateSize();
+    }, 300); // Wait for transition animation to complete
+    return () => clearTimeout(timer);
+  }, [sidebarCollapsed, map]);
 
   useEffect(() => {
     if (selectedArea && mapMoveEvent) {
@@ -55,7 +63,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
       setClickPosition({ x: centerPoint.x, y: centerPoint.y });
       setSelectedFeature(selectedArea);
       setClickedZipCode(searchPopupData.zipCode);
-      
+
       // Auto-hide popup after 5 seconds
       const timer = setTimeout(() => {
         setClickedZipCode(null);
@@ -67,7 +75,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
           setShowSearchPopup(false);
         }
       }, 5000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [showSearchPopup, selectedArea, searchPopupData, map, setSearchPopupData, setShowSearchPopup]);
@@ -129,17 +137,17 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
     if (score == null || isNaN(score)) return '#cccccc';
     return score > 25.0 ? '#a50f15' :
       score > 20.01 ? '#de2d26' :
-      score > 18.48 ? '#fb6a4a' :
-      score > 16.34 ? '#fcae91' :
-      score > 10.0 ? '#fee613' :
-      score > 5.0 ? '#a1d99b' :
-      '#41ab5d';
+        score > 18.48 ? '#fb6a4a' :
+          score > 16.34 ? '#fcae91' :
+            score > 10.0 ? '#fee613' :
+              score > 5.0 ? '#a1d99b' :
+                '#41ab5d';
   };
 
   // Enhanced GeoJSON data with contextual visualization for Public Health Planners
   const getFilteredGeoJSONData = () => {
     if (!geojsonData) return null;
-    
+
     // Always return all data for contextual visualization
     // Visual hierarchy is handled in geoJsonStyle function
     return geojsonData;
@@ -148,20 +156,20 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
   // Generate borough-level aggregated data for visualization
   const getBoroughGeoJSONData = () => {
     if (!geojsonData || !boroughData) return null;
-    
+
     // Use actual borough boundaries stored in the store
     const { boroughBoundaries } = useAppStore.getState();
-    
+
     if (!boroughBoundaries) {
       console.warn('Borough boundaries not loaded yet');
       return null;
     }
-    
+
     console.log('Creating borough visualization with boundaries:', boroughBoundaries.features?.length, 'features');
-    
+
     const aggregatedHealthData = aggregateBoroughData(geojsonData.features);
     const mergedData = mergeBoroughDataWithBoundaries(boroughBoundaries, aggregatedHealthData);
-    
+
     console.log('Merged borough data:', mergedData.features?.length, 'features');
     return mergedData;
   };
@@ -169,7 +177,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
   // Get appropriate data based on view mode
   const getVisualizationData = () => {
     console.log('Getting visualization data - viewMode:', viewMode, 'selectedBorough:', selectedBorough);
-    
+
     if (viewMode === 'borough') {
       const boroughData = getBoroughGeoJSONData();
       console.log('Borough data for visualization:', boroughData?.features?.length, 'features');
@@ -184,7 +192,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
   const geoJsonStyle = (feature) => {
     const isBorough = feature.properties.borough;
     const riskScore = isBorough ? feature.properties.avgRiskScore : feature.properties.RiskScore;
-    
+
     // Get proper color - ensure we have a valid risk score or use default
     const getFeatureColor = (score, isBorough = false) => {
       if (score != null && !isNaN(score)) {
@@ -196,12 +204,12 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
       }
       return '#74a9cf'; // Light blue for zip codes with missing data
     };
-    
+
     // Handle Borough View Mode
     if (viewMode === 'borough') {
       const boroughName = feature.properties.borough_name || feature.properties.borough;
       const isSelectedBorough = selectedBorough === 'All' || selectedBorough === boroughName;
-      
+
       const boroughBaseStyle = {
         fillColor: getFeatureColor(riskScore, true),
         weight: 2,
@@ -210,7 +218,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         dashArray: '0',
         fillOpacity: 0.7,
       };
-      
+
       // Highlight selected borough in borough view
       if (isSelectedBorough && selectedBorough !== 'All') {
         return {
@@ -220,17 +228,17 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
           color: '#2563eb', // Blue border for selected borough
         };
       }
-      
+
       return boroughBaseStyle;
     }
-    
+
     // Handle ZIP Code View Mode (existing logic)
     const zipCode = feature.properties.zip_code || feature.properties.ZCTA5CE10;
     const filteredZipCodes = getFilteredZipCodes();
     const isFiltering = selectedBorough !== 'All';
-    
+
     const isInSelectedBorough = !isFiltering || !filteredZipCodes || filteredZipCodes.includes(zipCode);
-    
+
     // Base style for zip codes
     const baseStyle = {
       fillColor: getFeatureColor(riskScore, false),
@@ -240,7 +248,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
       dashArray: isBorough ? '0' : '3',
       fillOpacity: 0.7,
     };
-    
+
     // Apply contextual dimming for enhanced evidence-building UX
     if (isFiltering && !isInSelectedBorough) {
       return {
@@ -250,7 +258,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         fillColor: '#cccccc' // Muted color for non-focus areas
       };
     }
-    
+
     // Enhanced visibility for areas in focus
     if (isFiltering && isInSelectedBorough) {
       return {
@@ -261,7 +269,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         fillColor: getFeatureColor(riskScore, false) // Ensure color is explicitly set
       };
     }
-    
+
     return baseStyle;
   };
 
@@ -270,9 +278,9 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
     setIsLoading(true);
     try {
       if (!navigator.onLine) throw new Error('offline');
-      
+
       const isBorough = feature.properties.borough;
-      
+
       // Prepare data for API call
       const analysisData = isBorough ? {
         zip_code: String(feature.properties.borough + " Borough"),
@@ -295,7 +303,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         FOODINSECU_CrudePrev: Number(feature.properties.FOODINSECU_CrudePrev) || 0,
         ACCESS2_CrudePrev: Number(feature.properties.ACCESS2_CrudePrev) || 0,
       };
-      
+
       const response = await axios.post(`${API_BASE_URL}/api/analyze`, analysisData);
       setAiSummary(response.data.summary);
     } catch (error) {
@@ -321,13 +329,13 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         const containerPoint = e.containerPoint;
         setClickPosition({ x: containerPoint.x, y: containerPoint.y });
         setSelectedFeature(feature);
-        
+
         // Set appropriate display identifier
-        const displayId = feature.properties.borough 
-          ? feature.properties.borough 
+        const displayId = feature.properties.borough
+          ? feature.properties.borough
           : feature.properties.zip_code;
         setClickedZipCode(displayId);
-        
+
         setSelectedArea(feature);
         await analyzeArea(feature);
       },
@@ -336,19 +344,19 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
         const isBorough = feature.properties.borough;
         if (isBorough) {
           // Borough hover style - match zip code behavior
-          layer.setStyle({ 
-            weight: 3, 
-            color: '#666', 
-            dashArray: '', 
-            fillOpacity: 0.9 
+          layer.setStyle({
+            weight: 3,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.9
           });
         } else {
           // Zip code hover style (existing)
-          layer.setStyle({ 
-            weight: 2, 
-            color: '#666', 
-            dashArray: '', 
-            fillOpacity: 0.9 
+          layer.setStyle({
+            weight: 2,
+            color: '#666',
+            dashArray: '',
+            fillOpacity: 0.9
           });
         }
         layer.bringToFront();
@@ -367,7 +375,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
     <>
       {/* Borough Boundary Layer - Always visible for geographic context */}
       <BoroughBoundaryLayer />
-      
+
       {visualizationData && (
         <GeoJSON
           key={`${selectedBorough}-${viewMode}`} // Force re-render when borough or view mode changes
@@ -387,9 +395,9 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
   );
 };
 
-const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMoveEvent, sidebarOpen, setSidebarOpen, showSearchPopup, searchPopupData, setSearchPopupData, setShowSearchPopup, triggerMapMove: triggerMapMoveFromApp }) => {
+const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMoveEvent, sidebarOpen, setSidebarOpen, showSearchPopup, searchPopupData, setSearchPopupData, setShowSearchPopup, triggerMapMove: triggerMapMoveFromApp, sidebarCollapsed }) => {
   const [geojsonData, setGeojsonData] = useState(null);
-  
+
   // Get loading states from store
   const { viewMode, isBoroughBoundariesLoading, isZipCodeDataLoading, setIsZipCodeDataLoading } = useAppStore();
 
@@ -456,15 +464,16 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMov
           searchPopupData={searchPopupData}
           setSearchPopupData={setSearchPopupData}
           setShowSearchPopup={setShowSearchPopup}
+          sidebarCollapsed={sidebarCollapsed}
         />
       </MapContainer>
-      
+
       {/* Map overlays */}
-      <MapSearchOverlay 
+      <MapSearchOverlay
         triggerMapMove={triggerMapMove}
       />
       <MapFilterOverlay />
-      
+
       {/* Borough boundaries loading overlay */}
       {viewMode === 'borough' && isBoroughBoundariesLoading && (
         <div className="map-loading-overlay">
@@ -474,7 +483,7 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMov
           </div>
         </div>
       )}
-      
+
       {/* Zip code data loading overlay */}
       {viewMode === 'zipcode' && isZipCodeDataLoading && (
         <div className="map-loading-overlay">

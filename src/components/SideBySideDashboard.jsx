@@ -18,7 +18,7 @@ const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
     <div className="dashboard-side-by-side">
       {/* Main Content Container */}
       <div className={`main-content-container ${sidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
-        
+
         {/* AI Insights Panel - Primary */}
         <div className={`ai-insights-panel ${sidebarCollapsed ? 'collapsed' : ''}`}>
           <div className="insights-panel-header">
@@ -26,7 +26,7 @@ const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
               <MdAutoAwesome className="panel-icon" />
               <span>AI Insights Hub</span>
             </div>
-            <button 
+            <button
               className="panel-collapse-btn"
               onClick={toggleSidebarCollapse}
               title={sidebarCollapsed ? "Expand AI Insights" : "Collapse AI Insights"}
@@ -34,7 +34,7 @@ const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
               {sidebarCollapsed ? <FaChevronRight /> : <FaChevronLeft />}
             </button>
           </div>
-          
+
           <div className="insights-panel-content">
             {!sidebarCollapsed && (
               <Sidebar {...sidebarProps} />
@@ -50,10 +50,10 @@ const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
               <span>Geographic Context</span>
             </div>
           </div>
-          
+
           <div className="map-panel-content">
-            <Map {...mapProps} />
-            
+            <Map {...mapProps} sidebarCollapsed={sidebarCollapsed} />
+
             {/* Risk Legend - Always Visible */}
             <div className="context-map-legend">
               <span className="legend-title">Risk Indicator</span>
@@ -80,14 +80,14 @@ const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
 
       {/* Mobile Panel Navigation */}
       <div className="mobile-panel-nav">
-        <button 
+        <button
           className={`mobile-nav-btn ${mobileActivePanel === 'insights' ? 'active' : ''}`}
           onClick={() => setMobileActivePanel('insights')}
         >
           <MdAutoAwesome />
           <span>Insights</span>
         </button>
-        <button 
+        <button
           className={`mobile-nav-btn ${mobileActivePanel === 'map' ? 'active' : ''}`}
           onClick={() => setMobileActivePanel('map')}
         >
@@ -104,7 +104,7 @@ const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
           </div>
         ) : (
           <div className="mobile-map-panel">
-            <Map {...mapProps} />
+            <Map {...mapProps} sidebarCollapsed={sidebarCollapsed} />
             <div className="mobile-map-legend">
               <span className="legend-title">Risk Levels</span>
               <div className="legend-items-mobile">
