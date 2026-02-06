@@ -9,16 +9,11 @@ from typing import List, Dict, Tuple, Optional
 
 logger = logging.getLogger(__name__)
 
-# Try to import sentence-transformers with fallback
-try:
-    from sentence_transformers import SentenceTransformer
-    from sklearn.metrics.pairwise import cosine_similarity
-    EMBEDDINGS_AVAILABLE = True
-except ImportError as e:
-    logger.warning(f"sentence-transformers not available: {e}")
-    EMBEDDINGS_AVAILABLE = False
-    SentenceTransformer = None
-    cosine_similarity = None
+import os
+
+# Lazy import check
+EMBEDDINGS_AVAILABLE = True  # We assume true until we try to import or check env
+
 
 
 class EmbeddingService:
@@ -35,8 +30,14 @@ class EmbeddingService:
             model_name: HuggingFace model name. 'all-MiniLM-L6-v2' is lightweight and effective.
         """
         self.model_name = model_name
-        self.model: Optional[SentenceTransformer] = None
-        self.available = EMBEDDINGS_AVAILABLE
+        self.model = None
+        
+        # Check if disabled by env var (for memory constrained environments like Render free tier)
+        if os.getenv("DISABLE_LOCAL_EMBEDDINGS", "false").lower() == "true":
+            logger.warning("Local embeddings disabled via DISABLE_LOCAL_EMBEDDINGS env var")
+            self.available = False
+        else:
+            self.available = EMBEDDINGS_AVAILABLE
         if self.available:
             # Lazy load: Do not load model in init
             logger.info("Embedding service initialized (lazy loading enabled)")
@@ -51,17 +52,29 @@ class EmbeddingService:
     
     def _load_model(self) -> None:
         """Load the sentence transformer model."""
-        if not EMBEDDINGS_AVAILABLE:
-            logger.warning("Embeddings not available - sentence-transformers not installed")
+        if not self.available:
             return
-            
+
         try:
+            # Import here to avoid memory usage at startup
+            from sentence_transformers import SentenceTransformer
+            from sklearn.metrics.pairwise import cosine_similarity
+            
             logger.info(f"Loading embedding model: {self.model_name}")
             self.model = SentenceTransformer(self.model_name)
+            
+            # Monkey patch the similarity function if needed or store it
+            self._cosine_similarity = cosine_similarity
+            
             logger.info("Embedding model loaded successfully")
+        except ImportError as e:
+             logger.error(f"Failed to import sentence-transformers: {e}")
+             self.available = False
         except Exception as e:
             logger.error(f"Failed to load embedding model: {e}")
-            raise
+            self.available = False
+            # Don't raise, just disable availability
+
     
     def generate_embedding(self, text: str) -> np.ndarray:
         """
@@ -152,7 +165,12 @@ class EmbeddingService:
             if query_embedding.ndim == 1:
                 query_embedding = query_embedding.reshape(1, -1)
             
-            similarities = cosine_similarity(query_embedding, doc_embeddings)
+            if hasattr(self, '_cosine_similarity'):
+                similarities = self._cosine_similarity(query_embedding, doc_embeddings)
+            else:
+                 from sklearn.metrics.pairwise import cosine_similarity
+                 similarities = cosine_similarity(query_embedding, doc_embeddings)
+                 
             return similarities.flatten()
         except Exception as e:
             logger.error(f"Error computing similarity: {e}")
