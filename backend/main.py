@@ -6,8 +6,6 @@ import os
 import time
 from typing import Optional, List, Dict
 from dotenv import load_dotenv
-from sklearn.cluster import KMeans
-import pandas as pd
 import json
 
 # Import services
@@ -442,148 +440,24 @@ async def get_enhanced_recommendations_endpoint(request: RecommendationRequest):
         print(f"❌ Enhanced recommendations error: {e}")
         raise HTTPException(status_code=500, detail=f"Error generating enhanced recommendations: {str(e)}")
 
-# Global cache for health data
-CACHED_HEALTH_DATA = None
-
-async def _get_health_data_dataframe():
-    global CACHED_HEALTH_DATA
-    if CACHED_HEALTH_DATA is not None:
-        return CACHED_HEALTH_DATA
-    
-    url = "https://geo-risk-spotspot-geojson.s3.us-east-1.amazonaws.com/ny_new_york_zip_codes_health.geojson"
-    print(f"📥 Fetching health data from {url}...")
-    
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, timeout=30.0)
-            response.raise_for_status()
-            geojson_data = response.json()
-            
-            # Extract properties from features
-            features = geojson_data.get("features", [])
-            data_list = []
-            
-            for feature in features:
-                props = feature.get("properties", {})
-                # Normalize zip code key
-                zip_code = props.get("ZCTA5CE10") or props.get("zip_code")
-                
-                if zip_code:
-                    item = {
-                        "zip_code": zip_code,
-                        "DIABETES_CrudePrev": props.get("DIABETES_CrudePrev", 0),
-                        "OBESITY_CrudePrev": props.get("OBESITY_CrudePrev", 0),
-                        "LPA_CrudePrev": props.get("LPA_CrudePrev", 0),
-                        "CSMOKING_CrudePrev": props.get("CSMOKING_CrudePrev", 0),
-                        "BPHIGH_CrudePrev": props.get("BPHIGH_CrudePrev", 0),
-                        "FOODINSECU_CrudePrev": props.get("FOODINSECU_CrudePrev", 0),
-                        "ACCESS2_CrudePrev": props.get("ACCESS2_CrudePrev", 0),
-                        "RiskScore": props.get("RiskScore", 0)
-                    }
-                    data_list.append(item)
-            
-            df = pd.DataFrame(data_list)
-            # Handle NaN values
-            df = df.fillna(0)
-            
-            CACHED_HEALTH_DATA = df
-            print(f"✅ Loaded health data for {len(df)} zip codes")
-            return df
-            
-    except Exception as e:
-        print(f"❌ Failed to load health data: {e}")
-        return None
-
 @app.get("/api/analysis/clusters")
 async def get_clusters():
     """
-    Perform K-Means clustering on zip code health data to identify risk profiles.
-    Returns mapping of zip_code -> cluster_id (0-4).
+    Return pre-computed K-Means clustering results for zip code health data.
+    Returns mapping of zip_code -> cluster_id (0-4) and cluster profiles.
+
+    Clusters are pre-computed to avoid memory issues on free tier hosting.
     """
-    df = await _get_health_data_dataframe()
-    
-    if df is None or df.empty:
-        raise HTTPException(status_code=503, detail="Health data unavailable")
-    
-    # Select features for clustering
-    features = [
-        'DIABETES_CrudePrev', 
-        'OBESITY_CrudePrev', 
-        'BPHIGH_CrudePrev', 
-        'LPA_CrudePrev', 
-        'CSMOKING_CrudePrev',
-        'FOODINSECU_CrudePrev',
-        'ACCESS2_CrudePrev'
-    ]
-    
-    # Ensure features exist
-    X = df[features]
-    
-    # Perform Clustering
-    # We use 5 clusters as requested
-    kmeans = KMeans(n_clusters=5, random_state=42, n_init=10)
-    df['cluster_id'] = kmeans.fit_predict(X)
-    
-    # Create simple result mapping
-    result = df[['zip_code', 'cluster_id']].to_dict(orient='records')
-    
-    # Calculate cluster centers to explain what each cluster represents
-    cluster_centers = kmeans.cluster_centers_
-    cluster_profiles = []
-    
-    # Calculate global means for comparison
-    global_means = df[features].mean()
-
-    for i, center in enumerate(cluster_centers):
-        metrics = dict(zip(features, center.tolist()))
-        
-        # Semantic Naming Logic
-        # We compare cluster average to global average
-        deviations = {}
-        for feature in features:
-            deviations[feature] = metrics[feature] - global_means[feature]
-            
-        # Identify distinctive traits (simple heuristic)
-        # Top 2 deviations (positive or negative) define the cluster
-        sorted_traits = sorted(deviations.items(), key=lambda x: x[1], reverse=True)
-        top_trait = sorted_traits[0][0]
-        secondary_trait = sorted_traits[1][0]
-        
-        # Helper to format trait names
-        def format_trait(trait_key, val):
-            name = trait_key.replace('_CrudePrev', '').replace('_', ' ').title()
-            if name == "Lpa": name = "Physical Inactivity"
-            if name == "Access2": name = "Lack of Healthcare"
-            if name == "Bphigh": name = "Hypertension"
-            if name == "Csmoking": name = "Smoking"
-            if name == "Foodinsecu": name = "Food Insecurity"
-            
-            # Simple threshold for "High" vs "Elevated"
-            prefix = "High" if val > 5 else "Elevated"
-            return f"{prefix} {name}"
-
-        # Assign a descriptive name
-        if deviations[top_trait] < 0 and deviations[secondary_trait] < 0:
-            cluster_name = "Low Risk / Healthy"
-        else:
-            name1 = format_trait(top_trait, deviations[top_trait])
-            name2 = format_trait(secondary_trait, deviations[secondary_trait])
-            # Simplify name
-            cluster_name = f"{name1} & {name2}".replace("High ", "").replace("Elevated ", "")
-            cluster_name = f"High {cluster_name}"
-
-        profile = {
-            "cluster_id": i,
-            "name": cluster_name,
-            "description": f"Characterized by higher rates of {top_trait.split('_')[0]} and {secondary_trait.split('_')[0]}",
-            "metrics": metrics
-        }
-        cluster_profiles.append(profile)
-        
-    return {
-        "clusters": result,
-        "profiles": cluster_profiles
-    }
+    try:
+        # Load pre-computed clusters from static JSON file
+        clusters_path = os.path.join(os.path.dirname(__file__), 'data', 'clusters.json')
+        with open(clusters_path, 'r') as f:
+            return json.load(f)
+    except FileNotFoundError:
+        raise HTTPException(status_code=503, detail="Cluster data not available")
+    except Exception as e:
+        print(f"Error loading cluster data: {e}")
+        raise HTTPException(status_code=500, detail="Failed to load cluster data")
 
 def _generate_smart_query_from_health_data(health_data: dict) -> str:
     """
