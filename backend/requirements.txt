@@ -9,3 +9,4 @@ huggingface_hub>=0.15.0,<1.0.0
 numpy
 scikit-learn
 torch>=1.11.0
+pandas
