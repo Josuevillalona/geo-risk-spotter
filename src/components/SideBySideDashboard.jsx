@@ -3,9 +3,35 @@ import Map from "../Map";
 import Sidebar from "../Sidebar";
 import { FaMapMarkerAlt, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { MdAutoAwesome } from "react-icons/md";
+import { useAppStore } from '../store';
 
 const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const { visualizationMode, clusterProfiles } = useAppStore();
+
+  const riskLegendItems = [
+    { color: "#a50f15", label: "Highest" },
+    { color: "#de2d26", label: "High" },
+    { color: "#fb6a4a", label: "Mod. High" },
+    { color: "#fcae91", label: "Moderate" },
+    { color: "#fee613", label: "Mod. Low" },
+    { color: "#a1d99b", label: "Low" },
+    { color: "#41ab5d", label: "Lowest" }
+  ];
+
+  const clusterLegendItems = clusterProfiles ? clusterProfiles.map((profile) => ({
+    color: ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd'][profile.cluster_id] || '#cccccc',
+    label: profile.name || `Group ${String.fromCharCode(65 + profile.cluster_id)}`
+  })) : [
+    { color: '#1f77b4', label: "Loading..." },
+    { color: '#ff7f0e', label: "Loading..." },
+    { color: '#2ca02c', label: "Loading..." },
+    { color: '#d62728', label: "Loading..." },
+    { color: '#9467bd', label: "Loading..." }
+  ];
+
+  const currentLegendItems = visualizationMode === 'cluster' ? clusterLegendItems : riskLegendItems;
+  const legendTitle = visualizationMode === 'cluster' ? "Health Profiles" : "Risk Indicator";
 
   // For mobile responsiveness
   const [mobileActivePanel, setMobileActivePanel] = useState('insights'); // 'insights' or 'map'
@@ -54,19 +80,10 @@ const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
           <div className="map-panel-content">
             <Map {...mapProps} sidebarCollapsed={sidebarCollapsed} />
 
-            {/* Risk Legend - Always Visible */}
             <div className="context-map-legend">
-              <span className="legend-title">Risk Indicator</span>
+              <span className="legend-title">{legendTitle}</span>
               <div className="legend-items">
-                {[
-                  { color: "#a50f15", label: "Highest" },
-                  { color: "#de2d26", label: "High" },
-                  { color: "#fb6a4a", label: "Mod. High" },
-                  { color: "#fcae91", label: "Moderate" },
-                  { color: "#fee613", label: "Mod. Low" },
-                  { color: "#a1d99b", label: "Low" },
-                  { color: "#41ab5d", label: "Lowest" }
-                ].map((item, idx) => (
+                {currentLegendItems.map((item, idx) => (
                   <span key={idx} className="legend-item">
                     <span className="legend-color" style={{ background: item.color }} />
                     {item.label}
@@ -106,17 +123,9 @@ const SideBySideDashboard = ({ mapProps, sidebarProps }) => {
           <div className="mobile-map-panel">
             <Map {...mapProps} sidebarCollapsed={sidebarCollapsed} />
             <div className="mobile-map-legend">
-              <span className="legend-title">Risk Levels</span>
+              <span className="legend-title">{legendTitle}</span>
               <div className="legend-items-mobile">
-                {[
-                  { color: "#a50f15", label: "Highest" },
-                  { color: "#de2d26", label: "High" },
-                  { color: "#fb6a4a", label: "Med+" },
-                  { color: "#fcae91", label: "Med" },
-                  { color: "#fee613", label: "Med-" },
-                  { color: "#a1d99b", label: "Low" },
-                  { color: "#41ab5d", label: "Lowest" }
-                ].map((item, idx) => (
+                {currentLegendItems.map((item, idx) => (
                   <span key={idx} className="legend-item-mobile">
                     <span className="legend-color-mobile" style={{ background: item.color }} />
                     {item.label}
