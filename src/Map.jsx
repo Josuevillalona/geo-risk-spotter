@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { MapContainer, TileLayer, GeoJSON, useMap } from 'react-leaflet';
 import axios from 'axios';
 import 'leaflet/dist/leaflet.css';
@@ -23,7 +23,31 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
   const [selectedFeature, setSelectedFeature] = useState(null);
 
   // Borough state from store
-  const { selectedBorough, viewMode, boroughData, getFilteredZipCodes, isBoroughBoundariesLoading } = useAppStore();
+  const {
+    selectedBorough,
+    viewMode,
+    boroughData,
+    getFilteredZipCodes,
+    isBoroughBoundariesLoading,
+    visualizationMode,
+    clusterData,
+    isClusterDataLoading
+  } = useAppStore();
+
+  // Compute effective visualization mode - only show cluster view when data is ready
+  // This prevents janky intermediate states during mode transitions
+  const effectiveVisualizationMode = (visualizationMode === 'cluster' && clusterData && !isClusterDataLoading)
+    ? 'cluster'
+    : 'risk';
+
+  // Refs to access current state values from within event handler closures
+  // This prevents stale closure issues when visualizationMode or clusterData changes
+  const visualizationModeRef = useRef(effectiveVisualizationMode);
+  const clusterDataRef = useRef(clusterData);
+
+  // Update refs synchronously (not in useEffect) so they're always current
+  visualizationModeRef.current = effectiveVisualizationMode;
+  clusterDataRef.current = clusterData;
 
   // Invalidate map size when sidebar collapses/expands
   useEffect(() => {
@@ -144,6 +168,19 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
                 '#41ab5d';
   };
 
+  // Function to determine color based on Cluster ID (Categorical scale)
+  const getClusterColor = (clusterId) => {
+    if (clusterId == null) return '#cccccc';
+    const colors = [
+      '#1f77b4', // Cluster 0: Blue
+      '#ff7f0e', // Cluster 1: Orange
+      '#2ca02c', // Cluster 2: Green
+      '#d62728', // Cluster 3: Red
+      '#9467bd'  // Cluster 4: Purple
+    ];
+    return colors[clusterId] || '#cccccc';
+  };
+
   // Enhanced GeoJSON data with contextual visualization for Public Health Planners
   const getFilteredGeoJSONData = () => {
     if (!geojsonData) return null;
@@ -193,8 +230,21 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
     const isBorough = feature.properties.borough;
     const riskScore = isBorough ? feature.properties.avgRiskScore : feature.properties.RiskScore;
 
+    // Use effectiveVisualizationMode and clusterData directly for initial render
+    // (refs are only for event handlers which are closures)
+    const currentMode = effectiveVisualizationMode;
+    const currentClusterData = clusterData;
+
     // Get proper color - ensure we have a valid risk score or use default
     const getFeatureColor = (score, isBorough = false) => {
+      // Handle Cluster View Mode
+      if (currentMode === 'cluster' && currentClusterData && !isBorough) {
+        const zipCode = feature.properties.zip_code || feature.properties.ZCTA5CE10;
+        if (zipCode && currentClusterData[zipCode] !== undefined) {
+          return getClusterColor(currentClusterData[zipCode]);
+        }
+      }
+
       if (score != null && !isNaN(score)) {
         return getRiskScoreColor(score);
       }
@@ -273,6 +323,36 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
     return baseStyle;
   };
 
+  // Helper function for mouseout that uses refs (for event handler closures)
+  const getFeatureStyleFromRefs = (feature) => {
+    const isBorough = feature.properties.borough;
+    const riskScore = isBorough ? feature.properties.avgRiskScore : feature.properties.RiskScore;
+    const zipCode = feature.properties.zip_code || feature.properties.ZCTA5CE10;
+
+    // Use refs to get current values (avoids stale closure)
+    const currentMode = visualizationModeRef.current;
+    const currentClusterData = clusterDataRef.current;
+
+    // Determine fill color based on current mode
+    let fillColor;
+    if (currentMode === 'cluster' && currentClusterData && currentClusterData[zipCode] !== undefined && !isBorough) {
+      fillColor = getClusterColor(currentClusterData[zipCode]);
+    } else if (riskScore != null && !isNaN(riskScore)) {
+      fillColor = getRiskScoreColor(riskScore);
+    } else {
+      fillColor = isBorough ? '#3182ce' : '#74a9cf';
+    }
+
+    return {
+      fillColor,
+      weight: 1,
+      opacity: 1,
+      color: 'white',
+      dashArray: isBorough ? '0' : '3',
+      fillOpacity: 0.7,
+    };
+  };
+
   // Only handles API and state, not popup rendering
   const analyzeArea = async (feature) => {
     setIsLoading(true);
@@ -342,29 +422,49 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
       mouseover: (e) => {
         const layer = e.target;
         const isBorough = feature.properties.borough;
+
+        // Use refs to get CURRENT visualization mode and cluster data (avoids stale closure)
+        const currentMode = visualizationModeRef.current;
+        const currentClusterData = clusterDataRef.current;
+
+        const zipCode = feature.properties.zip_code || feature.properties.ZCTA5CE10;
+        const riskScore = feature.properties.RiskScore;
+
+        // Always determine the correct fill color based on current mode
+        let hoverFillColor;
+        if (currentMode === 'cluster' && currentClusterData && currentClusterData[zipCode] !== undefined && !isBorough) {
+          hoverFillColor = getClusterColor(currentClusterData[zipCode]);
+        } else {
+          // Risk mode - use the risk score color
+          hoverFillColor = getRiskScoreColor(riskScore);
+        }
+
         if (isBorough) {
-          // Borough hover style - match zip code behavior
+          // Borough hover style
+          const boroughRiskScore = feature.properties.avgRiskScore;
           layer.setStyle({
             weight: 3,
             color: '#666',
             dashArray: '',
-            fillOpacity: 0.9
+            fillOpacity: 0.9,
+            fillColor: getRiskScoreColor(boroughRiskScore)
           });
         } else {
-          // Zip code hover style (existing)
+          // Zip code hover style
           layer.setStyle({
-            weight: 2,
-            color: '#666',
+            weight: (currentMode === 'cluster') ? 4 : 2,
+            color: (currentMode === 'cluster') ? '#fff' : '#666',
             dashArray: '',
-            fillOpacity: 0.9
+            fillOpacity: 1,
+            fillColor: hoverFillColor // Always explicitly set fill color
           });
         }
         layer.bringToFront();
       },
       mouseout: (e) => {
         const layer = e.target;
-        // Reset to original style for both boroughs and zip codes
-        layer.setStyle(geoJsonStyle(feature));
+        // Reset to original style using refs (avoids stale closure)
+        layer.setStyle(getFeatureStyleFromRefs(feature));
       },
     });
   };
@@ -378,7 +478,7 @@ const MapContent = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary,
 
       {visualizationData && (
         <GeoJSON
-          key={`${selectedBorough}-${viewMode}`} // Force re-render when borough or view mode changes
+          key={`${selectedBorough}-${viewMode}-${effectiveVisualizationMode}`} // Force re-render when effective visualization mode changes
           data={visualizationData}
           style={geoJsonStyle}
           onEachFeature={onEachFeature}
@@ -399,7 +499,18 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMov
   const [geojsonData, setGeojsonData] = useState(null);
 
   // Get loading states from store
-  const { viewMode, isBoroughBoundariesLoading, isZipCodeDataLoading, setIsZipCodeDataLoading } = useAppStore();
+  const {
+    viewMode,
+    isBoroughBoundariesLoading,
+    isZipCodeDataLoading,
+    setIsZipCodeDataLoading,
+    visualizationMode,
+    clusterData,
+    setClusterData,
+    setClusterProfiles,
+    isClusterDataLoading,
+    setIsClusterDataLoading
+  } = useAppStore();
 
   // Function to trigger map movement for search results
   const triggerMapMove = (feature) => {
@@ -438,6 +549,34 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMov
         setIsZipCodeDataLoading(false);
       });
   }, [setIsZipCodeDataLoading]);
+
+  // Fetch cluster data when needed
+  useEffect(() => {
+    if (visualizationMode === 'cluster' && !clusterData && !isClusterDataLoading) {
+      console.log('Fetching cluster data...');
+      setIsClusterDataLoading(true);
+      axios.get(`${API_BASE_URL}/api/analysis/clusters`)
+        .then(response => {
+          const { clusters, profiles } = response.data;
+
+          // Convert list to map for O(1) lookup
+          const clusterMap = {};
+          clusters.forEach(item => {
+            clusterMap[item.zip_code] = item.cluster_id;
+          });
+
+          setClusterData(clusterMap);
+          setClusterProfiles(profiles);
+          console.log('Cluster data loaded:', clusters.length, 'zip codes');
+        })
+        .catch(error => {
+          console.error('Error fetching cluster data:', error);
+        })
+        .finally(() => {
+          setIsClusterDataLoading(false);
+        });
+    }
+  }, [visualizationMode, clusterData, isClusterDataLoading, setClusterData, setClusterProfiles, setIsClusterDataLoading]);
 
   return (
     <div style={{ position: 'relative', height: '100%', width: '100%' }}>
@@ -490,6 +629,16 @@ const Map = ({ selectedArea, setSelectedArea, setIsLoading, setAiSummary, mapMov
           <div className="map-loading-content">
             <div className="loading-spinner"></div>
             <span>Loading zip code data...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Cluster data loading overlay */}
+      {visualizationMode === 'cluster' && isClusterDataLoading && (
+        <div className="map-loading-overlay">
+          <div className="map-loading-content">
+            <div className="loading-spinner"></div>
+            <span>Loading health clusters...</span>
           </div>
         </div>
       )}

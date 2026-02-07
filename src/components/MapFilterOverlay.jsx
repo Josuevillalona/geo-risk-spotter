@@ -1,14 +1,17 @@
-import React from 'react';
-import { FaMapMarkerAlt, FaCity } from 'react-icons/fa';
+import { FaMapMarkerAlt, FaCity, FaHeartbeat, FaLayerGroup } from 'react-icons/fa';
 import { useAppStore } from '../store';
 
 const MapFilterOverlay = () => {
-  const { 
-    viewMode, 
-    setViewMode, 
-    selectedBorough, 
+  const {
+    viewMode,
+    setViewMode,
+    selectedBorough,
     setSelectedBorough,
-    boroughData 
+    boroughData,
+    visualizationMode,
+    setVisualizationMode,
+    isClusterDataLoading,
+    clusterData
   } = useAppStore();
 
   const handleViewModeToggle = () => {
@@ -20,6 +23,10 @@ const MapFilterOverlay = () => {
   };
 
   const boroughs = boroughData ? Object.keys(boroughData) : [];
+
+  // Determine effective mode for UI (shows loading state appropriately)
+  const isClusterActive = visualizationMode === 'cluster';
+  const isClusterReady = clusterData && !isClusterDataLoading;
 
   return (
     <div className="map-filter-overlay">
@@ -43,6 +50,52 @@ const MapFilterOverlay = () => {
           )}
         </button>
       </div>
+
+      {/* Visualization Mode Toggle (Only in Zip Code View) */}
+      {viewMode === 'zipcode' && (
+        <div className="filter-section">
+          <div className={`segmented-control ${isClusterDataLoading ? 'loading' : ''}`}>
+            {/* Sliding indicator */}
+            <div
+              className={`segment-indicator ${isClusterActive ? 'right' : 'left'}`}
+              style={{
+                background: isClusterActive
+                  ? (isClusterDataLoading ? '#94a3b8' : '#3b82f6')
+                  : '#10b981'
+              }}
+            />
+
+            <button
+              className={`segment-btn ${!isClusterActive ? 'active' : ''}`}
+              onClick={() => setVisualizationMode('risk')}
+              title="Color by health risk score (green to red)"
+            >
+              <FaHeartbeat className="segment-icon" />
+              <span>Risk Score</span>
+            </button>
+
+            <button
+              className={`segment-btn ${isClusterActive ? 'active' : ''} ${isClusterDataLoading ? 'loading' : ''}`}
+              onClick={() => setVisualizationMode('cluster')}
+              title="Group areas by similar health profiles"
+            >
+              {isClusterDataLoading ? (
+                <>
+                  <div className="loading-dots">
+                    <span></span><span></span><span></span>
+                  </div>
+                  <span>Loading</span>
+                </>
+              ) : (
+                <>
+                  <FaLayerGroup className="segment-icon" />
+                  <span>Clusters</span>
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Borough Filter */}
       <div className="filter-section">

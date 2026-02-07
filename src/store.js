@@ -19,10 +19,16 @@ export const useAppStore = create(
       isBoroughDataLoading: false,
       isBoroughBoundariesLoading: false,
       isZipCodeDataLoading: false,
-      
+
       // Enhanced Borough Visualization State
       showBoroughBoundaries: true, // Always show boundaries for context
       boundaryVisualMode: 'contextual', // 'contextual', 'prominent', 'subtle'
+
+      // Clustering State
+      clusterData: null, // { zip_code: cluster_id }
+      clusterProfiles: null, // [{ cluster_id, metrics }]
+      visualizationMode: 'risk', // 'risk' or 'cluster'
+      isClusterDataLoading: false, // Loading state for cluster data fetch
 
       // Existing Actions
       setAndAnalyzeArea: (area) => set({ selectedArea: area, isLoading: true, aiSummary: null, chatHistory: [] }),
@@ -40,38 +46,44 @@ export const useAppStore = create(
       setShowBoroughBoundaries: (show) => set({ showBoroughBoundaries: show }),
       setBoundaryVisualMode: (mode) => set({ boundaryVisualMode: mode }),
 
+      // Clustering Actions
+      setClusterData: (data) => set({ clusterData: data }),
+      setClusterProfiles: (profiles) => set({ clusterProfiles: profiles }),
+      setVisualizationMode: (mode) => set({ visualizationMode: mode }),
+      setIsClusterDataLoading: (loading) => set({ isClusterDataLoading: loading }),
+
       // Get filtered data based on current borough selection
       getFilteredZipCodes: () => {
         const { selectedBorough, boroughData } = get();
         if (selectedBorough === 'All' || !boroughData) {
           return null; // Return all data
         }
-        
+
         // Extract the actual zip code values from the borough features
         const boroughFeatures = boroughData[selectedBorough]?.zipCodes || [];
-        const zipCodeValues = boroughFeatures.map(feature => 
+        const zipCodeValues = boroughFeatures.map(feature =>
           feature.properties?.ZCTA5CE10 || feature.properties?.zip_code
         ).filter(Boolean);
-        
+
         return zipCodeValues;
       },
-      
+
       saveCurrentAnalysis: (analysisData = null) => {
         try {
           const { savedAnalyses } = get();
-          
+
           // If no data provided, try to use store state (backward compatibility)
           let selectedArea, aiSummary, chatHistory;
           if (analysisData) {
-            ({ selectedArea, aiSummary, chatHistory = [] } = analysisData);
+            ({ selectedArea, aiSummary, chatHistory =[] } = analysisData);
           } else {
             ({ selectedArea, aiSummary, chatHistory } = get());
           }
-          
+
           if (!selectedArea) {
             throw new Error('No area selected to save');
           }
-          
+
           const newAnalysis = {
             zcta_code: selectedArea.properties?.ZCTA5CE10 || selectedArea.properties?.zip_code || null,
             version: 1,
@@ -80,18 +92,18 @@ export const useAppStore = create(
             chatHistory: chatHistory || [],
             rawData: selectedArea.properties || {},
           };
-          
+
           // Check localStorage quota
           const currentData = JSON.stringify([...savedAnalyses, newAnalysis]);
           if (currentData.length > 5000000) { // ~5MB limit
             throw new Error('Storage quota exceeded. Please delete some saved analyses.');
           }
-          
+
           set({ savedAnalyses: [...savedAnalyses, newAnalysis] });
           return true;
-          
+
         } catch (error) {
-          console.error('Error saving analysis:', error);          throw error;
+          console.error('Error saving analysis:', error); throw error;
         }
       },
 
@@ -100,8 +112,8 @@ export const useAppStore = create(
         try {
           const { savedAnalyses } = get();
           const updatedAnalyses = savedAnalyses.filter(
-            analysis => !(analysis.zcta_code === analysisToDelete.zcta_code && 
-                         analysis.saved_at === analysisToDelete.saved_at)
+            analysis => !(analysis.zcta_code === analysisToDelete.zcta_code &&
+              analysis.saved_at === analysisToDelete.saved_at)
           );
           set({ savedAnalyses: updatedAnalyses });
           return true;
