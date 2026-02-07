@@ -1,4 +1,6 @@
 import React from 'react';
+import { FaLayerGroup } from 'react-icons/fa';
+import { useAppStore } from './store';
 
 // Helper functions for metrics and risk
 const formatPercent = (value) => {
@@ -35,16 +37,27 @@ const getMetricRisk = (value, type) => {
  * Props: clickedZipCode, selectedFeature, clickPosition, onClose
  */
 const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition, onClose }) => {
+  const { visualizationMode, clusterData, clusterProfiles } = useAppStore();
+
   if (!clickedZipCode || !selectedFeature) return null;
-  
+
   const isBorough = selectedFeature.properties.borough;
   const props = selectedFeature.properties;
-  
+
   // Get appropriate values based on whether this is a borough or zip code
   const getRiskScore = () => isBorough ? props.avgRiskScore : props.RiskScore;
   const getDiabetesRate = () => isBorough ? props.avgDiabetes : props.DIABETES_CrudePrev;
   const getObesityRate = () => isBorough ? props.avgObesity : props.OBESITY_CrudePrev;
-  
+
+  // Cluster Info
+  let clusterInfo = null;
+  if (visualizationMode === 'cluster' && !isBorough && clusterData && clusterProfiles) {
+    const clusterId = clusterData[clickedZipCode];
+    if (clusterId !== undefined) {
+      clusterInfo = clusterProfiles.find(p => p.cluster_id === clusterId);
+    }
+  }
+
   return (
     <div
       style={{
@@ -145,6 +158,45 @@ const MapPopup = ({ clickedZipCode, selectedFeature, clickPosition, onClose }) =
             <span>{getRiskLevel(getRiskScore()).icon}</span>
           </div>
         </div>
+
+        {/* Cluster Info Section */}
+        {clusterInfo && (
+          <div style={{
+            marginBottom: '12px',
+            padding: '8px 12px',
+            backgroundColor: '#f0fdf4',
+            borderRadius: '6px',
+            border: '1px solid #bbf7d0',
+          }}>
+            <div style={{
+              fontSize: '11px',
+              textTransform: 'uppercase',
+              color: '#166534',
+              fontWeight: '600',
+              marginBottom: '4px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              <FaLayerGroup /> Health Profile
+            </div>
+            <div style={{
+              fontSize: '13px',
+              fontWeight: '600',
+              color: '#14532d',
+              marginBottom: '2px'
+            }}>
+              {clusterInfo.name}
+            </div>
+            <div style={{
+              fontSize: '11px',
+              color: '#15803d',
+              lineHeight: '1.4'
+            }}>
+              {clusterInfo.description}
+            </div>
+          </div>
+        )}
 
         {/* Key Metrics */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
