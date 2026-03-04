@@ -2,8 +2,6 @@
 
 **RiskPulse** is an advanced public health analytics platform designed to identify diabetes risk hotspots across New York City. By combining granular geospatial data with AI-powered analysis, it empowers public health officials and community planners to target interventions where they are needed most.
 
-![RiskPulse App Screenshot](./public/screenshot.png) *(Note: Add a screenshot here if available)*
-
 ## 🚀 Key Features
 
 *   **Interactive Risk Map**: Visualize diabetes risk scores, obesity rates, and healthcare gaps at the Zip Code and Borough level using Leaflet & GeoJSON.
